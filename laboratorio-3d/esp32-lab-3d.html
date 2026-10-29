@@ -1,0 +1,1533 @@
+<!doctype html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="utf-8">
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&]professor\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ESP32 Lab 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: bancada de laboratório. Palco 3D à esquerda, lição + código + serial à direita. */
+:root{
+  --bg:#e6ede9; --surface:#f6f9f7; --surface2:#dbe5e0; --fg:#12201b; --muted:#4f625a; --line:#bccbc3;
+  --accent:#0d6a4f; --accent-fg:#ffffff; --amber:#995900; --amber-bg:#f7ead0;
+  --stage:#cfdcd5; --floor:#bccbc3; --code-bg:#0f1b17; --code-fg:#d3eee1; --code-line:#26382f;
+  --good:#12804f; --bad:#b83225; --warn:#9a6200;
+  --font-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0a130f; --surface:#111e19; --surface2:#192a23; --fg:#e1efe8; --muted:#8aa398; --line:#25403a;
+    --accent:#3ddc97; --accent-fg:#052418; --amber:#f2b84b; --amber-bg:#2c2410;
+    --stage:#0e1b16; --floor:#16261f; --code-bg:#070f0c; --code-fg:#cdeadc; --code-line:#1b2e26;
+    --good:#43d18a; --bad:#ff7a6b; --warn:#f2b84b; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0a130f; --surface:#111e19; --surface2:#192a23; --fg:#e1efe8; --muted:#8aa398; --line:#25403a;
+  --accent:#3ddc97; --accent-fg:#052418; --amber:#f2b84b; --amber-bg:#2c2410;
+  --stage:#0e1b16; --floor:#16261f; --code-bg:#070f0c; --code-fg:#cdeadc; --code-line:#1b2e26;
+  --good:#43d18a; --bad:#ff7a6b; --warn:#f2b84b; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--font-body); font-size:15px; line-height:1.5;
+  padding-block:18px 28px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.app{max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.top{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px}
+.brand{display:flex; align-items:center; gap:12px; min-width:0}
+.brand svg{flex:none; color:var(--accent)}
+h1{margin:0; font-family:var(--font-display); font-weight:700; font-size:26px; letter-spacing:.01em; line-height:1.1}
+.brand p{margin:2px 0 0; color:var(--muted); font-size:13px}
+.progress{display:flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:12px; color:var(--muted)}
+.bar{width:140px; height:6px; background:var(--surface2); border-radius:3px; overflow:hidden}
+.bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .4s}
+
+.lessons{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin}
+.lessons button{
+  flex:none; display:flex; align-items:center; gap:8px; padding:7px 12px 7px 8px; border:1px solid var(--line);
+  background:var(--surface); border-radius:6px; cursor:pointer; font-size:13px; font-weight:500; white-space:nowrap;
+}
+.lessons button .n{
+  display:grid; place-items:center; width:22px; height:22px; border-radius:4px; font-family:var(--font-mono);
+  font-size:12px; background:var(--surface2); color:var(--muted);
+}
+.lessons button[aria-current="true"]{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.lessons button[aria-current="true"] .n{background:var(--accent); color:var(--accent-fg)}
+.lessons button.done .n{background:var(--good); color:#fff}
+.lessons button:hover{background:var(--surface2)}
+
+.grid{display:grid; grid-template-columns:minmax(0,1.12fr) minmax(0,1fr); gap:16px; align-items:start}
+.left,.right{display:flex; flex-direction:column; gap:12px; min-width:0}
+@media (max-width:980px){ .grid{grid-template-columns:minmax(0,1fr)} }
+
+.stage{
+  position:relative; width:100%; aspect-ratio:4/3; min-height:300px; max-height:72vh;
+  border:1px solid var(--line); border-radius:8px; overflow:hidden; background:var(--stage); touch-action:none;
+}
+.stage canvas{display:block; width:100%; height:100%}
+.hint{
+  position:absolute; left:10px; bottom:10px; right:10px; pointer-events:none; font-size:11.5px;
+  font-family:var(--font-mono); color:var(--muted); text-shadow:0 0 6px var(--stage), 0 0 2px var(--stage);
+}
+.glfail{position:absolute; inset:0; display:grid; place-items:center; padding:24px; text-align:center; color:var(--ink)}
+.glfail[hidden]{display:none}
+
+.pins{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px}
+.chip{
+  display:flex; flex-direction:column; gap:1px; padding:7px 10px; border:1px solid var(--line); border-radius:6px;
+  background:var(--surface); font-family:var(--font-mono); font-size:12px; min-width:0;
+}
+.chip b{font-weight:500; color:var(--muted); font-size:11px}
+.chip span{font-size:14px; font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:7px}
+.chip i{width:9px; height:9px; border-radius:50%; background:var(--surface2); border:1px solid var(--line); flex:none}
+.chip.on i{background:var(--accent); border-color:var(--accent); box-shadow:0 0 8px var(--accent)}
+
+.controls{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center}
+.ctl{display:flex; align-items:center; gap:10px; flex:1 1 280px; font-size:13px; min-width:0}
+.ctl input[type=range]{flex:1; min-width:80px; accent-color:var(--accent)}
+.ctl output{font-family:var(--font-mono); font-size:13px; min-width:4ch; text-align:right; font-variant-numeric:tabular-nums}
+
+.btn{
+  border:1px solid var(--line); background:var(--surface); border-radius:6px; padding:8px 14px; cursor:pointer;
+  font-weight:500; font-size:14px; display:inline-flex; align-items:center; gap:8px; user-select:none; touch-action:none;
+}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent); color:var(--accent-fg); border-color:var(--accent); font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45; cursor:default}
+.btn.held{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+
+.card{border:1px solid var(--line); border-radius:8px; background:var(--surface); padding:16px 18px}
+.card h2{margin:0 0 4px; font-family:var(--font-display); font-size:21px; line-height:1.2; font-weight:600}
+.eyebrow{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.card p{margin:8px 0 0}
+.goal{color:var(--muted)}
+.checks{list-style:none; padding:0; margin:12px 0 0; display:flex; flex-direction:column; gap:6px}
+.checks li{display:flex; gap:10px; align-items:flex-start; font-size:14px}
+.checks li::before{
+  content:""; flex:none; width:16px; height:16px; margin-top:3px; border:1.5px solid var(--line); border-radius:4px; background:var(--bg);
+}
+.checks li.ok::before{
+  background:var(--good); border-color:var(--good);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+}
+.checks li.ok{color:var(--muted)}
+.checks li.challenge span::after{content:" desafio"; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--amber); margin-left:6px}
+.tip{
+  margin-top:14px; padding:10px 12px; border-radius:6px; background:var(--amber-bg); border:1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+  font-size:13.5px;
+}
+.tip strong{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--amber); display:block; margin-bottom:2px}
+.banner{
+  margin-top:12px; padding:9px 12px; border-radius:6px; background:var(--good); color:#fff; font-weight:600; display:none;
+}
+.banner.show{display:block}
+.lnav{display:flex; justify-content:space-between; gap:8px; margin-top:14px}
+
+.editor{border:1px solid var(--code-line); border-radius:8px; overflow:hidden; background:var(--code-bg)}
+.bar-tools{
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 10px; background:var(--surface); border-bottom:1px solid var(--line);
+}
+.bar-tools .sp{flex:1}
+.bar-tools label{font-size:12.5px; color:var(--muted); display:flex; align-items:center; gap:6px}
+.bar-tools select{background:var(--bg); border:1px solid var(--line); border-radius:5px; padding:4px 6px; font-size:12.5px}
+.status{font-family:var(--font-mono); font-size:11.5px; padding:3px 8px; border-radius:99px; background:var(--surface2); color:var(--muted)}
+.status.run{background:var(--accent); color:var(--accent-fg)}
+textarea#code{
+  display:block; width:100%; height:330px; resize:vertical; border:0; padding:12px 14px; background:var(--code-bg); color:var(--code-fg);
+  font-family:var(--font-mono); font-size:13px; line-height:1.55; tab-size:2; white-space:pre; overflow:auto;
+}
+textarea#code:focus-visible{outline-offset:-2px}
+
+.serial{border:1px solid var(--code-line); border-radius:8px; overflow:hidden; background:var(--code-bg)}
+.serial header{display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--surface); border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:12px; color:var(--muted)}
+.serial header button{background:none; border:0; cursor:pointer; color:var(--muted); font-size:12px; text-decoration:underline}
+pre#serial{
+  margin:0; height:170px; overflow:auto; padding:10px 12px; color:var(--code-fg); font-family:var(--font-mono); font-size:12.5px; line-height:1.5;
+  white-space:pre-wrap; word-break:break-word;
+}
+pre#serial .err{color:#ff8f80} pre#serial .warn{color:#f2c25c} pre#serial .sys{color:#7fa597}
+
+.browser{border:1px solid var(--line); border-radius:8px; background:var(--surface); overflow:hidden}
+.browser[hidden]{display:none}
+.browser header{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px 12px; padding:8px 12px; border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:12px; color:var(--muted)}
+.net{display:inline-flex; align-items:center; gap:7px}
+.net i{width:9px; height:9px; border-radius:50%; background:var(--surface2); border:1px solid var(--line)}
+.net.on i{background:var(--accent); border-color:var(--accent); box-shadow:0 0 8px var(--accent)}
+.addr{display:flex; gap:8px; padding:10px 12px 0; align-items:center}
+.addr .pre{font-family:var(--font-mono); font-size:13px; color:var(--muted); white-space:nowrap}
+.addr input{flex:1; min-width:0; background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:7px 9px; font-family:var(--font-mono); font-size:13px}
+.routes{display:flex; flex-wrap:wrap; gap:6px; padding:8px 12px 0; min-height:14px}
+.routes button{border:1px solid var(--line); background:var(--bg); border-radius:99px; padding:2px 10px; font-family:var(--font-mono); font-size:12px; cursor:pointer}
+.routes button:hover{background:var(--surface2)}
+.viewport{margin:10px 12px 0; min-height:110px; max-height:240px; overflow:auto; border:1px solid var(--line); border-radius:6px; background:var(--bg); padding:10px 14px}
+.viewport h1{font-family:var(--font-body); font-size:20px; margin:0 0 6px}
+.viewport a{color:var(--accent); font-weight:600; cursor:pointer}
+.viewport pre{margin:0; font-family:var(--font-mono); font-size:12.5px; white-space:pre-wrap}
+.viewport .emptyv{color:var(--muted); font-size:13px}
+.viewport .errv{color:var(--bad); font-size:13px}
+.vmeta{padding:6px 12px 10px; font-family:var(--font-mono); font-size:11.5px; color:var(--muted)}
+.app[data-mode="intro"] .pins,.app[data-mode="intro"] .controls,.app[data-mode="intro"] #codeArea{display:none}
+.app:not([data-mode="intro"]) #anatomy{display:none}
+#anatomy h3{margin:0 0 6px; font-family:var(--font-display); font-size:16px; font-weight:600}
+#anatomy details{margin-top:14px; border-top:1px solid var(--line); padding-top:12px}
+#anatomy summary{cursor:pointer; font-family:var(--font-display); font-weight:600; font-size:16px}
+.parts{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-top:10px}
+.parts button{display:flex; align-items:center; gap:8px; text-align:left; border:1px solid var(--line); background:var(--bg); border-radius:6px; padding:8px 10px; cursor:pointer; font-size:13px; line-height:1.25}
+.parts button .m{flex:none; width:16px; height:16px; border-radius:4px; border:1.5px solid var(--line)}
+.parts button.seen .m{background:var(--good); border-color:var(--good)}
+.parts button[aria-pressed="true"]{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); background:var(--surface2)}
+.detail{margin-top:12px; padding:12px 14px; border-radius:6px; background:var(--bg); border:1px solid var(--line)}
+.detail h4{margin:0; font-family:var(--font-display); font-size:17px}
+.detail .role{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin:2px 0 6px}
+.detail p{margin:6px 0 0; font-size:14px}
+.detail .why{color:var(--muted)}
+.spec{width:100%; border-collapse:collapse; font-size:13px; margin-top:10px}
+.spec th,.spec td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+.spec th{font-family:var(--font-mono); font-size:11.5px; font-weight:500; color:var(--muted); letter-spacing:.04em}
+.spec td:first-child{font-weight:600; white-space:nowrap}
+.spec td:nth-child(2){color:var(--accent); font-weight:500}
+.tw{overflow-x:auto}
+.q{margin-top:12px}
+.q p{margin:0 0 6px; font-weight:600; font-size:14px}
+.q .opts{display:grid; gap:6px}
+.q .opts button{text-align:left; border:1px solid var(--line); background:var(--bg); border-radius:6px; padding:7px 10px; cursor:pointer; font-size:13.5px}
+.q .opts button:hover:not([disabled]){background:var(--surface2)}
+.q .opts button.right{border-color:var(--good); box-shadow:inset 0 0 0 1px var(--good)}
+.q .opts button.wrong{border-color:var(--bad); box-shadow:inset 0 0 0 1px var(--bad)}
+.q .exp{margin-top:6px; font-size:13px; color:var(--muted)}
+.roadmap{font-size:13px; color:var(--muted); border-top:1px dashed var(--line); padding-top:12px}
+.roadmap b{color:var(--fg); font-weight:600}
+@media (max-width:640px){ .hint{display:none} .stage{aspect-ratio:1/1; max-height:none} }
+@media (prefers-reduced-motion:reduce){ .bar i{transition:none} }
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<div class="app" data-mode="intro">
+  <header class="top">
+    <div class="brand">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+        <rect x="9" y="9" width="22" height="22" rx="3" stroke="currentColor" stroke-width="2.2"/>
+        <rect x="15" y="15" width="10" height="10" rx="1.5" fill="currentColor"/>
+        <path d="M14 9V4M20 9V4M26 9V4M14 36v-5M20 36v-5M26 36v-5M9 14H4M9 20H4M9 26H4M36 14h-5M36 20h-5M36 26h-5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1>ESP32 Lab 3D</h1>
+        <p>DevKit de 30 pinos, protoboard e um interpretador de código Arduino que roda no navegador.</p>
+      </div>
+    </div>
+    <div class="progress" aria-live="polite"><span id="progText">0 de 6 lições</span><div class="bar"><i id="progBar"></i></div></div>
+  </header>
+
+  <nav class="lessons" id="lessonNav" aria-label="Lições"></nav>
+
+  <main class="grid">
+    <section class="left" aria-label="Bancada 3D">
+      <div class="stage" id="stage">
+        <div class="hint">arraste: girar · WASD: mover · Q/E: girar · roda: zoom · clique e segure o botão preto · arraste o knob azul</div>
+        <div class="glfail" id="glFail" hidden>Seu navegador não conseguiu iniciar o WebGL. Ative a aceleração de hardware para ver a bancada 3D. O código e o monitor serial continuam funcionando.</div>
+      </div>
+      <div class="pins" id="pins" aria-label="Estado dos pinos"></div>
+      <div class="controls">
+        <label class="ctl" for="potRange">Potenciômetro (GPIO34)
+          <input type="range" id="potRange" min="0" max="4095" value="2048"><output id="potOut" for="potRange">2048</output>
+        </label>
+        <button class="btn" id="btnHold" type="button">Segurar botão (GPIO15)</button>
+      </div>
+      <section class="browser" id="browser" hidden aria-label="Navegador virtual">
+        <header><span>Navegador virtual · rede simulada <b>LabIFS</b></span><span class="net" id="netState"><i></i><em style="font-style:normal">ESP32 offline</em></span></header>
+        <form class="addr" id="addrForm"><span class="pre">http://192.168.0.42</span><input id="addrPath" value="/" aria-label="Caminho da página" autocomplete="off" spellcheck="false"><button class="btn" type="submit">Abrir</button></form>
+        <div class="routes" id="routes" aria-label="Rotas registradas"></div>
+        <div class="viewport" id="viewport"><span class="emptyv">Execute o programa. Quando o ESP32 conectar e chamar server.begin(), abra uma página aqui.</span></div>
+        <div class="vmeta" id="vmeta">–</div>
+      </section>
+    </section>
+
+    <section class="right">
+      <article class="card" id="lessonCard"></article>
+      <section class="card" id="anatomy" aria-label="Anatomia da placa"></section>
+      <div id="codeArea">
+      <div class="editor">
+        <div class="bar-tools">
+          <button class="btn primary" id="btnRun" type="button">▶ Executar</button>
+          <button class="btn" id="btnStop" type="button" disabled>■ Parar</button>
+          <button class="btn" id="btnReset" type="button">Restaurar código</button>
+          <span class="sp"></span>
+          <label for="speed">Velocidade
+            <select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select>
+          </label>
+          <span class="status" id="status">parado</span>
+        </div>
+        <textarea id="code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Editor de código Arduino"></textarea>
+      </div>
+      <div class="serial">
+        <header><span>Monitor serial · 115200 baud</span><button id="btnClear" type="button">limpar</button></header>
+        <pre id="serial" aria-live="off"></pre>
+      </div>
+      <p class="roadmap"><b>Só na placa real:</b> Bluetooth LE, sensores de toque, deep sleep e redes verdadeiras. O interpretador cobre GPIO, <code>analogRead</code>, PWM (<code>ledc*</code> e <code>analogWrite</code>), <code>Serial</code>, <code>millis</code>, <code>map</code>, <code>random</code> e uma versão simulada de <code>WiFi</code> e <code>WebServer</code>.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ===== Interpretador Arduino/ESP32 (subconjunto de C++ traduzido para JavaScript assíncrono) ===== */
+const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+const STOP = { stop: true };
+const HIGH = 1, LOW = 0, INPUT = 1, OUTPUT = 3, INPUT_PULLUP = 5;
+const OUTPUT_PINS = [0,1,2,3,4,5,12,13,14,15,16,17,18,19,21,22,23,25,26,27,32,33];
+const INPUT_ONLY = [34,35,36,39];
+const NET_SSID = 'LabIFS', NET_PASS = 'esp32lab', NET_IP = '192.168.0.42';
+
+function stripComments(s){
+  return s.replace(/("(?:\\.|[^"\\\n])*")|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, (m, str) => str ? str : (m.startsWith('/*') ? m.replace(/[^\n]/g,'') : ''));
+}
+
+function transpile(src){
+  let s = stripComments(src);
+  s = s.replace(/^\s*#include.*$/gm, '');
+  s = s.replace(/^\s*#define\s+(\w+)\s+(.+)$/gm, 'const $1 = $2;');
+  s = s.replace(/\b(?:const\s+)?char\s*\*\s*/g, 'String ');
+  s = s.replace(/\bWebServer\s+(\w+)\s*\(\s*(\d*)\s*\)\s*;/g, 'let $1 = WebServer($2 || 80);');
+  s = s.replace(/\b(\w+)\.handleClient\s*\(/g, 'await $1.handleClient(');
+  const fnNames = new Set(['setup','loop']);
+  const T = '(?:unsigned\\s+long|unsigned\\s+int|long|int|float|double|bool|boolean|byte|uint8_t|uint16_t|uint32_t|void|String)';
+  s = s.replace(new RegExp('\\b' + T + '\\s+(\\w+)\\s*\\(([^)]*)\\)\\s*\\{', 'g'), (m, name, params) => {
+    fnNames.add(name);
+    const p = params.split(',').map(x => x.trim()).filter(x => x && x !== 'void')
+      .map(x => x.replace(new RegExp('^(?:const\\s+)?' + T + '\\s+'), '').replace(/^[&*]+/, '')).join(', ');
+    return 'async function ' + name + '(' + p + ') {';
+  });
+  s = s.replace(/\(\s*(?:int|long|unsigned\s+int|unsigned\s+long|uint8_t|uint16_t|uint32_t|byte)\s*\)\s*/g, '~~');
+  s = s.replace(/\(\s*(?:float|double)\s*\)\s*/g, '');
+  const D = '\\b(?:(?:const|static|volatile)\\s+)*(?:unsigned\\s+)?(?:long\\s+long|long|int|float|double|bool|boolean|byte|uint8_t|uint16_t|uint32_t|int8_t|int16_t|int32_t|char|String)\\s+';
+  s = s.replace(new RegExp(D + '(?=\\w+\\s*(?:[=;,\\[]))', 'g'), 'let ');
+  s = s.replace(/(\blet\s+\w+)\s*\[\s*\d*\s*\]\s*=\s*\{([^}]*)\}/g, '$1 = [$2]');
+  s = s.replace(/(\blet\s+\w+)\s*\[\s*(\d+)\s*\]\s*;/g, '$1 = new Array($2).fill(0);');
+  const names = [...fnNames, 'delay', 'delayMicroseconds'];
+  s = s.replace(new RegExp('(?<!function\\s+)(?<![\\w.$])(' + names.join('|') + ')\\s*\\(', 'g'), 'await $1(');
+  return s;
+}
+
+const Sim = {
+  pins: {}, channels: {}, oldPwm: false, pot: 0.5, button: false,
+  running: false, token: 0, timers: new Set(), speed: 1, t0: 0, baud: 0,
+  stats: {}, warned: new Set(), lastAdc: 0, net: null, wifi: null,
+  hooks: { serial(){}, pins(){}, state(){}, event(){} },
+
+  resetStats(){
+    this.stats = { toggles:{}, lastToggle:{}, minGap:{}, levels:{}, duties:new Set(), potReads:new Set(), adcMax:0, adcMin:4095,
+      serialLines:0, pressRun:false, ledOnPressed:false, ledOffReleased:false, altA:false, altB:false,
+      pwmAttach:{}, adcRead:false, wifiBegin:false, wifiConnected:false, wifiFailWarn:false, ipPrinted:false, ipUsed:false,
+      serverBegin:false, pageOk:false, webOn:false, webOff:false, extraRoute:false, dutyMax:0, dutyMin:255, mappedPairs:new Set() };
+  },
+  resetNet(){
+    if(this.net) for(const r of this.net.queue){ if(!r.done){ r.done = true; r.resolve({ code: 0, error: 'ERR_CONNECTION_RESET', body: 'Conexão encerrada: o programa foi parado.', type: 'text/plain', ms: 0 }); } }
+    this.net = { listening: false, routes: {}, notFound: null, queue: [], cur: null };
+    this.wifi = { began: false, ssid: '', pass: '', at: 0 };
+  },
+  wifiStatus(){
+    const w = this.wifi; if(!w.began) return 0;
+    const el = this.now() - w.at;
+    if(w.ssid !== NET_SSID){ if(el > 2000){ this.stats.wifiFailWarn = true; this.warn('wf1', `⚠ Wi‑Fi: a rede "${w.ssid}" não foi encontrada. A rede simulada se chama "${NET_SSID}".`); return 1; } return 6; }
+    if(w.pass !== NET_PASS){ if(el > 2000){ this.stats.wifiFailWarn = true; this.warn('wf2', `⚠ Wi‑Fi: senha incorreta para "${w.ssid}" (status WL_CONNECT_FAILED).`); return 4; } return 6; }
+    if(el >= 1800){ this.stats.wifiConnected = true; return 3; }
+    return 6;
+  },
+  async serve(){
+    const N = this.net, s = this.stats;
+    while(N.queue.length){
+      const req = N.queue.shift(); if(req.done) continue;
+      N.cur = req; req.resp = null; const before = this.level(4);
+      const h = N.routes[req.uri] || N.notFound;
+      if(!h){ req.resp = { code: 404, type: 'text/plain', body: `404: a rota "${req.uri}" não existe. Registre com server.on("${req.uri}", função).` }; }
+      else {
+        try { await h(); } catch(e){ if(e === STOP) throw e; req.resp = { code: 500, type: 'text/plain', body: 'Erro no handler: ' + this.friendlyError(e) }; }
+        if(!req.resp){ req.resp = { code: 500, type: 'text/plain', body: 'O handler terminou sem chamar server.send().' }; this.warn('nosend', `⚠ O handler de "${req.uri}" terminou sem chamar server.send(): o navegador fica sem resposta útil.`); }
+      }
+      N.cur = null; const after = this.level(4);
+      if(before < 0.5 && after >= 0.5) s.webOn = true;
+      if(before >= 0.5 && after < 0.5) s.webOff = true;
+      if(req.uri === '/' && req.resp.code === 200) s.pageOk = true;
+      if(req.resp.code === 200 && !['/', '/ligar', '/desligar'].includes(req.uri)) s.extraRoute = true;
+      req.done = true; req.resolve(Object.assign({}, req.resp, { ms: Math.round(performance.now() - req.t) }));
+    }
+  },
+  request(raw){
+    return new Promise(resolve => {
+      const N = this.net, t = performance.now();
+      const fail = (error, body, delay) => setTimeout(() => resolve({ code: 0, error, body, type: 'text/plain', ms: 0 }), delay);
+      if(!this.running || !N.listening || this.wifiStatus() !== 3) return fail('ERR_CONNECTION_REFUSED', 'Não foi possível conectar ao ESP32. Confira se o programa está rodando, se o Wi‑Fi conectou e se você chamou server.begin().', 450);
+      let u; try { u = new URL(raw, 'http://esp32.local'); } catch(e){ return fail('ERR_INVALID_URL', 'Endereço inválido.', 100); }
+      const req = { uri: u.pathname, args: u.searchParams, t, resolve, done: false };
+      N.queue.push(req);
+      setTimeout(() => { if(!req.done){ req.done = true; resolve({ code: 0, error: 'ERR_TIMED_OUT', body: 'Tempo esgotado: o ESP32 não respondeu. Chame server.handleClient() dentro do loop().', type: 'text/plain', ms: 0 }); } }, 3500);
+    });
+  },
+  resetPins(){ this.resetNet(); this.pins = {}; this.channels = {}; this.oldPwm = false; this.warned.clear(); this.hooks.pins(); },
+  P(n){ return this.pins[n] || (this.pins[n] = { mode:null, value:0, pwm:null }); },
+  now(){ return (performance.now() - this.t0) * this.speed; },
+  warn(key, msg){ if(this.warned.has(key)) return; this.warned.add(key); this.hooks.serial(msg + '\n', 'warn'); },
+  // brilho 0..1 que um LED ligado nesse pino mostraria
+  level(n){
+    const p = this.pins[n]; if(!p) return 0;
+    if(p.pwm) return p.pwm.duty / ((1 << p.pwm.res) - 1);
+    return p.mode === OUTPUT ? p.value : 0;
+  },
+  fmt(v, d){
+    if(typeof v === 'boolean') return v ? '1' : '0';
+    if(typeof v === 'number'){
+      if(d !== undefined && d !== null) return v.toFixed(d);
+      return Number.isInteger(v) ? String(v) : v.toFixed(2);
+    }
+    return String(v);
+  },
+
+  api(){
+    const S = this, st = () => S.stats;
+    const checkPin = (n, wantOut) => {
+      if(n >= 6 && n <= 11){ S.warn('flash'+n, `⚠ GPIO${n} é usado pela memória flash e não deve ser usado.`); return false; }
+      if(wantOut && INPUT_ONLY.includes(n)){ S.warn('in'+n, `⚠ GPIO${n} é somente entrada no ESP32. Use outro pino para saída.`); return false; }
+      if(!OUTPUT_PINS.includes(n) && !INPUT_ONLY.includes(n)){ S.warn('inv'+n, `⚠ GPIO${n} não existe nesta placa.`); return false; }
+      return true;
+    };
+    const markLevel = (n, lv) => {
+      const s = st(); s.levels[n] = lv;
+      if(n === 4 || n === 16){
+        const a = S.level(4), b = S.level(16);
+        if(a > 0.9 && b < 0.1) s.altA = true;
+        if(b > 0.9 && a < 0.1) s.altB = true;
+      }
+    };
+    const out = t => { if(t.includes(NET_IP)) st().ipPrinted = true; S.hooks.serial(t); };
+    const api = {
+      WL_IDLE_STATUS: 0, WL_NO_SSID_AVAIL: 1, WL_CONNECTED: 3, WL_CONNECT_FAILED: 4, WL_DISCONNECTED: 6, WIFI_STA: 1, WIFI_AP: 2,
+      HIGH, LOW, INPUT, OUTPUT, INPUT_PULLUP, LED_BUILTIN: 2, PI: Math.PI,
+      A0: 36, A3: 39, A6: 34, A7: 35, A4: 32, A5: 33, DEC: 10, HEX: 16, BIN: 2,
+      pinMode(n, m){
+        if(!checkPin(n, m === OUTPUT)) return;
+        const p = S.P(n); p.mode = m; if(m !== OUTPUT) p.value = 0;
+        S.hooks.pins();
+      },
+      digitalWrite(n, v){
+        if(!checkPin(n, true)) return;
+        const p = S.P(n);
+        if(p.mode !== OUTPUT){ S.warn('pm'+n, `⚠ GPIO${n}: falta pinMode(${n}, OUTPUT) antes de digitalWrite. Nada acontece.`); return; }
+        const val = v ? 1 : 0;
+        if(p.pwm) p.pwm = null;
+        if(p.value !== val){
+          const s = st(), t = S.now();
+          s.toggles[n] = (s.toggles[n] || 0) + 1;
+          if(s.lastToggle[n] !== undefined){ const gap = t - s.lastToggle[n]; s.minGap[n] = Math.min(s.minGap[n] ?? 1e9, gap); }
+          s.lastToggle[n] = t;
+        }
+        p.value = val;
+        if(n === 4){
+          if(S.button && val) st().ledOnPressed = true;
+          if(!S.button && !val && st().ledOnPressed) st().ledOffReleased = true;
+        }
+        markLevel(n, val);
+        S.hooks.pins();
+      },
+      digitalRead(n){
+        const p = S.pins[n];
+        if(!p || p.mode == null){ S.warn('rd'+n, `⚠ GPIO${n}: use pinMode(${n}, INPUT_PULLUP) antes de ler. O valor lido é aleatório.`); return Math.random() < .5 ? 1 : 0; }
+        if(p.mode === OUTPUT) return p.value;
+        if(n === 15){
+          if(S.button) st().pressRun = true;
+          if(p.mode === INPUT_PULLUP) return S.button ? 0 : 1;
+          S.warn('flt15', '⚠ GPIO15 está INPUT sem resistor de pull-up: o pino flutua e a leitura oscila. Use INPUT_PULLUP.');
+          return S.button ? 0 : (Math.random() < .5 ? 1 : 0);
+        }
+        return p.mode === INPUT_PULLUP ? 1 : 0;
+      },
+      analogRead(n){
+        if(![32,33,34,35,36,39].includes(n)){ S.warn('adc'+n, `⚠ GPIO${n} não tem ADC1. Use 32–39 (ADC2 não funciona com Wi‑Fi).`); return 0; }
+        const s = st(); s.adcRead = true;
+        if(n !== 34) return 0;
+        const v = Math.max(0, Math.min(4095, Math.round(S.pot * 4095 + (Math.random() * 5 - 2))));
+        s.potReads.add(Math.round(v / 256)); s.adcMax = Math.max(s.adcMax, v); s.adcMin = Math.min(s.adcMin, v); S.lastAdc = v;
+        return v;
+      },
+      ledcAttach(n, freq, res){
+        if(!checkPin(n, true)) return false;
+        const p = S.P(n); p.mode = OUTPUT; p.pwm = { freq, res: Math.max(1, Math.min(14, res | 0)), duty: 0 };
+        st().pwmAttach[n] = true; S.hooks.pins(); return true;
+      },
+      ledcSetup(ch, freq, res){ S.oldPwm = true; S.channels[ch] = { freq, res: Math.max(1, Math.min(14, res | 0)) }; return freq; },
+      ledcAttachPin(n, ch){
+        if(!checkPin(n, true)) return;
+        const c = S.channels[ch]; if(!c){ S.warn('ch'+ch, `⚠ Canal ${ch} não configurado. Chame ledcSetup(${ch}, freq, bits) antes.`); return; }
+        const p = S.P(n); p.mode = OUTPUT; p.pwm = { freq: c.freq, res: c.res, duty: 0, ch }; st().pwmAttach[n] = true; S.hooks.pins();
+      },
+      ledcWrite(x, duty){
+        let n = x;
+        if(S.oldPwm){ n = Object.keys(S.pins).find(k => S.pins[k].pwm && S.pins[k].pwm.ch === x); if(n === undefined) return; n = +n; }
+        const p = S.pins[n];
+        if(!p || !p.pwm){ S.warn('lw'+n, `⚠ GPIO${n}: chame ledcAttach(${n}, frequência, bits) antes de ledcWrite.`); return; }
+        const max = (1 << p.pwm.res) - 1, d = Math.max(0, Math.min(max, Math.round(duty)));
+        p.pwm.duty = d;
+        const s = st(); s.duties.add(d);
+        if(p.pwm.res === 8){ s.dutyMax = Math.max(s.dutyMax, d); s.dutyMin = Math.min(s.dutyMin, d); }
+        if(S.lastAdc) s.mappedPairs.add(Math.round(S.lastAdc / 512) + ':' + Math.round(d / 32));
+        markLevel(n, d / max); S.hooks.pins();
+      },
+      analogWrite(n, v){
+        if(!checkPin(n, true)) return;
+        const p = S.P(n);
+        if(!p.pwm){ p.mode = OUTPUT; p.pwm = { freq: 1000, res: 8, duty: 0 }; st().pwmAttach[n] = true; }
+        api.ledcWrite(n, v);
+      },
+      delay(ms){
+        const my = S.token;
+        return new Promise((res, rej) => {
+          const e = { rej }; e.t = setTimeout(() => { S.timers.delete(e); my === S.token ? res() : rej(STOP); }, Math.max(0, ms) / S.speed);
+          S.timers.add(e);
+        });
+      },
+      delayMicroseconds(us){ return api.delay(us / 1000); },
+      millis(){ return Math.floor(S.now()); },
+      micros(){ return Math.floor(S.now() * 1000); },
+      map(x, a, b, c, d){ return Math.trunc((x - a) * (d - c) / (b - a) + c); },
+      constrain(x, a, b){ return Math.min(b, Math.max(a, x)); },
+      min: Math.min, max: Math.max, abs: Math.abs, sq: x => x * x, sqrt: Math.sqrt, pow: Math.pow,
+      sin: Math.sin, cos: Math.cos, floor: Math.floor, ceil: Math.ceil, round: Math.round,
+      random(a, b){ if(b === undefined){ b = a; a = 0; } return Math.floor(a + Math.random() * (b - a)); },
+      randomSeed(){}, noInterrupts(){}, interrupts(){},
+      WiFi: {
+        mode(){}, setAutoReconnect(){}, setSleep(){},
+        disconnect(){ S.wifi = { began: false, ssid: '', pass: '', at: 0 }; },
+        begin(ssid, pass){ S.wifi = { began: true, ssid: String(ssid), pass: String(pass === undefined ? '' : pass), at: S.now() }; st().wifiBegin = true; },
+        status(){ return S.wifiStatus(); },
+        isConnected(){ return S.wifiStatus() === 3; },
+        localIP(){ if(S.wifiStatus() === 3){ st().ipUsed = true; return NET_IP; } return '0.0.0.0'; },
+        RSSI(){ return S.wifiStatus() === 3 ? -58 : 0; },
+        SSID(){ return S.wifiStatus() === 3 ? S.wifi.ssid : ''; },
+        macAddress(){ return '24:6F:28:AB:CD:EF'; },
+      },
+      WebServer(port){
+        return {
+          on(path, h){ S.net.routes[path] = h; },
+          onNotFound(h){ S.net.notFound = h; },
+          begin(){
+            if(S.wifiStatus() !== 3) S.warn('srvwifi', '⚠ server.begin() antes de conectar ao Wi‑Fi: o servidor não ficará acessível.');
+            S.net.listening = true; st().serverBegin = true;
+          },
+          arg(n){ const c = S.net.cur; return c ? (c.args.get(n) ?? '') : ''; },
+          hasArg(n){ const c = S.net.cur; return !!c && c.args.has(n); },
+          uri(){ const c = S.net.cur; return c ? c.uri : ''; },
+          sendHeader(){},
+          send(code, type, body){ const c = S.net.cur; if(c) c.resp = { code, type: type || 'text/plain', body: body === undefined ? '' : String(body) }; },
+          async handleClient(){ await S.serve(); },
+        };
+      },
+      Serial: {
+        begin(b){ S.baud = b; },
+        print(v, d){ out(S.fmt(v, d)); },
+        println(v, d){ out((v === undefined ? '' : S.fmt(v, d)) + '\n'); st().serialLines++; },
+        printf(f, ...a){ let i = 0; out(String(f).replace(/%(\d*\.?\d*)([dilufs%])/g, (m, w, t) => t === '%' ? '%' : (t === 'f' ? Number(a[i++]).toFixed(w.includes('.') ? +w.split('.')[1] : 6) : String(a[i++])))); },
+        available(){ return 0; }, read(){ return -1; }, flush(){},
+      },
+    };
+    return api;
+  },
+
+  compile(code){
+    const js = transpile(code);
+    const api = this.api();
+    const keys = Object.keys(api);
+    const body = js + '\n;return { setup: typeof setup === "function" ? setup : null, loop: typeof loop === "function" ? loop : null };';
+    const fn = new AsyncFunction(...keys, body);
+    return () => fn(...keys.map(k => api[k]));
+  },
+
+  friendlyError(e){
+    const m = String(e && e.message || e);
+    let r;
+    if((r = m.match(/^(\w+) is not defined/))) return `'${r[1]}' não foi declarado. Confira o nome da função ou da variável.`;
+    if((r = m.match(/Assignment to constant variable/))) return 'Você tentou mudar o valor de uma constante (const).';
+    if((r = m.match(/Identifier '(\w+)' has already been declared/))) return `'${r[1]}' foi declarado duas vezes.`;
+    if(/Unexpected (token|end of input|identifier)/.test(m)) return 'Erro de sintaxe: confira ponto e vírgula, parênteses e chaves { }. (' + m + ')';
+    return m;
+  },
+
+  async run(code){
+    this.stop(true);
+    this.resetPins(); this.t0 = performance.now(); this.baud = 0;
+    let boot;
+    try { boot = this.compile(code); }
+    catch(e){ this.hooks.serial('Erro de compilação: ' + this.friendlyError(e) + '\n', 'err'); this.hooks.state(); return; }
+    const my = ++this.token; this.running = true; this.hooks.state();
+    this.hooks.serial('▶ Programa iniciado\n', 'sys');
+    try {
+      const prog = await boot();
+      if(!prog.setup || !prog.loop) throw new Error('O programa precisa ter as funções setup() e loop().');
+      await prog.setup();
+      while(this.token === my){ await prog.loop(); await new Promise(r => setTimeout(r, 2)); }
+    } catch(e){
+      if(e !== STOP) this.hooks.serial('Erro em execução: ' + this.friendlyError(e) + '\n', 'err');
+    }
+    if(this.token === my){ this.running = false; this.resetPins(); this.hooks.state(); }
+  },
+
+  stop(silent){
+    const was = this.running;
+    this.token++; this.running = false;
+    for(const e of this.timers){ clearTimeout(e.t); e.rej(STOP); }
+    this.timers.clear();
+    this.resetPins();
+    if(was && !silent) this.hooks.serial('■ Programa parado\n', 'sys');
+    this.hooks.state();
+  },
+};
+Sim.resetStats();
+Sim.resetNet();
+/* ===== Módulo 0: introdução ao ESP32 ===== */
+const INTRO = {
+  parts: [
+    { id: 'modulo', name: 'Módulo ESP32‑WROOM‑32', role: 'O cérebro da placa',
+      text: 'A lata metálica prateada guarda o chip ESP32 (processador de 2 núcleos Xtensa LX6, até 240 MHz), 520 KB de RAM, 4 MB de memória flash e o cristal de 40 MHz. O Wi‑Fi e o Bluetooth também ficam aqui dentro. A blindagem metálica reduz interferência e ajuda na certificação de rádio.',
+      why: 'Todo o seu programa roda neste módulo. Os pinos das laterais são ligações diretas com ele.' },
+    { id: 'antena', name: 'Antena de PCB', role: 'Transmite e recebe em 2,4 GHz',
+      text: 'É uma trilha de cobre desenhada na própria placa, na ponta oposta ao USB. Ela atende Wi‑Fi e Bluetooth na faixa de 2,4 GHz.',
+      why: 'Não cubra essa área com metal, fita de cobre nem caixas metálicas: o alcance do sinal cai muito. Em caixas, deixe a ponta da antena para fora.' },
+    { id: 'usb', name: 'Conector USB', role: 'Energia e gravação do código',
+      text: 'Recebe 5 V do computador ou do carregador e leva os dados de programação. Dependendo do modelo é micro‑USB ou USB‑C. Use um cabo que transmita dados, pois cabos só de carga não funcionam para gravar.',
+      why: 'Quando o computador não reconhece a placa, o primeiro suspeito é um cabo apenas de carga.' },
+    { id: 'ponte', name: 'Ponte USB‑serial (CP2102 ou CH340)', role: 'Tradutor entre o PC e o chip',
+      text: 'O ESP32 se comunica por UART (serial), e o computador por USB. Esse chip faz a tradução. É por ele que você grava o programa e vê as mensagens do Serial Monitor. Ele aparece como porta COM (Windows) ou /dev/ttyUSB0 (Linux).',
+      why: 'Se a porta não aparece, falta o driver do CP2102 ou do CH340.' },
+    { id: 'regulador', name: 'Regulador de 3,3 V (AMS1117)', role: 'Converte 5 V em 3,3 V',
+      text: 'O ESP32 trabalha em 3,3 V. O regulador transforma os 5 V do USB (ou do pino VIN) na tensão certa. O pino 3V3 da placa entrega essa tensão para sensores e módulos, com corrente limitada (em torno de 500 mA no total).',
+      why: 'Os GPIOs suportam no máximo 3,3 V. Ligar 5 V direto em um GPIO pode queimar o chip.' },
+    { id: 'botoes', name: 'Botões EN e BOOT', role: 'Reiniciar e gravar',
+      text: 'EN (enable) reinicia o chip, como um botão de reset. BOOT está ligado ao GPIO0: segurando BOOT enquanto aperta EN, o chip entra no modo de gravação. Muitas placas entram nesse modo sozinhas durante o upload.',
+      why: 'Se o upload falhar com "Connecting…", segure BOOT durante a conexão.' },
+    { id: 'leds', name: 'LEDs da placa', role: 'Energia e um LED para testes',
+      text: 'O LED vermelho indica que a placa está energizada. O LED azul está ligado ao GPIO2 e você controla pelo programa. É o seu "Olá, mundo" do hardware, usado na lição 1.',
+      why: 'Perfeito para testar se o upload funcionou sem precisar de nenhum componente externo.' },
+    { id: 'gpio', name: 'Pinos GPIO (30 pinos)', role: 'Ligação com o mundo exterior',
+      text: 'São duas fileiras de 15 pinos. Há alimentação (3V3, GND, VIN) e GPIOs digitais. Os GPIO34 a 39 só funcionam como entrada. O GPIO6 a 11 pertencem à flash e não devem ser usados. Os pinos 0, 2, 5, 12 e 15 são strapping pins e influenciam o boot. O I²C padrão usa o 21 (SDA) e o 22 (SCL). O SPI usa 18, 19, 23 e 5. Os pinos 1 (TX0) e 3 (RX0) conversam com o USB.',
+      why: 'Antes de escolher um pino, confira se ele é só entrada, se tem ADC e se não interfere no boot.' },
+  ],
+  specs: [
+    ['Processador', 'Xtensa LX6, 2 núcleos, 32 bits', 'ATmega328P, 8 bits'],
+    ['Clock', 'até 240 MHz', '16 MHz'],
+    ['RAM', '520 KB', '2 KB'],
+    ['Memória flash', '4 MB (no módulo)', '32 KB'],
+    ['Tensão dos pinos', '3,3 V', '5 V'],
+    ['ADC', '12 bits, até 18 canais', '10 bits, 6 canais'],
+    ['PWM', '16 canais (LEDC), qualquer pino de saída', '6 pinos fixos'],
+    ['Conectividade', 'Wi‑Fi 2,4 GHz + Bluetooth clássico e BLE', 'nenhuma'],
+    ['Extras', '10 sensores de toque, 2 DACs de 8 bits', '—'],
+  ],
+  quiz: [
+    { q: 'Qual é a tensão lógica dos pinos GPIO do ESP32?', o: ['5 V', '3,3 V', '1,8 V', '12 V'], a: 1, e: 'Os GPIOs trabalham em 3,3 V. O regulador da placa cria essa tensão a partir dos 5 V do USB.' },
+    { q: 'Qual componente permite gravar o código e ver o Serial Monitor pelo USB?', o: ['Regulador AMS1117', 'Antena de PCB', 'Ponte USB‑serial (CP2102/CH340)', 'Botão EN'], a: 2, e: 'A ponte converte USB em UART, a serial que o chip ESP32 entende.' },
+    { q: 'Quais pinos funcionam somente como entrada?', o: ['GPIO0 a 5', 'GPIO12 a 15', 'GPIO34 a 39', 'GPIO21 e 22'], a: 2, e: 'GPIO34 a 39 não têm driver de saída. Foi por isso que o potenciômetro usou o GPIO34.' },
+    { q: 'Para que serve o botão BOOT?', o: ['Desligar o Wi‑Fi', 'Entrar no modo de gravação (GPIO0 em LOW no reset)', 'Calibrar o ADC', 'Apagar a memória RAM'], a: 1, e: 'Com BOOT pressionado durante o reset, o chip aguarda um novo programa pela serial.' },
+  ],
+};
+
+/* ===== Lições ===== */
+const LESSONS = [
+{
+  id: 'intro', intro: true, title: 'Introdução: conheça o ESP32',
+  goal: 'Entenda o que existe na placa antes de programar. Clique em cada componente na lista ou direto na placa 3D, compare com o Arduino Uno e responda ao teste rápido.',
+  tip: 'O ESP32 é um microcontrolador de baixo custo da Espressif, com Wi‑Fi e Bluetooth integrados. A placa que você vê é uma DevKit: o chip mais a parte elétrica necessária para ligar no USB e usar em protoboard.',
+  checks: [
+    { id: 'explore', label: 'Explorou os 8 componentes da placa', test: () => false },
+    { id: 'quiz', label: 'Respondeu às 4 perguntas do teste rápido', test: () => false },
+  ],
+  code: ''
+},
+{
+  id: 'blink', title: 'Blink: o LED azul da placa',
+  goal: 'Configure um pino como saída e faça o LED embutido (GPIO2) piscar.',
+  tip: 'Na maioria das DevKits o LED azul fica ligado ao GPIO2. Esse pino também é um strapping pin: se ele estiver em nível alto durante o boot, o upload de código pode falhar.',
+  checks: [
+    { id: 'on',  label: 'O LED azul da placa (GPIO2) acendeu', test: s => (s.toggles[2] || 0) >= 1 },
+    { id: 'off', label: 'Ele apagou em seguida', test: s => (s.toggles[2] || 0) >= 2 },
+    { id: 'blink', label: 'Piscou pelo menos 3 vezes', test: s => (s.toggles[2] || 0) >= 6 },
+    { id: 'fast', label: 'Faça piscar mais rápido: intervalo menor que 300 ms', challenge: true, test: s => (s.minGap[2] ?? 1e9) < 300 && (s.toggles[2] || 0) >= 6 },
+  ],
+  code: `// Lição 1: Blink com o LED azul da placa (GPIO2)
+const int LED = 2;
+
+void setup() {
+  pinMode(LED, OUTPUT);   // GPIO2 vira saída
+}
+
+void loop() {
+  digitalWrite(LED, HIGH);  // liga (3,3 V)
+  delay(500);               // espera 500 ms
+  digitalWrite(LED, LOW);   // desliga (0 V)
+  delay(500);
+}
+`
+},
+{
+  id: 'semaforo', title: 'Dois LEDs: semáforo simples',
+  goal: 'Controle o LED vermelho (GPIO4) e o verde (GPIO16) para que um acenda enquanto o outro está apagado.',
+  tip: 'Os pinos do ESP32 trabalham em 3,3 V, não em 5 V. Cada LED precisa de um resistor em série (aqui, 220 Ω) e cada GPIO deve fornecer poucos miliampères.',
+  checks: [
+    { id: 'g', label: 'O LED verde acendeu com o vermelho apagado', test: s => s.altB },
+    { id: 'r', label: 'O LED vermelho acendeu com o verde apagado', test: s => s.altA },
+    { id: 'msg', label: 'O monitor serial mostrou pelo menos 2 mensagens', test: s => s.serialLines >= 2 },
+  ],
+  code: `// Lição 2: semáforo com dois LEDs
+const int VERMELHO = 4;
+const int VERDE = 16;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(VERMELHO, OUTPUT);
+  pinMode(VERDE, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(VERDE, HIGH);
+  digitalWrite(VERMELHO, LOW);
+  Serial.println("Pode passar");
+  delay(2000);
+
+  digitalWrite(VERDE, LOW);
+  digitalWrite(VERMELHO, HIGH);
+  Serial.println("Pare");
+  delay(2000);
+}
+`
+},
+{
+  id: 'botao', title: 'Botão com INPUT_PULLUP',
+  goal: 'Leia o botão do GPIO15 e acenda o LED vermelho enquanto ele estiver pressionado. Execute o programa e segure o botão.',
+  tip: 'O botão liga o GPIO15 ao GND. Com INPUT_PULLUP o resistor interno mantém o pino em HIGH, e ao apertar a leitura vira LOW. A lógica é invertida. Troque por INPUT para ver o pino flutuar.',
+  checks: [
+    { id: 'press', label: 'Você pressionou o botão com o programa rodando', test: s => s.pressRun },
+    { id: 'follow', label: 'O LED acendeu enquanto o botão estava pressionado', test: s => s.ledOnPressed },
+    { id: 'release', label: 'O LED apagou quando você soltou', test: s => s.ledOffReleased },
+  ],
+  code: `// Lição 3: botão controla o LED
+const int BOTAO = 15;
+const int LED = 4;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED, OUTPUT);
+  pinMode(BOTAO, INPUT_PULLUP);  // pull-up interno
+}
+
+void loop() {
+  int leitura = digitalRead(BOTAO);
+
+  if (leitura == LOW) {          // LOW = pressionado
+    digitalWrite(LED, HIGH);
+  } else {
+    digitalWrite(LED, LOW);
+  }
+  delay(10);
+}
+`
+},
+{
+  id: 'pwm', title: 'PWM: brilho com LEDC',
+  goal: 'Use o periférico LEDC do ESP32 para criar um efeito de respiração no LED vermelho.',
+  tip: 'O ESP32 tem 16 canais PWM por hardware (LEDC). No core Arduino-ESP32 3.x use ledcAttach(pino, frequência, bits). No core 2.x o equivalente é ledcSetup + ledcAttachPin. Com 8 bits o duty vai de 0 a 255.',
+  checks: [
+    { id: 'att', label: 'Configurou o PWM no GPIO4 com ledcAttach', test: s => !!s.pwmAttach[4] },
+    { id: 'lv', label: 'Passou por pelo menos 10 níveis de brilho', test: s => s.duties.size >= 10 },
+    { id: 'cyc', label: 'Foi do apagado ao máximo (0 a 255)', test: s => s.dutyMax >= 250 && s.dutyMin <= 5 },
+  ],
+  code: `// Lição 4: PWM com LEDC (core 3.x)
+const int LED = 4;
+const int FREQ = 5000;   // 5 kHz
+const int RES = 8;       // 8 bits: 0 a 255
+
+void setup() {
+  ledcAttach(LED, FREQ, RES);
+}
+
+void loop() {
+  for (int duty = 0; duty <= 255; duty += 5) {
+    ledcWrite(LED, duty);
+    delay(20);
+  }
+  for (int duty = 255; duty >= 0; duty -= 5) {
+    ledcWrite(LED, duty);
+    delay(20);
+  }
+}
+`
+},
+{
+  id: 'adc', title: 'Potenciômetro e ADC de 12 bits',
+  goal: 'Leia a tensão do potenciômetro no GPIO34 e mostre no monitor serial. Gire o knob azul ou use o controle deslizante.',
+  tip: 'O ADC do ESP32 tem 12 bits (0 a 4095), contra 10 bits (0 a 1023) do Arduino Uno. O GPIO34 só funciona como entrada. A leitura tem ruído de alguns pontos, e a tensão máxima é 3,3 V. Nunca ligue 5 V.',
+  checks: [
+    { id: 'read', label: 'Leu o ADC com analogRead(34)', test: s => s.adcRead },
+    { id: 'move', label: 'Girou o potenciômetro por pelo menos 4 faixas de valores', test: s => s.potReads.size >= 4 },
+    { id: 'max', label: 'Chegou perto de 4095 (todo para a direita)', test: s => s.adcMax >= 3900 },
+  ],
+  code: `// Lição 5: lendo o potenciômetro
+const int POT = 34;
+
+void setup() {
+  Serial.begin(115200);
+}
+
+void loop() {
+  int leitura = analogRead(POT);            // 0 a 4095
+  float volts = leitura * 3.3 / 4095.0;
+
+  Serial.print("ADC: ");
+  Serial.print(leitura);
+  Serial.print("   Tensão: ");
+  Serial.print(volts, 2);
+  Serial.println(" V");
+  delay(300);
+}
+`
+},
+{
+  id: 'projeto', title: 'Projeto: abajur com dimmer',
+  goal: 'Junte tudo: o potenciômetro ajusta o brilho do LED vermelho em tempo real. Gire o knob do mínimo ao máximo.',
+  tip: 'map() converte uma faixa em outra. Aqui, 0–4095 do ADC vira 0–255 do PWM. Sem esse ajuste o valor passaria do limite de 8 bits. No hardware real, adicione um filtro (média de várias leituras) para suavizar o ruído.',
+  checks: [
+    { id: 'dim', label: 'O brilho acompanhou o potenciômetro em pelo menos 5 níveis', test: s => s.mappedPairs.size >= 5 },
+    { id: 'off', label: 'Apagou totalmente no mínimo', test: s => s.duties.size > 0 && s.dutyMin <= 3 },
+    { id: 'full', label: 'Chegou ao brilho máximo', test: s => s.dutyMax >= 252 },
+  ],
+  code: `// Lição 6: abajur com dimmer
+const int POT = 34;
+const int LED = 4;
+
+void setup() {
+  Serial.begin(115200);
+  ledcAttach(LED, 5000, 8);
+}
+
+void loop() {
+  int leitura = analogRead(POT);              // 0 a 4095
+  int brilho = map(leitura, 0, 4095, 0, 255); // 0 a 255
+  ledcWrite(LED, brilho);
+
+  Serial.println(brilho);
+  delay(30);
+}
+`
+},
+{
+  id: 'wifi', net: true, title: 'Wi‑Fi: conectando à rede',
+  goal: 'Conecte o ESP32 à rede simulada LabIFS (senha esp32lab) e descubra o endereço IP que ele recebeu.',
+  tip: 'O ESP32 só conecta em redes de 2,4 GHz. WiFi.mode(WIFI_STA) o coloca como cliente, igual a um celular. WiFi.status() devolve códigos: WL_CONNECTED (3), WL_NO_SSID_AVAIL (1), WL_CONNECT_FAILED (4). Aqui a rede é simulada, com o nome LabIFS e a senha esp32lab.',
+  checks: [
+    { id: 'begin', label: 'Chamou WiFi.begin com o nome e a senha da rede', test: s => s.wifiBegin },
+    { id: 'conn', label: 'Aguardou até WiFi.status() virar WL_CONNECTED', test: s => s.wifiConnected },
+    { id: 'ip', label: 'Mostrou o IP (192.168.0.42) no monitor serial', test: s => s.ipPrinted },
+    { id: 'fail', label: 'Troque a senha de propósito e veja o aviso de falha', challenge: true, test: s => s.wifiFailWarn },
+  ],
+  code: `// Lição 7: conectando ao Wi-Fi
+#include <WiFi.h>
+
+const char* SSID = "LabIFS";
+const char* SENHA = "esp32lab";
+
+void setup() {
+  Serial.begin(115200);
+  Serial.print("Conectando a ");
+  Serial.println(SSID);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(SSID, SENHA);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println();
+  Serial.println("Conectado!");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+  Serial.print("Sinal (RSSI): ");
+  Serial.println(WiFi.RSSI());
+}
+
+void loop() {
+  delay(1000);
+}
+`
+},
+{
+  id: 'servidor', net: true, title: 'Servidor web: LED pelo navegador',
+  goal: 'Suba um servidor HTTP no ESP32 e controle o LED vermelho (GPIO4) pelo navegador virtual, abaixo da bancada. Depois que o monitor mostrar o IP, clique em Ligar e Desligar.',
+  tip: 'Cada rota é uma função: server.on("/ligar", ligar). O server.handleClient() precisa rodar sempre dentro do loop(), então evite delay longo ali. Este servidor não tem senha nem HTTPS: qualquer pessoa na rede poderia ligar o LED. Em um projeto real, adicione autenticação e criptografia.',
+  checks: [
+    { id: 'srv', label: 'O servidor iniciou com server.begin()', test: s => s.serverBegin },
+    { id: 'page', label: 'O navegador abriu a página inicial (código 200)', test: s => s.pageOk },
+    { id: 'on', label: 'O LED acendeu por uma requisição web', test: s => s.webOn },
+    { id: 'off', label: 'O LED apagou por uma requisição web', test: s => s.webOff },
+    { id: 'route', label: 'Crie uma nova rota (por exemplo /status) e acesse', challenge: true, test: s => s.extraRoute },
+  ],
+  code: `// Lição 8: servidor web controlando o LED
+#include <WiFi.h>
+#include <WebServer.h>
+
+const char* SSID = "LabIFS";
+const char* SENHA = "esp32lab";
+const int LED = 4;
+
+WebServer server(80);
+
+void paginaInicial() {
+  String html = "<h1>ESP32 Lab</h1>";
+  html += "<p>LED vermelho: ";
+  html += digitalRead(LED) ? "ligado" : "desligado";
+  html += "</p>";
+  html += "<p><a href='/ligar'>Ligar</a> | <a href='/desligar'>Desligar</a></p>";
+  server.send(200, "text/html", html);
+}
+
+void ligar() {
+  digitalWrite(LED, HIGH);
+  server.send(200, "text/html", "<h1>LED ligado</h1><a href='/'>Voltar</a>");
+}
+
+void desligar() {
+  digitalWrite(LED, LOW);
+  server.send(200, "text/html", "<h1>LED desligado</h1><a href='/'>Voltar</a>");
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED, OUTPUT);
+
+  WiFi.begin(SSID, SENHA);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println();
+  Serial.print("Abra no navegador: http://");
+  Serial.println(WiFi.localIP());
+
+  server.on("/", paginaInicial);
+  server.on("/ligar", ligar);
+  server.on("/desligar", desligar);
+  server.begin();
+}
+
+void loop() {
+  server.handleClient();   // atende quem estiver pedindo uma página
+}
+`
+}
+];
+</script>
+<script>
+/* ===== Cena 3D (Three.js) ===== */
+const Scene3D = (() => {
+  const stage = document.getElementById('stage');
+  let renderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+  } catch (e) {
+    document.getElementById('glFail').hidden = false;
+    return { ok: false };
+  }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.insertBefore(renderer.domElement, stage.firstChild);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, 4 / 3, 1, 1200);
+  camera.position.set(34, 112, 104);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 0, 8);
+  controls.enableDamping = true; controls.dampingFactor = 0.1;
+  controls.minDistance = 45; controls.maxDistance = 330; controls.maxPolarAngle = Math.PI * 0.47;
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 0.75));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.85);
+  sun.position.set(60, 140, 90); sun.castShadow = true;
+  sun.shadow.mapSize.set(1024, 1024);
+  Object.assign(sun.shadow.camera, { left: -100, right: 100, top: 100, bottom: -100, near: 10, far: 400 });
+  sun.shadow.bias = -0.0004;
+  scene.add(sun);
+
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(700, 500), new THREE.MeshStandardMaterial({ color: 0xbbc8c0, roughness: 1 }));
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -8.1; floor.receiveShadow = true; scene.add(floor);
+
+  const std = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.6, metalness: 0.05 }, o));
+  const box = (w, h, d, mat, x, y, z, parent = scene, shadow = true) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z);
+    m.castShadow = shadow; m.receiveShadow = true; parent.add(m); return m;
+  };
+  const cyl = (r, h, mat, x, y, z, parent = scene, seg = 24) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat); m.position.set(x, y, z);
+    m.castShadow = true; m.receiveShadow = true; parent.add(m); return m;
+  };
+
+  /* ---- Protoboard ---- */
+  const BB = { x0: -37, x1: 37, z0: -5, z1: 65 };
+  const bbW = BB.x1 - BB.x0, bbD = BB.z1 - BB.z0, bbCz = (BB.z0 + BB.z1) / 2;
+  (() => {
+    const g = new THREE.Group();
+    box(bbW, 8, bbD, std(0xe9e5d8, { roughness: 0.8 }), 0, -4, bbCz, g);
+    const c = document.createElement('canvas'); c.width = bbW * 10; c.height = bbD * 10;
+    const x = c.getContext('2d');
+    x.fillStyle = '#e9e5d8'; x.fillRect(0, 0, c.width, c.height);
+    const P = (wx, wz) => [(wx - BB.x0) * 10, (wz - BB.z0) * 10];
+    x.fillStyle = '#c9c4b3'; // canal central
+    const [cx0, cy0] = P(-3.2, BB.z0 + 1), [cx1] = P(3.2, 0); x.fillRect(cx0, cy0, cx1 - cx0, c.height - 20);
+    x.fillStyle = '#2b2b28';
+    const hole = (wx, wz) => { const [px, py] = P(wx, wz); x.fillRect(px - 5, py - 5, 10, 10); };
+    for (let z = BB.z0 + 4; z < BB.z1 - 3; z += 2.54) {
+      for (let k = 0; k < 5; k++) { hole(-(5.1 + k * 2.54), z); hole(5.1 + k * 2.54, z); }
+    }
+    for (const side of [-1, 1]) {
+      const cols = [side * 31.3, side * 33.84];
+      x.strokeStyle = side < 0 ? '#2a5fd0' : '#d0382a'; x.lineWidth = 3;
+      const [lx, ly] = P(side * 29.9, BB.z0 + 3), [, ly2] = P(0, BB.z1 - 3);
+      x.beginPath(); x.moveTo(lx, ly); x.lineTo(lx, ly2); x.stroke();
+      for (let z = BB.z0 + 4; z < BB.z1 - 3; z += 2.54) { if (Math.round((z - BB.z0) / 2.54) % 6 === 5) continue; cols.forEach(cxw => hole(cxw, z)); }
+    }
+    x.fillStyle = '#6b6a60'; x.font = 'bold 20px sans-serif'; x.textAlign = 'center';
+    x.fillText('GND', P(-32.5, 0)[0], 24); x.fillText('3V3', P(32.5, 0)[0], 24);
+    const tex = new THREE.CanvasTexture(c); tex.anisotropy = 8;
+    const top = new THREE.Mesh(new THREE.PlaneGeometry(bbW, bbD), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.85 }));
+    top.rotation.x = -Math.PI / 2; top.position.set(0, 0.02, bbCz); top.receiveShadow = true; g.add(top);
+    scene.add(g);
+  })();
+  const RAIL_GND = { x: -32.5 }, RAIL_3V3 = { x: 32.5 };
+
+  /* ---- ESP32 DevKit V1 (30 pinos) ---- */
+  const BZ = -30; // centro do PCB em z
+  const BOARD_L = 51, BOARD_W = 28, zMin = BZ - BOARD_L / 2;
+  const LEFT = ['EN','VP','VN','34','35','32','33','25','26','27','14','12','13','GND','VIN'];
+  const RIGHT = ['23','22','TX0','RX0','21','19','18','5','17','16','4','2','15','GND','3V3'];
+  const pinZ = i => zMin + 5 + i * 2.54;
+  const pinPos = (side, name) => {
+    const arr = side === 'L' ? LEFT : RIGHT, i = arr.indexOf(name);
+    return new THREE.Vector3(side === 'L' ? -11.43 : 11.43, 3.2, pinZ(i));
+  };
+  const PARTS = {};
+  const tag = (id, m) => { (PARTS[id] = PARTS[id] || []).push(m); m.userData.partId = id; return m; };
+  const onboard = (() => {
+    const g = new THREE.Group(); g.position.set(0, 0, BZ); scene.add(g);
+    box(BOARD_W, 1.6, BOARD_L, std(0x0b1d17, { roughness: 0.5 }), 0, -0.8, 0, g);
+    const c = document.createElement('canvas'); c.width = BOARD_W * 10; c.height = BOARD_L * 10;
+    const x = c.getContext('2d'); x.font = '14px "JetBrains Mono", monospace'; x.fillStyle = '#e8e4c8'; x.textBaseline = 'middle';
+    LEFT.forEach((n, i) => { const y = (5 + i * 2.54) * 10; x.textAlign = 'left'; x.fillText(n, 42, y); });
+    RIGHT.forEach((n, i) => { const y = (5 + i * 2.54) * 10; x.textAlign = 'right'; x.fillText(n, c.width - 42, y); });
+    x.textAlign = 'center'; x.font = 'bold 15px "Chakra Petch", sans-serif'; x.fillText('ESP32 DevKit V1', c.width / 2, 340);
+    x.font = '11px "JetBrains Mono", monospace'; x.fillText('EN', 90, 478); x.fillText('BOOT', 190, 478);
+    const sil = new THREE.Mesh(new THREE.PlaneGeometry(BOARD_W, BOARD_L), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true }));
+    sil.rotation.x = -Math.PI / 2; sil.position.y = 0.03; g.add(sil);
+    tag('modulo', box(18, 3, 25.5, std(0xc9ced1, { metalness: 0.85, roughness: 0.3 }), 0, 1.5, -12, g));
+    tag('antena', box(18, 0.5, 7, std(0x24493a), 0, 0.25, -28, g));
+    tag('usb', box(8.2, 3, 6.5, std(0xb7bcc0, { metalness: 0.8, roughness: 0.35 }), 0, 1.5, 23, g));
+    tag('ponte', box(5, 1, 5, std(0x161616), 0, 0.5, 14.5, g));
+    tag('regulador', box(6.5, 1.6, 3.5, std(0x222222), -6, 0.8, 3, g));
+    tag('botoes', box(3.6, 1.8, 3.6, std(0x333333), -8, 0.9, 17.5, g)); tag('botoes', box(3.6, 1.8, 3.6, std(0x333333), 8, 0.9, 17.5, g));
+    for (const side of [-1, 1]) {
+      tag('gpio', box(2.54, 2.5, 38.1, std(0x161616), side * 11.43, 1.25, pinZ(7) - BZ, g));
+      for (let i = 0; i < 15; i++) tag('gpio', box(0.7, 2.2, 0.7, std(0xd8b04a, { metalness: 0.9, roughness: 0.25 }), side * 11.43, 2.6, pinZ(i) - BZ, g, false));
+    }
+    const mat = new THREE.MeshStandardMaterial({ color: 0x1a3a66, emissive: 0x3fa0ff, emissiveIntensity: 0, roughness: 0.4 });
+    const led = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.8, 1.4), mat); led.position.set(6.5, 0.4, 10); g.add(led); tag('leds', led);
+    const light = new THREE.PointLight(0x3fa0ff, 0, 35, 2); light.position.set(6.5, 4, BZ + 10); scene.add(light);
+    const pwr = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 1.2), new THREE.MeshStandardMaterial({ color: 0x551111, emissive: 0xff2200, emissiveIntensity: 0.6 }));
+    pwr.position.set(-6.5, 0.3, 10); g.add(pwr); tag('leds', pwr);
+    return { mat, light, group: g };
+  })();
+
+  /* ---- Componentes ---- */
+  const makeLed = (x, z, hex) => {
+    const g = new THREE.Group(); g.position.set(x, 0, z); scene.add(g);
+    const mat = new THREE.MeshStandardMaterial({ color: hex, transparent: true, opacity: 0.82, roughness: 0.25, emissive: hex, emissiveIntensity: 0 });
+    cyl(2.5, 4.5, mat, 0, 2.3, 0, g);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(2.5, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), mat); dome.position.y = 4.55; dome.castShadow = true; g.add(dome);
+    cyl(3.05, 0.7, mat, 0, 0.4, 0, g);
+    const light = new THREE.PointLight(hex, 0, 45, 2); light.position.set(x, 8, z); scene.add(light);
+    return { mat, light, pos: new THREE.Vector3(x, 6, z), base: hex };
+  };
+  const makeResistor = (x, z) => {
+    box(0.45, 3.2, 0.45, std(0xb8b8b8, { metalness: 0.8 }), x - 3.6, 1.6, z, scene, false);
+    box(0.45, 3.2, 0.45, std(0xb8b8b8, { metalness: 0.8 }), x + 3.6, 1.6, z, scene, false);
+    const body = cyl(1.2, 6, std(0xd9b779), x, 3.3, z); body.rotation.z = Math.PI / 2;
+    [-1.7, -0.5, 0.7, 2.2].forEach((dx, i) => { const b = cyl(1.26, 0.55, std([0x7a3b12, 0x111111, 0xb0261b, 0xc9a227][i]), x + dx, 3.3, z); b.rotation.z = Math.PI / 2; });
+  };
+  const ledR = makeLed(-14, 22, 0xff2a2a), ledG = makeLed(-2, 22, 0x22e05a);
+  makeResistor(-14, 36); makeResistor(-2, 36);
+
+  const btn = (() => {
+    const x = 12, z = 36;
+    box(7, 3.4, 7, std(0x1d1d1d), x, 1.7, z);
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) box(0.5, 1.8, 0.5, std(0xb8b8b8, { metalness: 0.8 }), x + sx * 2.6, 2.2, z + sz * 2.6, scene, false);
+    const capMat = std(0xd23b3b, { roughness: 0.4 });
+    const cap = cyl(2.2, 2, capMat, x, 4.4, z);
+    return { cap, capMat, x, z, y0: 4.4 };
+  })();
+
+  const pot = (() => {
+    const x = 27, z = 24;
+    cyl(5.2, 5.6, std(0x1f4f9a, { roughness: 0.5 }), x, 2.8, z);
+    for (const dx of [-3, 0, 3]) box(0.6, 3, 0.6, std(0xb8b8b8, { metalness: 0.8 }), x + dx, 1, z + 6, scene, false);
+    const knob = new THREE.Group(); knob.position.set(x, 6.7, z); scene.add(knob);
+    const km = std(0xeaeaea, { roughness: 0.35 });
+    const body = cyl(3.6, 2.4, km, 0, 0, 0, knob, 32);
+    box(0.8, 0.3, 3.2, std(0x1a1a1a), 0, 1.3, -1.2, knob, false);
+    return { knob, body, x, z };
+  })();
+
+  /* ---- Fios ---- */
+  const wire = (a, b, color, lift = 8, radius = 0.5) => {
+    const d = a.distanceTo(b);
+    const mid = a.clone().lerp(b, 0.5); mid.y += lift + d * 0.12;
+    const up = v => v.clone().setY(v.y + 3.5);
+    const curve = new THREE.CatmullRomCurve3([a, up(a), mid, up(b), b]);
+    const m = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, radius, 8, false), std(color, { roughness: 0.45 }));
+    m.castShadow = true; scene.add(m);
+  };
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const GND_PIN = pinPos('R', 'GND'), V3_PIN = pinPos('R', '3V3');
+  wire(pinPos('R', '4'),  V(-14 + 1.27, 6, 22), 0xf09a20, 10);   // GPIO4 → LED vermelho
+  wire(pinPos('R', '16'), V(-2 + 1.27, 6, 22),  0x2fb455, 14);   // GPIO16 → LED verde
+  wire(pinPos('R', '15'), V(12, 2, 33), 0xe6d23a, 18);           // GPIO15 → botão
+  wire(pinPos('L', '34'), V(27, 6.5, 30), 0x3b82e8, 10);         // GPIO34 → pot (cursor)
+  wire(GND_PIN, V(RAIL_GND.x, 0.8, 8), 0x1b1b1b, 22, 0.6);
+  wire(V3_PIN, V(RAIL_3V3.x, 0.8, 8), 0xc62828, 10, 0.6);
+  wire(V(-14 - 1.27, 3, 22), V(RAIL_GND.x, 0.8, 22), 0x1b1b1b, 3, 0.4);
+  wire(V(-2 - 1.27, 3, 22),  V(RAIL_GND.x, 0.8, 26), 0x1b1b1b, 6, 0.4);
+  wire(V(12, 2, 39), V(RAIL_GND.x, 0.8, 44), 0x1b1b1b, 8, 0.4);
+  wire(V(24, 2, 30), V(RAIL_GND.x + 0, 0.8, 52), 0x1b1b1b, 14, 0.4);
+  wire(V(30, 2, 30), V(RAIL_3V3.x, 0.8, 30), 0xc62828, 4, 0.4);
+
+  /* ---- Ondas de Wi‑Fi sobre a antena ---- */
+  const waves = [0, 1, 2].map(i => {
+    const m = new THREE.Mesh(new THREE.TorusGeometry(1, 0.12, 8, 40, Math.PI * 0.9), new THREE.MeshBasicMaterial({ color: 0x3ddc97, transparent: true, opacity: 0 }));
+    m.position.set(0, 6, BZ - 33); m.rotation.set(Math.PI / 2, 0, Math.PI * 0.05); scene.add(m); return m;
+  });
+
+  /* ---- Rótulos ---- */
+  const label = (text, sub, pos, scale = 1) => {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 128;
+    const x = c.getContext('2d');
+    x.fillStyle = 'rgba(8,16,13,.82)'; x.beginPath(); x.roundRect ? x.roundRect(4, 12, 504, 104, 16) : x.rect(4, 12, 504, 104); x.fill();
+    x.fillStyle = '#e4f2ea'; x.font = '600 40px "Chakra Petch", sans-serif'; x.textAlign = 'center'; x.fillText(text, 256, 62);
+    x.fillStyle = '#7fe0b0'; x.font = '500 28px "JetBrains Mono", monospace'; x.fillText(sub, 256, 100);
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), depthTest: false, transparent: true }));
+    s.scale.set(22 * scale, 5.5 * scale, 1); s.position.copy(pos); s.renderOrder = 10; scene.add(s);
+  };
+  label('LED vermelho', 'GPIO4', V(-14, 15, 22));
+  label('LED verde', 'GPIO16', V(-2, 15, 22));
+  label('Botão', 'GPIO15', V(12, 12, 36));
+  label('Potenciômetro', 'GPIO34 · ADC', V(27, 17, 24));
+  label('LED azul', 'GPIO2', V(6.5, 11, BZ + 10), 0.9);
+
+  /* ---- Tema ---- */
+  const applyTheme = () => {
+    const cs = getComputedStyle(document.documentElement);
+    const stageC = cs.getPropertyValue('--stage').trim() || '#cfdcd5', floorC = cs.getPropertyValue('--floor').trim() || '#bccbc3';
+    scene.background = new THREE.Color(stageC); scene.fog = new THREE.Fog(new THREE.Color(stageC), 260, 560);
+    floor.material.color = new THREE.Color(floorC);
+  };
+  applyTheme();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(applyTheme, 30));
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  /* ---- Tamanho ---- */
+  const resize = () => {
+    const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  };
+  new ResizeObserver(resize).observe(stage); resize();
+
+  /* ---- Interação: botão e potenciômetro ---- */
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  const pick = (ev, objs) => {
+    const r = renderer.domElement.getBoundingClientRect();
+    ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera); return ray.intersectObjects(objs, false)[0];
+  };
+  const btnObjs = [btn.cap], potObjs = [pot.body];
+  let drag = null, onUI = () => {};
+  renderer.domElement.addEventListener('pointerdown', ev => {
+    if (pick(ev, btnObjs)) { Sim.button = true; drag = { type: 'btn' }; }
+    else if (pick(ev, potObjs)) { drag = { type: 'pot', x: ev.clientX, v: Sim.pot }; }
+    if (drag) { controls.enabled = false; renderer.domElement.setPointerCapture(ev.pointerId); onUI(); }
+  });
+  renderer.domElement.addEventListener('pointermove', ev => {
+    if (drag && drag.type === 'pot') { Sim.pot = Math.max(0, Math.min(1, drag.v + (ev.clientX - drag.x) / 220)); onUI(); }
+    else if (!drag) renderer.domElement.style.cursor = (pick(ev, btnObjs) || pick(ev, potObjs)) ? 'pointer' : 'grab';
+  });
+  const end = () => { if (drag) { if (drag.type === 'btn') Sim.button = false; drag = null; controls.enabled = true; onUI(); } };
+  renderer.domElement.addEventListener('pointerup', end);
+  renderer.domElement.addEventListener('pointercancel', end);
+
+  /* ---- Modo introdução: clicar nas peças e destacar ---- */
+  let introMode = false, onPart = () => {}, down = null, focus = null, helper = null;
+  renderer.domElement.addEventListener('pointerdown', ev => { down = { x: ev.clientX, y: ev.clientY }; });
+  renderer.domElement.addEventListener('pointerup', ev => {
+    if (!introMode || !down) return;
+    if (Math.hypot(ev.clientX - down.x, ev.clientY - down.y) > 5) return;
+    const h = pick(ev, Object.values(PARTS).flat()); if (h) onPart(h.object.userData.partId);
+  });
+  const highlight = id => {
+    if (helper) { scene.remove(helper); helper.geometry.dispose(); helper = null; }
+    if (!id || !PARTS[id]) return;
+    const b = new THREE.Box3(); PARTS[id].forEach(m => b.expandByObject(m)); b.expandByScalar(1.2);
+    helper = new THREE.Box3Helper(b, 0xf5b83d); helper.material.depthTest = false; helper.material.linewidth = 2; helper.renderOrder = 20; scene.add(helper);
+    const c = b.getCenter(new THREE.Vector3()), size = b.getSize(new THREE.Vector3()).length();
+    const dirv = camera.position.clone().sub(controls.target).normalize(), dist = Math.max(60, size * 2.4);
+    focus = { t: c, c: c.clone().add(dirv.multiplyScalar(dist)) };
+  };
+  const resetView = () => { focus = { t: new THREE.Vector3(0, 0, 8), c: new THREE.Vector3(34, 112, 104) }; };
+
+  /* ---- Teclado: WASD move, Q/E gira ---- */
+  const keys = new Set();
+  const typing = () => /^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '');
+  addEventListener('keydown', e => { if (!typing() && !e.ctrlKey && !e.metaKey) keys.add(e.key.toLowerCase()); });
+  addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+  addEventListener('blur', () => keys.clear());
+
+  const up = new THREE.Vector3(0, 1, 0), dir = new THREE.Vector3(), right = new THREE.Vector3(), mv = new THREE.Vector3(), off = new THREE.Vector3();
+  const lerpK = (cur, tgt, k) => cur + (tgt - cur) * k;
+  const frame = () => {
+    requestAnimationFrame(frame);
+    if (keys.size) {
+      camera.getWorldDirection(dir); dir.y = 0; dir.normalize(); right.crossVectors(dir, up).normalize(); mv.set(0, 0, 0);
+      if (keys.has('w')) mv.add(dir); if (keys.has('s')) mv.sub(dir); if (keys.has('d')) mv.add(right); if (keys.has('a')) mv.sub(right);
+      if (mv.lengthSq()) { mv.normalize().multiplyScalar(1.1); controls.target.add(mv); camera.position.add(mv); }
+      const rot = (keys.has('q') ? 1 : 0) - (keys.has('e') ? 1 : 0);
+      if (rot) { off.copy(camera.position).sub(controls.target).applyAxisAngle(up, rot * 0.025); camera.position.copy(controls.target).add(off); }
+    }
+    if (focus) {
+      controls.target.lerp(focus.t, 0.08); camera.position.lerp(focus.c, 0.08);
+      if (controls.target.distanceTo(focus.t) < 0.3 && camera.position.distanceTo(focus.c) < 0.6) focus = null;
+    }
+    if (helper) helper.material.color.setHex(Math.floor(performance.now() / 350) % 2 ? 0xf5b83d : 0xffd77a);
+    controls.update();
+    // LEDs
+    const set = (L, pin) => { const b = Sim.level(pin); L.mat.emissiveIntensity = b * 1.9; L.mat.opacity = 0.82 + b * 0.18; L.light.intensity = b * 3.2; };
+    set(ledR, 4); set(ledG, 16);
+    const bl = Sim.level(2); onboard.mat.emissiveIntensity = bl * 2.2; onboard.light.intensity = bl * 2.2;
+    // botão e potenciômetro
+    const pressed = Sim.button;
+    btn.cap.position.y = lerpK(btn.cap.position.y, pressed ? btn.y0 - 1.1 : btn.y0, 0.5);
+    btn.capMat.color.setHex(pressed ? 0x8d2222 : 0xd23b3b);
+    pot.knob.rotation.y = lerpK(pot.knob.rotation.y, -((-135 + Sim.pot * 270) * Math.PI / 180), 0.4);
+    const wOn = Sim.running && Sim.wifi && Sim.wifiStatus() === 3, tt = performance.now() / 1000;
+    waves.forEach((w, i) => { const ph = (tt * 0.9 + i / 3) % 1; const sc = 3 + ph * 9; w.scale.set(sc, sc, sc); w.material.opacity = wOn ? (1 - ph) * 0.75 : 0; w.rotation.z = Math.PI * 0.05; });
+    renderer.render(scene, camera);
+  };
+  requestAnimationFrame(frame);
+
+  return { ok: true, setUIHook: fn => { onUI = fn; }, highlight, resetView, setIntro: (on, cb) => {
+      introMode = on; onPart = cb || (() => {}); if (!on) highlight(null);
+      scene.children.forEach(o => { if (o.isLight || o === floor || o === onboard.group || o === helper) return; o.visible = !on; });
+      if (on) focus = { t: new THREE.Vector3(0, 0, -30), c: new THREE.Vector3(24, 70, 14) };
+    } };
+})();
+/* ===== Interface ===== */
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} if (/\.done$/.test(k) && window.progressoMudou) window.progressoMudou(); },
+  };
+  let cur = Math.min(store.get('esp32lab.cur2', 0), LESSONS.length - 1);
+  const done = store.get('esp32lab.done', {});          // { lessonId: { checkId: true } }
+  const codes = store.get('esp32lab.codes', {});        // código editado por lição
+  const el = { code: $('code'), serial: $('serial'), status: $('status'), run: $('btnRun'), stop: $('btnStop'), card: $('lessonCard'),
+    nav: $('lessonNav'), pins: $('pins'), pot: $('potRange'), potOut: $('potOut'), hold: $('btnHold') };
+
+  /* ---- Navegação e cartão da lição ---- */
+  const lessonDone = L => L.checks.filter(c => !c.challenge).every(c => (done[L.id] || {})[c.id]);
+  const renderNav = () => {
+    el.nav.innerHTML = '';
+    LESSONS.forEach((L, i) => {
+      const b = document.createElement('button'); b.type = 'button';
+      b.className = lessonDone(L) ? 'done' : ''; if (i === cur) b.setAttribute('aria-current', 'true');
+      b.innerHTML = '<span class="n">' + (lessonDone(L) ? '✓' : i) + '</span><span></span>';
+      b.lastChild.textContent = L.title.split(':')[0]; b.title = L.title;
+      b.addEventListener('click', () => go(i)); el.nav.appendChild(b);
+    });
+    const n = LESSONS.filter(lessonDone).length;
+    $('progText').textContent = n + ' de ' + LESSONS.length + ' lições';
+    $('progBar').style.width = (n / LESSONS.length * 100) + '%';
+  };
+  const renderCard = () => {
+    const L = LESSONS[cur], d = done[L.id] || {};
+    el.card.innerHTML = '';
+    const add = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; el.card.appendChild(e); return e; };
+    add('div', 'eyebrow', L.intro ? 'Módulo 0 · Base do curso' : 'Lição ' + cur + ' de ' + (LESSONS.length - 1));
+    add('h2', '', L.title);
+    add('p', 'goal', L.goal);
+    const ul = add('ul', 'checks');
+    L.checks.forEach(c => {
+      const li = document.createElement('li'); li.dataset.id = c.id;
+      if (c.challenge) li.className = 'challenge'; if (d[c.id]) li.classList.add('ok');
+      const sp = document.createElement('span'); sp.textContent = c.label; li.appendChild(sp); ul.appendChild(li);
+    });
+    const ban = add('div', 'banner' + (lessonDone(L) ? ' show' : ''), L.intro ? 'Introdução concluída! Vá para a lição 1.' : cur < LESSONS.length - 1 ? 'Lição concluída! Siga para a próxima.' : 'Última lição concluída. Agora monte o seu próprio projeto.');
+    ban.id = 'banner';
+    const tip = document.createElement('div'); tip.className = 'tip';
+    const st = document.createElement('strong'); st.textContent = 'Dica ESP32'; tip.appendChild(st); tip.appendChild(document.createTextNode(L.tip)); el.card.appendChild(tip);
+    const nav = add('div', 'lnav');
+    const prev = document.createElement('button'); prev.className = 'btn'; prev.type = 'button'; prev.textContent = '← Anterior'; prev.disabled = cur === 0;
+    const next = document.createElement('button'); next.className = 'btn'; next.type = 'button'; next.textContent = 'Próxima →'; next.disabled = cur === LESSONS.length - 1;
+    prev.onclick = () => go(cur - 1); next.onclick = () => go(cur + 1); nav.append(prev, next);
+  };
+  const go = i => {
+    if (i < 0 || i >= LESSONS.length) return;
+    codes[LESSONS[cur].id] = el.code.value; store.set('esp32lab.codes', codes);
+    Sim.stop(true); cur = i; store.set('esp32lab.cur2', cur);
+    Sim.resetStats(); applyMode();
+    el.code.value = codes[LESSONS[cur].id] ?? LESSONS[cur].code;
+    clearSerial(); resetBrowser(); renderNav(); renderCard(); renderPins(); setState();
+    el.nav.children[cur] && el.nav.children[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+  };
+
+  /* ---- Verificação das missões ---- */
+  const evaluate = () => {
+    const L = LESSONS[cur]; let changed = false; const d = done[L.id] || (done[L.id] = {});
+    L.checks.forEach(c => { if (!d[c.id] && c.test(Sim.stats)) { d[c.id] = true; changed = true; } });
+    if (changed) {
+      store.set('esp32lab.done', done);
+      L.checks.forEach(c => { const li = el.card.querySelector('li[data-id="' + c.id + '"]'); if (li && d[c.id]) li.classList.add('ok'); });
+      const b = $('banner'); if (b && lessonDone(L)) b.classList.add('show');
+      renderNav();
+    }
+  };
+  setInterval(() => { if (Sim.running) evaluate(); }, 250);
+
+  /* ---- Pinos ---- */
+  const CHIPS = [
+    { pin: 2, name: 'GPIO2 · LED azul', kind: 'out' }, { pin: 4, name: 'GPIO4 · LED vermelho', kind: 'out' },
+    { pin: 16, name: 'GPIO16 · LED verde', kind: 'out' }, { pin: 15, name: 'GPIO15 · botão', kind: 'in' },
+    { pin: 34, name: 'GPIO34 · ADC', kind: 'adc' },
+  ];
+  const renderPins = () => {
+    el.pins.innerHTML = '';
+    CHIPS.forEach(c => {
+      const d = document.createElement('div'); d.className = 'chip'; d.id = 'chip' + c.pin;
+      d.innerHTML = '<b></b><span><i></i><em style="font-style:normal"></em></span>'; d.firstChild.textContent = c.name; el.pins.appendChild(d);
+    });
+  };
+  const updatePins = () => {
+    CHIPS.forEach(c => {
+      const d = $('chip' + c.pin); if (!d) return; const p = Sim.pins[c.pin]; let txt = '–', on = false;
+      if (c.kind === 'out') {
+        if (p && p.pwm) { txt = 'PWM ' + p.pwm.duty + '/' + ((1 << p.pwm.res) - 1); on = p.pwm.duty > 0; }
+        else if (p && p.mode === OUTPUT) { txt = p.value ? 'HIGH' : 'LOW'; on = !!p.value; }
+        else txt = p && p.mode != null ? 'entrada' : 'livre';
+      } else if (c.kind === 'in') {
+        txt = Sim.button ? 'LOW · apertado' : 'HIGH · solto'; on = Sim.button;
+      } else { txt = Math.round(Sim.pot * 4095) + ' / 4095'; on = Sim.pot > 0.02; }
+      d.querySelector('em').textContent = txt; d.classList.toggle('on', on);
+    });
+  };
+  const syncUI = () => {
+    el.pot.value = Math.round(Sim.pot * 4095); el.potOut.textContent = el.pot.value;
+    el.hold.classList.toggle('held', Sim.button); updatePins();
+  };
+  setInterval(updatePins, 120);
+  if (Scene3D.ok) Scene3D.setUIHook(syncUI);
+
+  el.pot.addEventListener('input', () => { Sim.pot = el.pot.value / 4095; syncUI(); });
+  const press = v => () => { Sim.button = v; syncUI(); };
+  el.hold.addEventListener('pointerdown', ev => { ev.preventDefault(); el.hold.setPointerCapture(ev.pointerId); press(true)(); });
+  el.hold.addEventListener('pointerup', press(false)); el.hold.addEventListener('pointercancel', press(false));
+  el.hold.addEventListener('keydown', ev => { if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); press(true)(); } });
+  el.hold.addEventListener('keyup', ev => { if (ev.key === ' ' || ev.key === 'Enter') press(false)(); });
+
+  /* ---- Serial ---- */
+  const clearSerial = () => { el.serial.textContent = ''; };
+  Sim.hooks.serial = (text, cls) => {
+    const stick = el.serial.scrollTop + el.serial.clientHeight >= el.serial.scrollHeight - 24;
+    if (cls === 'warn' && el.serial.textContent && !el.serial.textContent.endsWith('\n')) text = '\n' + text;
+    if (cls) { const s = document.createElement('span'); s.className = cls; s.textContent = text; el.serial.appendChild(s); }
+    else el.serial.appendChild(document.createTextNode(text));
+    while (el.serial.childNodes.length > 600) el.serial.removeChild(el.serial.firstChild);
+    if (stick) el.serial.scrollTop = el.serial.scrollHeight;
+  };
+  $('btnClear').addEventListener('click', clearSerial);
+
+  /* ---- Execução ---- */
+  const setState = () => {
+    el.run.disabled = Sim.running; el.stop.disabled = !Sim.running;
+    el.status.textContent = Sim.running ? 'executando' : 'parado'; el.status.classList.toggle('run', Sim.running);
+    updatePins();
+  };
+  Sim.hooks.state = setState; Sim.hooks.pins = updatePins;
+  el.run.addEventListener('click', () => {
+    codes[LESSONS[cur].id] = el.code.value; store.set('esp32lab.codes', codes);
+    Sim.speed = +$('speed').value; Sim.run(el.code.value);
+  });
+  el.stop.addEventListener('click', () => Sim.stop());
+  $('speed').addEventListener('change', e => { Sim.speed = +e.target.value; });
+  $('btnReset').addEventListener('click', () => {
+    Sim.stop(true); el.code.value = LESSONS[cur].code; delete codes[LESSONS[cur].id]; store.set('esp32lab.codes', codes);
+  });
+  el.code.addEventListener('keydown', e => {
+    if (e.key === 'Tab') {
+      e.preventDefault(); const s = el.code.selectionStart, t = el.code.selectionEnd;
+      el.code.setRangeText('  ', s, t, 'end');
+    } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); el.run.click(); }
+  });
+  el.code.addEventListener('input', () => { codes[LESSONS[cur].id] = el.code.value; store.set('esp32lab.codes', codes); });
+
+  /* ---- Módulo 0: anatomia da placa ---- */
+  const seen = new Set(store.get('esp32lab.seen', []));
+  const quizAns = store.get('esp32lab.quiz', {});
+  const mark = (id) => {
+    const d = done.intro || (done.intro = {}); if (d[id]) return;
+    d[id] = true; store.set('esp32lab.done', done); renderNav();
+    if (LESSONS[cur].intro) { const li = el.card.querySelector('li[data-id="' + id + '"]'); if (li) li.classList.add('ok'); const b = $('banner'); if (b && lessonDone(LESSONS[0])) b.classList.add('show'); }
+  };
+  const A = $('anatomy');
+  const selectPart = id => {
+    const part = INTRO.parts.find(p => p.id === id); if (!part) return;
+    seen.add(id); store.set('esp32lab.seen', [...seen]);
+    if (Scene3D.ok) Scene3D.highlight(id);
+    A.querySelectorAll('.parts button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'); if (seen.has(b.dataset.id)) b.classList.add('seen'); });
+    const D = A.querySelector('.detail'); D.replaceChildren();
+    const mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; e.textContent = x; D.appendChild(e); };
+    mk('h4', '', part.name); mk('div', 'role', part.role); mk('p', '', part.text); mk('p', 'why', 'Na prática: ' + part.why);
+    if (seen.size >= INTRO.parts.length) mark('explore');
+  };
+  const renderAnatomy = () => {
+    A.replaceChildren();
+    const h = document.createElement('h3'); h.textContent = 'Componentes da placa'; A.appendChild(h);
+    const hint = document.createElement('div'); hint.className = 'goal'; hint.style.fontSize = '13.5px';
+    hint.textContent = 'Escolha na lista ou clique direto na placa 3D. A peça é destacada e a câmera aproxima.'; A.appendChild(hint);
+    const grid = document.createElement('div'); grid.className = 'parts';
+    INTRO.parts.forEach(p => {
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.id = p.id; b.setAttribute('aria-pressed', 'false');
+      if (seen.has(p.id)) b.classList.add('seen');
+      const m = document.createElement('span'); m.className = 'm'; const t = document.createElement('span'); t.textContent = p.name.replace(/ \(.*\)/, '');
+      b.append(m, t); b.onclick = () => selectPart(p.id); grid.appendChild(b);
+    });
+    A.appendChild(grid);
+    const det = document.createElement('div'); det.className = 'detail';
+    det.innerHTML = '<p class="goal" style="margin:0">Nenhum componente selecionado ainda.</p>'; A.appendChild(det);
+
+    const d1 = document.createElement('details'); d1.open = true;
+    d1.innerHTML = '<summary>ESP32 × Arduino Uno</summary>';
+    const tw = document.createElement('div'); tw.className = 'tw'; const tb = document.createElement('table'); tb.className = 'spec';
+    const hr = tb.insertRow(); ['', 'ESP32 DevKit', 'Arduino Uno'].forEach(x => { const th = document.createElement('th'); th.textContent = x; hr.appendChild(th); });
+    INTRO.specs.forEach(r => { const tr = tb.insertRow(); r.forEach(x => { const td = tr.insertCell(); td.textContent = x; }); });
+    tw.appendChild(tb); d1.appendChild(tw); A.appendChild(d1);
+
+    const d2 = document.createElement('details'); d2.open = true; d2.innerHTML = '<summary>Teste rápido</summary>';
+    INTRO.quiz.forEach((q, qi) => {
+      const box = document.createElement('div'); box.className = 'q';
+      const pq = document.createElement('p'); pq.textContent = (qi + 1) + '. ' + q.q; box.appendChild(pq);
+      const opts = document.createElement('div'); opts.className = 'opts'; box.appendChild(opts);
+      const exp = document.createElement('div'); exp.className = 'exp'; box.appendChild(exp);
+      const reveal = pick => {
+        [...opts.children].forEach((b, i) => { b.disabled = true; if (i === q.a) b.classList.add('right'); else if (i === pick) b.classList.add('wrong'); });
+        exp.textContent = (pick === q.a ? 'Certo. ' : 'Não foi dessa vez. ') + q.e;
+      };
+      q.o.forEach((o, oi) => {
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = o;
+        b.onclick = () => { quizAns[qi] = oi; store.set('esp32lab.quiz', quizAns); reveal(oi); if (Object.keys(quizAns).length >= INTRO.quiz.length) mark('quiz'); };
+        opts.appendChild(b);
+      });
+      if (quizAns[qi] !== undefined) reveal(quizAns[qi]);
+      d2.appendChild(box);
+    });
+    A.appendChild(d2);
+  };
+  const applyMode = () => {
+    const intro = !!LESSONS[cur].intro;
+    document.querySelector('.app').dataset.mode = intro ? 'intro' : 'lab';
+    const hint = document.querySelector('.hint');
+    if (!hint.dataset.lab) hint.dataset.lab = hint.textContent;
+    hint.textContent = intro ? 'arraste: girar · roda: zoom · clique em uma peça da placa para saber o que ela faz' : hint.dataset.lab;
+    if (Scene3D.ok) { Scene3D.setIntro(intro, selectPart); if (!intro) Scene3D.resetView(); }
+    if (intro) renderAnatomy();
+  };
+
+  /* ---- Navegador virtual ---- */
+  const B = { box: $('browser'), view: $('viewport'), meta: $('vmeta'), path: $('addrPath'), routes: $('routes'), net: $('netState') };
+  const resetBrowser = () => {
+    B.box.hidden = !LESSONS[cur].net;
+    B.view.innerHTML = '<span class="emptyv">Execute o programa. Quando o ESP32 conectar e chamar server.begin(), abra uma página aqui.</span>';
+    B.meta.textContent = '–'; B.path.value = '/';
+  };
+  const safeRender = html => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('script,iframe,object,embed,link,meta,style,base,form').forEach(n => n.remove());
+    doc.querySelectorAll('*').forEach(n => [...n.attributes].forEach(a => { if (/^on/i.test(a.name) || /^\s*javascript:/i.test(a.value)) n.removeAttribute(a.name); }));
+    return [...doc.body.childNodes];
+  };
+  const browse = async path => {
+    if (!path.startsWith('/')) path = '/' + path;
+    B.path.value = path; B.meta.textContent = 'carregando…';
+    const r = await Sim.request(path);
+    B.view.replaceChildren();
+    if (r.code === 0) {
+      const d = document.createElement('div'); d.className = 'errv'; d.textContent = r.error + ': ' + r.body; B.view.appendChild(d); B.meta.textContent = 'falhou';
+    } else if (/html/.test(r.type)) { B.view.append(...safeRender(r.body)); B.meta.textContent = r.code + ' · ' + r.type + ' · ' + r.ms + ' ms'; }
+    else { const pre = document.createElement('pre'); pre.textContent = r.body; B.view.appendChild(pre); B.meta.textContent = r.code + ' · ' + r.type + ' · ' + r.ms + ' ms'; }
+    evaluate();
+  };
+  $('addrForm').addEventListener('submit', e => { e.preventDefault(); browse(B.path.value.trim() || '/'); });
+  B.view.addEventListener('click', e => {
+    const a = e.target.closest && e.target.closest('a[href]'); if (!a) return;
+    e.preventDefault(); const h = a.getAttribute('href'); if (h && h.startsWith('/')) browse(h);
+  });
+  let routeKey = '';
+  setInterval(() => {
+    const online = Sim.running && Sim.net.listening && Sim.wifiStatus() === 3;
+    B.net.classList.toggle('on', online); B.net.querySelector('em').textContent = online ? 'ESP32 online · 192.168.0.42' : (Sim.running && Sim.wifi.began ? 'conectando…' : 'ESP32 offline');
+    const keys = Object.keys(Sim.net.routes).join('|');
+    if (keys !== routeKey) {
+      routeKey = keys; B.routes.replaceChildren();
+      Object.keys(Sim.net.routes).forEach(r => { const b = document.createElement('button'); b.type = 'button'; b.textContent = r; b.onclick = () => browse(r); B.routes.appendChild(b); });
+    }
+  }, 200);
+
+  /* ---- Início ---- */
+  el.code.value = codes[LESSONS[cur].id] ?? LESSONS[cur].code;
+  applyMode(); resetBrowser(); renderNav(); renderCard(); renderPins(); setState(); syncUI();
+})();
+</script>
+<script>
+window.PROGRESSO_ID = "esp32-lab-v1";
+window.PROGRESSO_DADOS = function () {
+  var d = {}; try { d = JSON.parse(localStorage.getItem("esp32lab.done") || "{}") || {}; } catch (e) {}
+  var feitas = 0, ok = 0, det = {};
+  LESSONS.forEach(function (L) {
+    var x = d[L.id] || {}, n = Object.keys(x).filter(function (k) { return x[k]; }).length;
+    ok += n; det[L.id] = n;
+    var obrig = (L.checks || []).filter(function (c) { return !c.challenge; });
+    if (obrig.length && obrig.every(function (c) { return x[c.id]; })) feitas++;
+  });
+  return { feitas: feitas, total: LESSONS.length, pontos: ok * 10, detalhe: det };
+};
+</script>
+<script src="../config.js"></script>
+<script src="../progresso-turma.js"></script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

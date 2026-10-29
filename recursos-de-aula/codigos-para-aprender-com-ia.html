@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>14 Códigos para Aprender com IA</title>
+<meta name="description" content="Atalhos de prompt para estudar qualquer assunto do zero com ajuda de IA — com exemplos prontos para copiar e adaptar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#EEF2F0;--panel:#fff;--sunk:#E1E8E4;--ink:#16261C;--ink-2:#3F4F5B;--muted:#5B6871;--line:#D5DDDA;
+  --accent:#1F5135;--accent-ink:#fff;--accent-soft:#DCEAE1;--side:#16261C;--side-ink:#DCE5EA;
+  --warn:#8A5A12;--warn-soft:#F7ECD6;--warn-line:#E7D7AE;
+  --cond:"Barlow Condensed","Arial Narrow",sans-serif;--sans:"Source Sans 3","Segoe UI",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){color-scheme:dark;--bg:#0F171D;--panel:#16222B;--sunk:#1C2730;--ink:#E4ECEF;--ink-2:#B8C6CD;--muted:#8699A4;--line:#2A3A45;
+    --accent:#6BAA68;--accent-ink:#0A140D;--accent-soft:#1C2E20;--side:#0B140E;
+    --warn:#D9B35C;--warn-soft:#2A2411;--warn-line:#4A3F1E}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0F171D;--panel:#16222B;--sunk:#1C2730;--ink:#E4ECEF;--ink-2:#B8C6CD;--muted:#8699A4;--line:#2A3A45;
+  --accent:#6BAA68;--accent-ink:#0A140D;--accent-soft:#1C2E20;--side:#0B140E;
+  --warn:#D9B35C;--warn-soft:#2A2411;--warn-line:#4A3F1E}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55;
+  padding-left:max(0px, env(safe-area-inset-left,0px));padding-right:max(0px, env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--cond);text-wrap:balance}
+code,.mono{font-family:var(--mono)}
+header{background:var(--side);color:var(--side-ink);padding-inline:clamp(16px,5vw,64px);padding-block:40px 36px}
+.wrap{max-width:1040px;margin:0 auto}
+.back{display:inline-block;color:#7FBF7A;text-decoration:none;font-size:15px;margin-bottom:14px}
+.back:hover{text-decoration:underline}
+#b-eyebrow,header .eyebrow{color:#7FBF7A!important}
+.eyebrow{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font-size:clamp(34px,6vw,54px);line-height:1.05;margin:8px 0 10px;color:#fff}
+header p{margin:0;max-width:64ch;color:#B8C6CD;font-size:16.5px}
+main{padding-inline:clamp(16px,5vw,64px);padding-block:28px 64px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(16,25,21,.08)}
+.card + .card{margin-top:14px}
+.tip{background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--ink);border-radius:12px;padding:16px 18px;font-size:15px}
+.tip b{color:var(--warn)}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:16px}
+.step{background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:14px}
+.step .n{font-family:var(--mono);color:var(--accent);font-weight:700;font-size:13px}
+.step p{margin:4px 0 0;font-size:14px;color:var(--ink-2)}
+h2.sec{font-size:30px;margin:34px 0 4px}
+.sec-sub{color:var(--ink-2);font-size:15px;margin:0 0 16px;max-width:60ch}
+
+.grid14{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.codigo{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 2px 10px rgba(16,25,21,.06)}
+.codigo .head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.codigo .slash{font-family:var(--mono);font-weight:700;font-size:16.5px;color:var(--accent);background:var(--accent-soft);padding:3px 9px;border-radius:7px}
+.codigo h3{margin:0;font-size:19px;flex:1;min-width:120px}
+.codigo .use{font-size:13.5px;color:var(--ink-2);margin:0}
+.prompt{background:var(--sunk);border:1px solid var(--line);border-radius:9px;padding:12px;font-family:var(--mono);font-size:12.5px;line-height:1.5;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.copybtn{align-self:flex-start;background:var(--accent);color:var(--accent-ink);border:none;border-radius:7px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+.copybtn:hover{opacity:.9}
+.copybtn.copied{background:var(--ink-2)}
+
+.checklist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+.checklist li{display:block;position:relative;padding-left:24px;font-size:14.5px;overflow-wrap:anywhere}
+.checklist li::before{content:"\2713";font-family:var(--mono);color:var(--accent);font-weight:700;position:absolute;left:0;top:0}
+
+footer{color:var(--muted);font-size:13.5px;margin-top:36px;line-height:1.6}
+footer a{color:var(--accent)}
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="back" href="./">&larr; Recursos de aula</a>
+  <span class="eyebrow">Para usar em qualquer disciplina</span>
+  <h1>14 Códigos para Aprender com IA</h1>
+  <p>Atalhos de prompt para começar um assunto do zero, entender uma explicação difícil ou colocar o aprendizado em prática — com exemplos prontos para copiar e adaptar.</p>
+</div></header>
+
+<main><div class="wrap">
+
+  <div class="card">
+    <p style="margin:0 0 10px">Aqui estão os <b>14 códigos</b> com exemplos para copiar e adaptar quando você quiser começar um assunto novo, entender uma explicação ou colocar o aprendizado em prática. Troque o assunto dos exemplos pelo que você quer aprender.</p>
+    <div class="tip"><b>Os códigos são atalhos de escrita, não comandos oficiais.</b> O pedido completo é o que orienta a IA: diga o assunto, seu nível e o que deseja ver na imagem.</div>
+  </div>
+
+  <h2 class="sec">Como usar</h2>
+  <p class="sec-sub">Funciona em qualquer ferramenta de IA com geração de imagem (ChatGPT, Gemini, Claude e outras).</p>
+  <div class="steps">
+    <div class="step"><div class="n">1</div><p>Abra uma conversa com a IA.</p></div>
+    <div class="step"><div class="n">2</div><p>Copie um dos exemplos abaixo e adapte o tema e o nível de dificuldade.</p></div>
+    <div class="step"><div class="n">3</div><p>Peça para criar a imagem. Se tiver uma referência, envie suas anotações ou o trecho do material que está estudando.</p></div>
+    <div class="step"><div class="n">4</div><p>Confira as informações, os textos e as setas antes de usar o resultado como material de estudo.</p></div>
+  </div>
+  <p style="font-size:14px;color:var(--ink-2);margin-top:14px">Fórmula simples: <b>assunto + código + pedido visual</b>. Você não precisa usar todos os códigos nem seguir a lista como uma sequência obrigatória.</p>
+
+  <h2 class="sec">Os 14 códigos</h2>
+  <p class="sec-sub">Toque em "Copiar" para levar o exemplo pronto até a sua conversa com a IA.</p>
+  <div class="grid14" id="grid14"></div>
+
+  <h2 class="sec">Como melhorar o resultado</h2>
+  <div class="card">
+    <p style="margin:0 0 10px">Se a imagem tiver muita informação, peça para dividir. Se ficar superficial, indique qual conceito precisa de mais detalhes.</p>
+    <div class="prompt">Ajuste a imagem para uma pessoa iniciante. Melhore [PONTO ESPECÍFICO], use menos texto por bloco e mantenha as palavras legíveis. Se necessário, divida em duas imagens.</div>
+  </div>
+
+  <h2 class="sec">Para conferir antes de gerar</h2>
+  <div class="card">
+    <div class="prompt">Antes de criar a imagem, apresente o conteúdo em texto para eu conferir. Indique quais explicações são simplificações e quais pontos precisam de uma fonte de referência.</div>
+  </div>
+
+  <h2 class="sec">Seu primeiro teste</h2>
+  <div class="card">
+    <ul class="checklist">
+      <li>Escolha um assunto que você quer aprender.</li>
+      <li>Use <span class="mono">/mapa</span> para conhecer os principais temas.</li>
+      <li>Escolha um desses temas e experimente <span class="mono">/simples</span> ou <span class="mono">/exemplo</span>.</li>
+      <li>Explique com suas próprias palavras o que entendeu e confira com seu material de estudo.</li>
+    </ul>
+    <p style="margin:14px 0 0;font-size:14px;color:var(--ink-2)">Ver uma explicação ajuda, mas praticar e conferir o que você entendeu também faz parte do aprendizado.</p>
+  </div>
+
+  <footer>
+    Prof. Eber Santana · IFS Campus Tobias Barreto. Conteúdo adaptado do material de Lari, do <a href="https://conteudos-infinitos-falou-digital.notion.site/17-10-Aprender-14-c-digos-para-aprender-qualquer-assunto-do-zero-3fb4c8f15127812981bad4fbd90465a1" target="_blank" rel="noopener">Falou Digital (Notion)</a>.
+  </footer>
+
+</div></main>
+
+<script>
+(function(){
+"use strict";
+var codigos = [
+  ["/zero","Comece sem conhecimento prévio","Use quando o assunto é totalmente novo e você precisa entender do que ele trata.",
+    "Quero aprender fotografia do zero. /zero Crie uma imagem didática com os conceitos iniciais, ilustrações e palavras simples para quem nunca estudou o assunto."],
+  ["/primeirospassos","Saiba o que fazer primeiro","Use para transformar a vontade de aprender em primeiras ações concretas.",
+    "Quero começar a desenhar. /primeirospassos Crie um guia visual com os materiais básicos e 5 exercícios simples para meus primeiros dias."],
+  ["/mapa","Enxergue o assunto por inteiro","Use para conhecer os principais temas e como eles se conectam.",
+    "Quero aprender marketing digital. /mapa Crie um mapa visual com as principais áreas e mostre como elas se conectam, usando descrições curtas para iniciantes."],
+  ["/fundamentos","Entenda a base","Use para identificar os conceitos que sustentam o restante do aprendizado.",
+    "Quero aprender programação. /fundamentos Crie um infográfico com lógica, variáveis, condições e repetições, usando exemplos visuais simples."],
+  ["/trilha","Organize a sequência de aprendizagem","Use para decidir o que estudar antes e o que vem depois.",
+    "Quero aprender inglês do zero. /trilha Crie uma trilha visual de aprendizagem, organizada por etapas, com temas e uma atividade prática em cada etapa."],
+  ["/simples","Descomplique uma ideia difícil","Use para ter uma primeira explicação com pouco jargão.",
+    "Quero entender física quântica. /simples Crie uma explicação visual introdutória com ilustrações simples e poucos conceitos. Sinalize as simplificações e evite representar analogias como descrições literais."],
+  ["/analogia","Conecte com algo conhecido","Use para entender uma ideia nova a partir de uma comparação familiar.",
+    "Quero entender a internet. /analogia Crie uma imagem comparando o envio de dados com um sistema de entregas. Mostre as correspondências e indique onde a comparação deixa de funcionar."],
+  ["/exemplo","Veja o conceito funcionando","Use quando você entende a definição, mas ainda não sabe aplicá-la.",
+    "Quero aprender porcentagem. /exemplo Crie uma imagem com 3 exemplos cotidianos: desconto em uma compra, aumento de preço e porcentagem de uma quantidade. Mostre os cálculos com números simples."],
+  ["/camadas","Avance aos poucos","Use para sair da visão geral e aprofundar sem receber tudo de uma vez.",
+    "Quero entender como funciona um computador. /camadas Crie uma explicação visual em 3 níveis: visão geral, principais componentes e como eles trabalham juntos. Use linguagem para iniciantes."],
+  ["/diagrama","Entenda partes e relações","Use para visualizar uma estrutura ou acompanhar um fluxo.",
+    "Estou aprendendo sobre o coração humano. /diagrama Crie um diagrama didático com as principais estruturas identificadas e setas mostrando o percurso do sangue. Diferencie os fluxos e inclua uma legenda."],
+  ["/passoapasso","Aprenda a executar","Use para acompanhar uma atividade na ordem em que ela precisa acontecer.",
+    "Quero aprender a plantar uma horta em vasos. /passoapasso Crie um tutorial visual com preparação do vaso, substrato, plantio, rega e cuidados iniciais. Use manjericão como exemplo."],
+  ["/projeto","Coloque o aprendizado em prática","Use para aprender construindo uma entrega pequena e possível.",
+    "Quero aprender HTML e CSS. /projeto Crie um guia visual para construir minha primeira página pessoal, com etapas, elementos da página e o que vou praticar em cada etapa."],
+  ["/erros","Reconheça dificuldades comuns","Use para identificar o que costuma atrapalhar quem está começando.",
+    "Estou aprendendo violão. /erros Crie um guia visual com 5 erros comuns de iniciantes, mostrando como reconhecer e corrigir cada um com orientações simples."],
+  ["/resumovisual","Reúna o que aprendeu","Use depois de estudar para organizar os conceitos principais em uma página.",
+    "Estou aprendendo economia. /resumovisual Crie uma página visual de revisão sobre oferta, demanda e inflação, com definições curtas, exemplos cotidianos e conexões entre os conceitos."]
+];
+
+var grid = document.getElementById("grid14");
+var html = "";
+codigos.forEach(function(c, i){
+  html += '<div class="codigo">'+
+    '<div class="head"><span class="slash">'+c[0]+'</span><h3>'+c[1]+'</h3></div>'+
+    '<p class="use">'+c[2]+'</p>'+
+    '<div class="prompt" id="prompt-'+i+'">'+c[3]+'</div>'+
+    '<button class="copybtn" data-idx="'+i+'" onclick="COD.copiar('+i+',this)">Copiar exemplo</button>'+
+  '</div>';
+});
+grid.innerHTML = html;
+
+function copiar(idx, btn){
+  var text = codigos[idx][3];
+  function marcou(){
+    var original = "Copiar exemplo";
+    btn.textContent = "Copiado!";
+    btn.classList.add("copied");
+    setTimeout(function(){ btn.textContent = original; btn.classList.remove("copied"); }, 1800);
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(marcou, function(){ selecionar(idx); });
+  }else{
+    selecionar(idx);
+  }
+}
+function selecionar(idx){
+  var el = document.getElementById("prompt-"+idx);
+  var range = document.createRange();
+  range.selectNodeContents(el);
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+window.COD = {copiar:copiar};
+})();
+</script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

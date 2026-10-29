@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informática Básica - Ambiente Interativo</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+    --primary:#1e7e34; --primary-dark:#155229; --primary-light:#e8f5e9;
+    --accent:#f44236; --blue:#1565c0; --purple:#6a1b9a; --orange:#e65100;
+    --light-gray:#f5f5f5; --dark-text:#2b2b2b; --border-color:#ddd;
+    --success:#2e7d32; --error:#c62828; --warning:#ef6c00;
+}
+
+body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:var(--light-gray); color:var(--dark-text); line-height:1.6; }
+
+header { background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%); color:#fff; padding:1.8rem 2rem; box-shadow:0 2px 10px rgba(0,0,0,.15); position:sticky; top:0; z-index:100; }
+.header-content{ max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;}
+h1{ font-size:2.2rem;}
+.subtitle{ font-size:.95rem; opacity:.95;}
+.institution{ font-size:.85rem; margin-top:.3rem; opacity:.85;}
+.progress-badge{ background:rgba(255,255,255,.15); padding:.6rem 1.2rem; border-radius:30px; font-size:.85rem; text-align:center;}
+.progress-badge b{ font-size:1.3rem; display:block;}
+
+nav{ background:#fff; padding:.7rem 1rem; border-bottom:3px solid var(--primary); position:sticky; top:96px; z-index:99; box-shadow:0 2px 5px rgba(0,0,0,.05);}
+.nav-container{ max-width:1200px; margin:0 auto; display:flex; gap:.4rem; overflow-x:auto; scrollbar-width:thin;}
+.nav-btn{ background:#f0f0f0; border:none; padding:.55rem 1.1rem; cursor:pointer; font-size:.85rem; color:var(--dark-text); border-radius:20px; transition:.25s; white-space:nowrap; font-weight:500;}
+.nav-btn:hover{ background:var(--primary-light); color:var(--primary-dark);}
+.nav-btn.active{ background:var(--primary); color:#fff;}
+.nav-btn .num{ display:inline-block; background:rgba(0,0,0,.15); border-radius:50%; width:20px; height:20px; line-height:20px; font-size:.7rem; margin-right:.4rem;}
+.nav-btn.active .num{ background:rgba(255,255,255,.3);}
+
+.container{ max-width:1200px; margin:0 auto; padding:2rem 1rem;}
+.module{ display:none; animation:fadeIn .35s ease-in;}
+.module.active{ display:block;}
+@keyframes fadeIn{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:translateY(0);} }
+@keyframes floatY{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+@keyframes pulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+@keyframes blink{ 0%,49%{opacity:1;} 50%,100%{opacity:.15;} }
+@keyframes scrollGlow{ 0%{box-shadow:0 0 0 rgba(30,126,52,.4);} 50%{box-shadow:0 0 18px rgba(30,126,52,.35);} 100%{box-shadow:0 0 0 rgba(30,126,52,.4);} }
+
+.content-section{ background:#fff; padding:2rem; margin-bottom:1.5rem; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,.08);}
+.module-header{ display:flex; align-items:center; gap:1rem; margin-bottom:.5rem; flex-wrap:wrap;}
+.module-icon{ font-size:2.6rem; animation:floatY 3s ease-in-out infinite;}
+.section-title{ font-size:1.8rem; color:var(--primary); border-bottom:3px solid var(--primary); padding-bottom:.5rem; flex:1;}
+.module-intro{ color:#666; font-style:italic; margin-bottom:1.5rem;}
+
+.subsection-title{ font-size:1.2rem; color:#fff; background:linear-gradient(90deg,var(--primary),var(--primary-dark)); margin-top:1.6rem; margin-bottom:1rem; padding:.6rem 1rem; border-radius:6px; display:flex; align-items:center; gap:.5rem;}
+.content-text{ font-size:.98rem; line-height:1.8; margin-bottom:1rem; color:#444;}
+.content-text b{ color:var(--primary-dark);}
+
+/* Info grid boxes */
+.info-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin:1.2rem 0;}
+.info-box{ background:linear-gradient(145deg,#fff,#f2f7f2); border:1px solid #dfe9df; border-left:5px solid var(--primary); border-radius:8px; padding:1rem; transition:.25s;}
+.info-box:hover{ transform:translateY(-4px); box-shadow:0 6px 14px rgba(0,0,0,.1);}
+.info-box .ico{ font-size:1.8rem; margin-bottom:.4rem; display:block;}
+.info-box h4{ color:var(--primary-dark); font-size:.95rem; margin-bottom:.3rem;}
+.info-box p{ font-size:.85rem; color:#555;}
+
+/* Timeline */
+.timeline-wrap{ overflow-x:auto; padding:1.5rem .5rem; margin:1rem 0; background:linear-gradient(180deg,#f8fbf8,#fff); border-radius:10px; border:1px solid #e2ede2;}
+.timeline{ display:flex; gap:0; position:relative; min-width:max-content; padding:0 1rem;}
+.timeline::before{ content:''; position:absolute; top:38px; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--primary),var(--accent)); z-index:0;}
+.t-item{ width:190px; text-align:center; position:relative; z-index:1; padding:0 .6rem;}
+.t-dot{ width:20px; height:20px; background:var(--primary); border:4px solid #fff; border-radius:50%; margin:28px auto 0; box-shadow:0 0 0 2px var(--primary); transition:.25s;}
+.t-item:hover .t-dot{ animation:pulse 1s infinite; background:var(--accent); box-shadow:0 0 0 2px var(--accent);}
+.t-year{ font-weight:700; color:var(--primary-dark); margin-top:.6rem; font-size:.95rem;}
+.t-title{ font-weight:600; font-size:.85rem; margin-top:.2rem;}
+.t-desc{ font-size:.78rem; color:#666; margin-top:.3rem;}
+
+/* Bit/Byte visual */
+.bitdemo{ display:flex; gap:1.5rem; align-items:center; justify-content:center; flex-wrap:wrap; margin:1.2rem 0; padding:1.2rem; background:#0d1b0d; border-radius:10px;}
+.bulb{ text-align:center; color:#eee;}
+.bulb .icon{ font-size:2.5rem;}
+.bulb.on .icon{ color:#ffd54f; text-shadow:0 0 20px #ffd54f;}
+.bulb.off .icon{ color:#555;}
+.bit-byte-row{ display:flex; gap:6px; margin:1rem 0; flex-wrap:wrap; justify-content:center;}
+.bit-box{ width:34px; height:34px; background:#e8f5e9; border:2px solid var(--primary); border-radius:4px; display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--primary-dark); animation:blink 2.4s infinite;}
+.bit-box:nth-child(even){ animation-delay:.3s;}
+
+/* Hardware diagram */
+.hw-diagram{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1rem; margin:1.2rem 0;}
+.hw-part{ background:#fff; border:2px solid var(--blue); border-radius:8px; padding:1rem .6rem; text-align:center; transition:.25s;}
+.hw-part:hover{ background:var(--blue); color:#fff; transform:scale(1.05);}
+.hw-part .ico{ font-size:1.8rem; display:block; margin-bottom:.4rem;}
+
+/* Malware grid */
+.malware-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:.8rem; margin:1.2rem 0;}
+.malware-card{ background:#2b0000; color:#ffcdd2; border-radius:8px; padding:.9rem; text-align:center; border:1px solid #5c1a1a;}
+.malware-card .ico{ font-size:1.7rem; display:block; margin-bottom:.3rem;}
+.malware-card h5{ font-size:.85rem; color:#ff8a80; margin-bottom:.2rem;}
+.malware-card p{ font-size:.75rem; color:#eecccc;}
+
+/* Activity tabs */
+.activity-tabs{ display:flex; gap:.5rem; margin:1.8rem 0 1.2rem; border-bottom:2px solid var(--border-color); flex-wrap:wrap;}
+.activity-tab{ background:#eee; border:none; padding:.8rem 1.3rem; cursor:pointer; font-size:.92rem; border-radius:6px 6px 0 0; transition:.25s; font-weight:600; color:#555;}
+.activity-tab:hover{ background:var(--primary-light); color:var(--primary-dark);}
+.activity-tab.active{ background:var(--primary); color:#fff;}
+.activity-content{ display:none;}
+.activity-content.active{ display:block; animation:fadeIn .3s ease-in;}
+.activity-count{ font-size:.85rem; color:#757575; margin-bottom:1rem;}
+
+/* Flashcards */
+.flashcard-container{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:1.2rem;}
+.flashcard{ background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%); color:#fff; padding:1.6rem; border-radius:10px; cursor:pointer; transition:.3s; min-height:170px; display:flex; flex-direction:column; justify-content:center; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,.18); position:relative;}
+.flashcard:hover{ transform:translateY(-5px) scale(1.01); box-shadow:0 8px 18px rgba(0,0,0,.28);}
+.flashcard-question{ font-size:1rem; font-weight:600;}
+.flashcard-answer{ font-size:.88rem; line-height:1.5; opacity:0; max-height:0; overflow:hidden; transition:.3s; margin-top:0;}
+.flashcard.revealed .flashcard-answer{ opacity:1; max-height:220px; margin-top:.8rem;}
+.flashcard.revealed .flashcard-question{ opacity:.6; font-size:.85rem;}
+.flashcard-label{ position:absolute; top:8px; right:10px; font-size:.7rem; background:rgba(255,255,255,.2); padding:.2rem .5rem; border-radius:4px;}
+.flashcard-hint{ position:absolute; bottom:8px; left:0; right:0; font-size:.68rem; opacity:.6;}
+
+/* PBL */
+.pbl-scenario{ background:linear-gradient(120deg,#e3f2fd,#f3e5f5); padding:1.6rem; border-left:5px solid var(--blue); border-radius:8px;}
+.pbl-title{ font-weight:700; font-size:1.15rem; margin-bottom:.8rem; color:var(--blue);}
+.pbl-text{ color:#444; margin-bottom:1rem; line-height:1.7;}
+.pbl-tasks{ background:#fff; padding:1.2rem; border-radius:6px;}
+.pbl-task{ padding:.7rem .9rem; margin-bottom:.6rem; background:var(--light-gray); border-left:3px solid var(--blue); border-radius:4px;}
+.pbl-task-number{ font-weight:700; color:var(--blue); margin-right:.4rem;}
+.pbl-tip{ margin-top:1rem; padding:.8rem; background:#fff8e1; border-left:4px solid var(--warning); border-radius:4px; font-size:.85rem; color:#6d4c00;}
+
+/* V/F */
+.vf-container{ display:grid; gap:1rem;}
+.vf-question{ background:#fff; padding:1.2rem; border-radius:8px; border-left:5px solid var(--warning); box-shadow:0 2px 6px rgba(0,0,0,.06);}
+.vf-question-text{ font-size:1rem; margin-bottom:.9rem; color:var(--dark-text); line-height:1.5;}
+.vf-buttons{ display:flex; gap:.8rem; margin-bottom:.8rem;}
+.vf-btn{ flex:1; padding:.65rem 1rem; border:none; border-radius:6px; cursor:pointer; font-weight:700; font-size:.92rem; transition:.2s;}
+.vf-btn-true{ background:var(--success); color:#fff;}
+.vf-btn-true:hover{ background:#1b5e20; transform:translateY(-2px);}
+.vf-btn-false{ background:var(--error); color:#fff;}
+.vf-btn-false:hover{ background:#8e0000; transform:translateY(-2px);}
+.vf-btn:disabled{ opacity:.5; cursor:default; transform:none;}
+.vf-answer{ display:none; padding:.9rem; border-radius:6px;}
+.vf-answer.show{ display:block; animation:fadeIn .3s;}
+.vf-answer.correct{ background:#c8e6c9; border-left:5px solid var(--success);}
+.vf-answer.incorrect{ background:#ffcdd2; border-left:5px solid var(--error);}
+.vf-answer-label{ font-weight:700; margin-bottom:.3rem;}
+.vf-answer-text{ font-size:.9rem; color:#333;}
+
+.progress-container{ margin-bottom:1.5rem; background:#fff; padding:1rem 1.4rem; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.05);}
+.progress-bar{ width:100%; height:9px; background:var(--border-color); border-radius:5px; overflow:hidden; margin-top:.5rem;}
+.progress-fill{ height:100%; background:linear-gradient(90deg,var(--primary),var(--accent)); transition:.3s;}
+
+/* Game: Detetive do Código */
+.game-card{ background:#0d1117; color:#e6edf3; border-radius:10px; padding:1.4rem; box-shadow:0 4px 14px rgba(0,0,0,.25);}
+.game-progress{ font-size:.85rem; color:#8b949e; margin-bottom:.8rem; font-weight:600;}
+.game-code{ background:#161b22; border:1px solid #30363d; border-radius:8px; padding:1rem; font-family:'Consolas',monospace; font-size:.9rem; color:#79c0ff; white-space:pre-wrap; overflow-x:auto; margin:.8rem 0;}
+.game-options{ display:grid; gap:.6rem; margin-top:1rem;}
+.game-opt-btn{ text-align:left; background:#21262d; color:#e6edf3; border:1px solid #30363d; padding:.75rem 1rem; border-radius:6px; cursor:pointer; font-size:.92rem; transition:.2s;}
+.game-opt-btn:hover:not(:disabled){ background:#30363d; border-color:var(--primary);}
+.game-opt-btn:disabled{ cursor:default;}
+.game-opt-btn.opt-correct{ background:#1b4620; border-color:var(--success); color:#7ee787;}
+.game-opt-btn.opt-wrong{ background:#4c1414; border-color:var(--error); color:#ffa198;}
+.game-feedback{ margin-top:1rem;}
+.game-explain{ padding:.9rem; border-radius:6px; font-size:.88rem; line-height:1.6; margin-bottom:.8rem;}
+.game-explain.ok{ background:#1b4620; color:#c6f6d5;}
+.game-explain.no{ background:#3d2020; color:#ffd9d9;}
+.game-btn{ background:var(--primary); color:#fff; border:none; padding:.7rem 1.4rem; border-radius:6px; cursor:pointer; font-weight:700; font-size:.9rem; transition:.2s;}
+.game-btn:hover{ background:var(--primary-dark); transform:translateY(-2px);}
+.game-result{ text-align:center; background:#0d1117; color:#e6edf3; border-radius:10px; padding:2rem;}
+.game-result-score{ font-size:2.2rem; font-weight:800; color:#ffd54f; margin-bottom:.8rem; animation:pulse 1.5s infinite;}
+
+/* Blockly Games embed */
+.blockly-frame-wrap{ border:1px solid var(--border-color); border-radius:10px; overflow:hidden; margin:1rem 0; background:#fff;}
+.blockly-toolbar{ display:flex; justify-content:space-between; align-items:center; background:#263238; color:#fff; padding:.6rem 1rem; font-size:.85rem; font-weight:600;}
+.blockly-openbtn{ background:var(--primary); color:#fff; text-decoration:none; padding:.4rem .9rem; border-radius:20px; font-size:.8rem; font-weight:700; transition:.2s; white-space:nowrap;}
+.blockly-openbtn:hover{ background:var(--primary-dark); transform:translateY(-1px);}
+.blockly-iframe{ width:100%; height:480px; border:none; display:block; background:#f0f0f0;}
+.blockly-note{ font-size:.78rem; color:#666; padding:.6rem 1rem; background:#fafafa; border-top:1px solid var(--border-color); line-height:1.5;}
+
+/* Terminal de prática (Python/Portugol) */
+.terminal-wrap{ border-radius:10px; overflow:hidden; margin:1rem 0; box-shadow:0 4px 14px rgba(0,0,0,.2);}
+.terminal-tabs{ display:flex; background:#161b22;}
+.term-tab{ flex:1; background:#161b22; color:#8b949e; border:none; padding:.7rem 1rem; cursor:pointer; font-size:.88rem; font-weight:700; transition:.2s; border-bottom:3px solid transparent;}
+.term-tab:hover{ color:#e6edf3;}
+.term-tab.active{ color:#79c0ff; border-bottom-color:#79c0ff; background:#0d1117;}
+.term-code{ width:100%; min-height:130px; background:#0d1117; color:#e6edf3; border:none; font-family:'Consolas',monospace; font-size:.92rem; padding:1rem; resize:vertical; line-height:1.6; display:block;}
+.term-code:focus{ outline:2px solid var(--primary); outline-offset:-2px;}
+.terminal-actions{ background:#0d1117; padding:.8rem 1rem; display:flex; gap:.7rem; border-top:1px solid #21262d;}
+.term-clear-btn{ background:transparent; color:#8b949e; border:1px solid #30363d; padding:.7rem 1.2rem; border-radius:6px; cursor:pointer; font-weight:600; font-size:.85rem; transition:.2s;}
+.term-clear-btn:hover{ background:#21262d; color:#e6edf3;}
+.terminal-output{ background:#010409; color:#7ee787; font-family:'Consolas',monospace; font-size:.9rem; padding:1rem; min-height:90px; white-space:pre-wrap; border-top:1px solid #21262d; line-height:1.7;}
+.term-placeholder{ color:#484f58; font-style:italic;}
+.term-line-error{ color:#ffa198; display:block; font-weight:600;}
+.term-line-ok{ color:#7ee787; display:block;}
+.term-summary-ok{ color:#58a6ff; display:block; margin-top:.5rem; font-weight:600;}
+
+/* Diagrama interativo de camadas (click-to-reveal) */
+.layerdiagram{ display:flex; gap:1.2rem; margin:1rem 0; flex-wrap:wrap;}
+.layerdiagram-stack{ flex:1 1 280px; display:flex; flex-direction:column; gap:.5rem; min-width:260px;}
+.layer-btn{ display:flex; align-items:center; gap:.7rem; text-align:left; width:100%; background:#fff; border:2px solid var(--border-color); border-left:6px solid var(--layer-color,var(--primary)); border-radius:8px; padding:.7rem .9rem; cursor:pointer; transition:.2s; font-family:inherit;}
+.layer-btn:hover{ background:var(--primary-light); transform:translateX(4px);}
+.layer-btn.active{ background:var(--layer-color,var(--primary)); border-color:var(--layer-color,var(--primary)); color:#fff; transform:translateX(6px); box-shadow:0 4px 12px rgba(0,0,0,.2);}
+.layer-btn.active .layer-short{ color:rgba(255,255,255,.85);}
+.layer-num{ background:rgba(0,0,0,.08); color:inherit; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.8rem; flex-shrink:0;}
+.layer-btn.active .layer-num{ background:rgba(255,255,255,.25);}
+.layer-icon{ font-size:1.3rem; flex-shrink:0;}
+.layer-label{ font-weight:700; font-size:.92rem; display:block;}
+.layer-short{ font-size:.78rem; color:#757575; display:block;}
+.layerdiagram-detail{ flex:1 1 280px; min-width:260px; background:var(--primary-light); border:2px solid var(--primary); border-radius:8px; padding:1rem 1.2rem; min-height:140px;}
+.layerdiagram-detail h4{ color:var(--primary-dark); margin-bottom:.5rem; font-size:1.05rem;}
+
+/* Diagrama com hotspots clicáveis sobre um "desenho" do hardware */
+.hw-hotspot-wrap{ position:relative; width:100%; max-width:380px; aspect-ratio:3/4; margin:0 auto 1rem; background:linear-gradient(180deg,#eceef2,#d2d7e0); border:4px solid #4a4a4a; border-radius:14px; box-shadow:0 8px 20px rgba(0,0,0,.25); overflow:hidden;}
+.case-decor{ position:absolute; left:10%; right:10%; background:#5a5f6b; border-radius:4px;}
+.case-top{ top:6%; height:8%;}
+.case-board{ top:18%; height:34%; background:#3d6b3d; border:2px solid #2a4a2a;}
+.case-bay{ top:56%; height:14%; background:#2f3338;}
+.hotspot-dot{ position:absolute; width:32px; height:32px; border-radius:50%; background:var(--accent); color:#fff; border:3px solid #fff; font-weight:800; font-size:.85rem; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.35); transform:translate(-50%,-50%); transition:.2s; z-index:5;}
+.hotspot-dot:hover{ transform:translate(-50%,-50%) scale(1.15);}
+.hotspot-dot.active{ background:var(--primary); transform:translate(-50%,-50%) scale(1.3);}
+.hotspot-detail{ background:var(--primary-light); border:2px solid var(--primary); border-radius:8px; padding:1rem 1.2rem; min-height:110px; margin-top:.8rem;}
+.hotspot-detail h4{ color:var(--primary-dark); margin-bottom:.5rem;}
+.hotspot-hint{ text-align:center; font-size:.8rem; color:#757575; margin-top:.4rem;}
+
+footer{ background:var(--dark-text); color:#fff; text-align:center; padding:1.8rem; margin-top:2rem; font-size:.9rem;}
+
+@media (max-width:768px){
+    h1{ font-size:1.5rem;} .section-title{ font-size:1.3rem;}
+    .flashcard-container{ grid-template-columns:1fr;}
+    .header-content{ flex-direction:column; align-items:flex-start;}
+}
+@media print{ nav,footer{ display:none;} .module{ display:block !important; page-break-after:always;} }
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<header>
+    <div class="header-content">
+        <div>
+            <h1>🖥️ Informática Básica</h1>
+            <p class="subtitle">Ambiente Interativo de Aprendizagem</p>
+            <p class="institution">Instituto Federal de Sergipe (IFS) - Campus Tobias Barreto · Prof. MSc. Eber da Silva de Santana</p>
+        </div>
+        <div class="progress-badge">Módulo<b id="moduleCounter">1/11</b></div>
+    </div>
+</header>
+
+<nav><div class="nav-container" id="navContainer"></div></nav>
+
+<div class="container" role="main"><div id="modulesContainer"></div></div>
+
+<footer>© 2026 - Informática Básica | Prof. Eber da Silva de Santana</footer>
+
+<script>
+/* ===================== DADOS DOS MÓDULOS ===================== */
+const modules = [
+{
+ id:'m1', icon:'💡', title:'1. Introdução à Informática',
+ intro:'O que é Informática, a diferença entre Hardware/Software/Peopleware e como os computadores representam a informação em Bits e Bytes.',
+ html:`
+ <div class="subsection-title">🔎 O que é Informática?</div>
+ <p class="content-text">Segundo Velloso (2014), <b>Informática</b> é a ciência que estuda o <b>tratamento automático e racional da informação</b>. A palavra nasce da junção de <b>INFOR</b>mação + auto<b>MÁTICA</b>. Suas funções são: desenvolver novas máquinas, criar novos métodos de trabalho, construir aplicações automáticas e melhorar métodos já existentes.</p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">🔧</span><h4>Hardware</h4><p>Parte física do sistema de computação (Sistema Central e Periféricos).</p></div>
+   <div class="info-box"><span class="ico">💾</span><h4>Software</h4><p>Parte lógica do sistema de computação (Básico, Utilitário e Aplicativo).</p></div>
+   <div class="info-box"><span class="ico">🧑‍💻</span><h4>Peopleware</h4><p>Pessoas que trabalham com o computador: digitadores, programadores, analistas e usuários.</p></div>
+ </div>
+
+ <div class="subsection-title">🔢 Bits e Bytes: a unidade da informação</div>
+ <p class="content-text">Os computadores representam toda informação usando apenas dois estados possíveis: <b>0</b> e <b>1</b> — os dígitos binários (<b>bits</b>). Um <b>Bit</b> é a menor unidade de dado. Um conjunto de <b>8 bits</b> forma <b>1 Byte</b>, capaz de representar uma letra ou número.</p>
+ <div class="bitdemo">
+   <div class="bulb on"><div class="icon">💡</div>1</div>
+   <div class="bulb off"><div class="icon">💡</div>0</div>
+   <div class="bulb on"><div class="icon">💡</div>1</div>
+   <div class="bulb on"><div class="icon">💡</div>1</div>
+   <div class="bulb off"><div class="icon">💡</div>0</div>
+   <div class="bulb on"><div class="icon">💡</div>1</div>
+   <div class="bulb off"><div class="icon">💡</div>0</div>
+   <div class="bulb on"><div class="icon">💡</div>1</div>
+ </div>
+ <p class="content-text" style="text-align:center">☝️ Esses 8 bits acima (01101101) formam <b>1 Byte</b> — o suficiente para representar 1 caractere.</p>
+
+ <div class="subsection-title">📏 Escala de Armazenamento: do Byte ao Yottabyte</div>
+ <p class="content-text">Cada unidade equivale a <b>1024 vezes</b> a unidade anterior (base binária, 2¹⁰):</p>
+ <div class="timeline-wrap" tabindex="0" role="region" aria-label="Linha do tempo (role para os lados)"><div class="timeline">
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1 Byte</div><div class="t-title">📄 8 bits</div><div class="t-desc">1 letra ou número</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1 KB</div><div class="t-title">📃 1024 Bytes</div><div class="t-desc">Um parágrafo de texto</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1 MB</div><div class="t-title">🖼️ 1024 KB</div><div class="t-desc">Uma foto digital</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1 GB</div><div class="t-title">🎬 1024 MB</div><div class="t-desc">Um filme curto</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1 TB</div><div class="t-title">💽 1024 GB</div><div class="t-desc">HD de um PC comum</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1 PB</div><div class="t-title">🏢 1024 TB</div><div class="t-desc">Datacenter pequeno</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1 EB/ZB/YB</div><div class="t-title">🌍 escalas gigantes</div><div class="t-desc">Tráfego global de internet</div></div>
+ </div></div>
+
+ <div class="subsection-title">👩‍🔬 Pioneiros da Computação</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">👩‍💻</span><h4>Ada Lovelace</h4><p>Considerada a 1ª programadora da história; criou o algoritmo para a Máquina Analítica de Babbage.</p></div>
+   <div class="info-box"><span class="ico">⚓</span><h4>Grace Hopper</h4><p>Inventora do compilador e da linguagem COBOL.</p></div>
+   <div class="info-box"><span class="ico">⚙️</span><h4>Charles Babbage</h4><p>"Pai da Computação"; criou a Máquina Diferencial e a Analítica.</p></div>
+   <div class="info-box"><span class="ico">🔐</span><h4>Alan Turing</h4><p>Pai da Ciência da Computação e da IA; decifrou o código Enigma.</p></div>
+ </div>
+
+ <div class="subsection-title">🧱 Explore: As Camadas do Computador</div>
+ <p class="content-text">Clique em cada camada abaixo, da mais física até a mais visível para você, e veja como elas se encaixam.</p>
+ <div id="idiag-m1"></div>`,
+ flashcards:[
+  {q:'O que é Informática?', a:'Ciência que estuda o tratamento automático e racional da informação (Velloso, 2014). Vem de INFORmação + autoMÁTICA.'},
+  {q:'Quais são as funções da Informática?', a:'Desenvolver novas máquinas, novos métodos de trabalho, construir aplicações automáticas e melhorar métodos existentes.'},
+  {q:'O que é Hardware?', a:'A parte física do sistema de computação: o Sistema Central e os periféricos.'},
+  {q:'O que é Software?', a:'A parte lógica do sistema de computação: Software Básico, Utilitário e Aplicativo.'},
+  {q:'O que é Peopleware?', a:'As pessoas que trabalham com o computador: digitadores, programadores, analistas e usuários.'},
+  {q:'O que é um Bit?', a:'A menor unidade de dado do computador. Pode assumir apenas dois valores: 0 ou 1.'},
+  {q:'O que é um Byte?', a:'Um conjunto de 8 bits, suficiente para representar uma letra ou número.'},
+  {q:'Quantos bits tem 1 Byte?', a:'8 bits.'},
+  {q:'Quantos Bytes tem 1 Kilobyte (KB)?', a:'1024 Bytes.'},
+  {q:'Quantos Kilobytes tem 1 Megabyte (MB)?', a:'1024 KB.'},
+  {q:'Quantos Megabytes tem 1 Gigabyte (GB)?', a:'1024 MB.'},
+  {q:'Qual é a ordem crescente das unidades de armazenamento?', a:'Byte → KB → MB → GB → TB → PB → EB → ZB → YB.'},
+  {q:'Por que os computadores usam o sistema binário?', a:'Porque os circuitos eletrônicos só reconhecem dois estados físicos: ligado (1) e desligado (0).'},
+  {q:'Quem foi Ada Lovelace?', a:'Considerada a primeira programadora da história; escreveu o primeiro algoritmo para ser processado por uma máquina.'},
+  {q:'Quem foi Grace Hopper?', a:'Pioneira da computação naval americana; inventou o compilador e a linguagem COBOL.'},
+  {q:'Quem foi Charles Babbage?', a:'Considerado o "Pai da Computação"; projetou a Máquina Diferencial e a Máquina Analítica.'},
+  {q:'Quem foi Alan Turing?', a:'Considerado o Pai da Ciência da Computação e da IA; ajudou a decifrar o código Enigma na 2ª Guerra Mundial.'},
+  {q:'O que representa o sistema binário?', a:'Um sistema numérico com apenas dois estados possíveis: 0 e 1.'}
+ ],
+ vf:[
+  {t:'1 Byte é composto por 8 bits.', v:true, e:'Correto — essa é a definição padrão de Byte.'},
+  {t:'Um Kilobyte (KB) equivale a exatamente 1000 bytes.', v:false, e:'Na verdade equivale a 1024 bytes, pois a base de cálculo é binária (2¹⁰), não decimal.'},
+  {t:'Hardware é a parte lógica do computador, como os programas.', v:false, e:'Hardware é a parte FÍSICA do computador. A parte lógica (programas) é o Software.'},
+  {t:'Peopleware refere-se às pessoas que interagem com o computador.', v:true, e:'Correto — inclui digitadores, programadores, analistas e usuários.'},
+  {t:'Ada Lovelace é considerada a primeira programadora da história.', v:true, e:'Correto — ela escreveu o primeiro algoritmo destinado a ser processado por uma máquina.'},
+  {t:'Um Bit pode assumir três valores possíveis: 0, 1 e 2.', v:false, e:'O Bit é binário e só pode assumir DOIS valores possíveis: 0 ou 1.'},
+  {t:'1 Gigabyte (GB) é maior que 1 Terabyte (TB).', v:false, e:'É o contrário: 1 TB = 1024 GB. Portanto, o Terabyte é maior que o Gigabyte.'},
+  {t:'A palavra "Informática" vem da junção de "Informação" e "Automática".', v:true, e:'Correto, conforme a origem apresentada por Velloso (2014).'},
+  {t:'Grace Hopper inventou o primeiro compilador e a linguagem COBOL.', v:true, e:'Correto — ela é uma referência histórica fundamental da computação.'},
+  {t:'Os computadores processam informações usando o sistema decimal (base 10).', v:false, e:'Os computadores processam informações em sistema BINÁRIO (base 2), usando 0 e 1.'}
+ ],
+ pblTitle:'Cenário: Explicando Informática para um Iniciante',
+ pblText:'Um colega de trabalho, que nunca estudou informática, ouviu você falar sobre "bytes" e "hardware" e ficou curioso. Ele pergunta: "Isso tudo tem a ver com o quê, exatamente?"',
+ pblTasks:[
+  'Explique, com suas próprias palavras, a diferença entre Hardware, Software e Peopleware usando exemplos do dia a dia dele.',
+  'Se um arquivo de foto tem 3 MB, explique quantos KB e quantos Bytes isso representa aproximadamente.',
+  'Descreva por que o computador "pensa" apenas em 0 e 1, e não em números decimais como nós.',
+  'Escolha um dos pioneiros da computação estudados e explique por que a contribuição dessa pessoa ainda importa hoje.'
+ ]
+},
+
+{
+ id:'m2', icon:'🔩', title:'2. Hardware — Componentes do Computador',
+ intro:'Conheça o Sistema Central (CPU, ULA, UC), os tipos de memória (RAM x ROM) e os principais componentes físicos de um computador.',
+ html:`
+ <div class="subsection-title">🖥️ O Sistema Central</div>
+ <p class="content-text">O Sistema Central é composto pela <b>CPU</b> (processador), a <b>Memória Principal</b> (RAM) e recebe dados das Unidades de Entrada, enviando resultados para as Unidades de Saída.</p>
+ <div class="hw-diagram">
+   <div class="hw-part"><span class="ico">⌨️</span>Unidade de Entrada</div>
+   <div class="hw-part"><span class="ico">🧠</span>CPU (ULA + UC)</div>
+   <div class="hw-part"><span class="ico">🖥️</span>Unidade de Saída</div>
+   <div class="hw-part"><span class="ico">⚡</span>Memória RAM</div>
+   <div class="hw-part"><span class="ico">💽</span>Memória Auxiliar</div>
+ </div>
+
+ <div class="subsection-title">🧠 O Processador (CPU) — o "cérebro"</div>
+ <p class="content-text">A CPU é dividida em duas unidades internas:</p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">➗</span><h4>ULA (Unidade Lógica e Aritmética)</h4><p>Responsável pelas operações aritméticas e lógicas e por tomadas de decisão. É coordenada pela UC.</p></div>
+   <div class="info-box"><span class="ico">🎛️</span><h4>UC (Unidade de Controle)</h4><p>Responsável pelo fluxo de dados e pela interpretação de cada instrução. Todo o processamento é coordenado por ela.</p></div>
+ </div>
+
+ <div class="subsection-title">⚡ Memória RAM x 🔒 Memória ROM</div>
+ <div class="info-grid">
+   <div class="info-box" style="border-left-color:var(--orange)"><span class="ico">⚡</span><h4>RAM (Random Access Memory)</h4><p>Memória de trabalho. Permite leitura e gravação. É <b>volátil</b>: perde tudo quando o computador é desligado.</p></div>
+   <div class="info-box" style="border-left-color:var(--blue)"><span class="ico">🔒</span><h4>ROM (Read Only Memory)</h4><p>Memória apenas de leitura, usada para instruções essenciais (BIOS). É <b>não volátil</b>: mantém dados mesmo sem energia.</p></div>
+ </div>
+
+ <div class="subsection-title">💽 Armazenamento e Placa-Mãe</div>
+ <p class="content-text">A <b>Placa-Mãe (Motherboard)</b> é o circuito que conecta e permite a comunicação entre todos os componentes. O <b>Chipset</b> controla essa comunicação entre CPU, memória e periféricos. Como memória auxiliar (armazenamento permanente), temos: <b>HDD</b> (disco magnético, mais lento), <b>SSD</b> (memória flash, mais rápido), pendrives e cartões SD.</p>
+ <p class="content-text">Processadores de <b>64 bits</b> conseguem endereçar muito mais memória (na casa dos exabytes) do que os de <b>32 bits</b> (limitados a cerca de 4 GB de RAM).</p>
+
+ <div class="subsection-title">🖱️ Explore: Por Dentro do Gabinete</div>
+ <p class="content-text">Clique nos números do desenho abaixo para descobrir o que cada peça faz lá dentro.</p>
+ <div id="hw-hotspots-m2"></div>`,
+ flashcards:[
+  {q:'O que significa CPU?', a:'Central Processing Unit — o "cérebro" do computador, responsável por executar instruções e cálculos.'},
+  {q:'Quais são as duas unidades internas da CPU?', a:'A ULA (Unidade Lógica e Aritmética) e a UC (Unidade de Controle).'},
+  {q:'Qual é a função da ULA?', a:'Realizar operações aritméticas e lógicas, além de tomadas de decisão.'},
+  {q:'Qual é a função da UC?', a:'Controlar o fluxo de dados e interpretar cada instrução do programa.'},
+  {q:'O que é a Memória RAM?', a:'Memória de trabalho temporária (volátil), usada para armazenar dados enquanto o computador está ligado.'},
+  {q:'Por que a RAM é chamada de volátil?', a:'Porque perde todo o conteúdo assim que o computador é desligado ou a energia é cortada.'},
+  {q:'O que é a Memória ROM?', a:'Memória somente leitura e não volátil, usada para instruções essenciais como o BIOS.'},
+  {q:'Qual a diferença entre memória Principal e Auxiliar?', a:'A Principal (RAM) é temporária e rápida; a Auxiliar (HD, SSD, pendrive) é permanente e guarda dados/programas.'},
+  {q:'O que é a Placa-Mãe (Motherboard)?', a:'O circuito principal que conecta e permite a comunicação entre todos os componentes do computador.'},
+  {q:'Qual é a diferença entre HDD e SSD?', a:'HDD usa discos magnéticos giratórios (mais lento); SSD usa memória flash, sem partes móveis (mais rápido).'},
+  {q:'O que significa a arquitetura de 64 bits?', a:'A capacidade do processador de endereçar muito mais memória e processar mais dados por ciclo do que um de 32 bits.'},
+  {q:'Quanto de RAM um processador de 32 bits consegue endereçar, no máximo?', a:'Cerca de 4 GB de RAM.'},
+  {q:'Cite exemplos de memória auxiliar (secundária).', a:'Pen drives, HD (disco rígido), SSD, cartão SD, DVD/CD/Blu-Ray.'},
+  {q:'O que armazena a BIOS?', a:'Instruções essenciais gravadas em ROM/Firmware, necessárias para iniciar (dar boot) no computador.'},
+  {q:'O que é o Chipset?', a:'Circuito da placa-mãe que controla a comunicação entre CPU, memória e demais componentes.'},
+  {q:'Qual componente é considerado o "cérebro" do computador?', a:'O processador (CPU).'}
+ ],
+ vf:[
+  {t:'A CPU é composta apenas pela Unidade de Controle (UC).', v:false, e:'A CPU é composta por DUAS unidades: a ULA e a UC, trabalhando em conjunto.'},
+  {t:'A memória RAM mantém os dados salvos mesmo depois de desligar o computador.', v:false, e:'A RAM é volátil e perde os dados quando a energia é cortada; quem guarda dados permanentemente é a memória auxiliar (HD/SSD).'},
+  {t:'SSDs costumam ser mais rápidos que HDs por não terem partes mecânicas móveis.', v:true, e:'Correto — o SSD usa memória flash, sem discos giratórios, o que aumenta a velocidade de leitura/gravação.'},
+  {t:'A Placa-Mãe é responsável por conectar e permitir a comunicação entre os componentes do computador.', v:true, e:'Correto, é justamente essa a função da motherboard.'},
+  {t:'A ROM é uma memória volátil, assim como a RAM.', v:false, e:'A ROM é NÃO volátil — mantém seu conteúdo mesmo sem energia elétrica.'},
+  {t:'Um processador de 64 bits pode endereçar muito mais memória do que um de 32 bits.', v:true, e:'Correto — processadores de 64 bits chegam à casa dos exabytes, contra apenas ~4 GB nos de 32 bits.'},
+  {t:'A ULA é responsável por interpretar e controlar o fluxo das instruções do programa.', v:false, e:'Essa é a função da Unidade de Controle (UC). A ULA cuida das operações aritméticas e lógicas.'},
+  {t:'Pendrives e cartões SD são exemplos de memória auxiliar (não volátil).', v:true, e:'Correto — são dispositivos de armazenamento permanente.'},
+  {t:'O Chipset é um tipo de memória RAM usado apenas em notebooks.', v:false, e:'O Chipset é um circuito da placa-mãe que gerencia a comunicação entre componentes; não é um tipo de memória RAM.'},
+  {t:'A BIOS é armazenada na memória RAM do computador.', v:false, e:'A BIOS é armazenada em memória ROM/Firmware, que é não volátil.'}
+ ],
+ pblTitle:'Cenário: Diagnosticando um Computador Lento',
+ pblText:'Um cliente reclama que seu computador "trava muito" e demora para abrir programas. Como técnico, você suspeita de um problema de hardware.',
+ pblTasks:[
+  'Liste 3 componentes de hardware que podem causar lentidão se estiverem com defeito ou capacidade insuficiente.',
+  'Explique por que trocar um HD por um SSD costuma resolver boa parte dos problemas de lentidão.',
+  'Se o computador tem pouca RAM, o que acontece quando o usuário abre muitos programas ao mesmo tempo?',
+  'Monte uma recomendação de configuração mínima (processador, RAM, armazenamento) para um computador de uso doméstico em 2026.'
+ ]
+},
+
+{
+ id:'m3', icon:'💿', title:'3. Software — Classificação e Tipos de Licença',
+ intro:'A diferença entre Software Aplicativo, Básico e Sistema Operacional, as principais linguagens de programação e os tipos de licença de software.',
+ html:`
+ <div class="subsection-title">📊 A Hierarquia do Software</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📝</span><h4>1. Software Aplicativo</h4><p>Resolve problemas específicos do usuário final. Ex: Word, Excel, editor de imagens.</p></div>
+   <div class="info-box"><span class="ico">🛠️</span><h4>2. Software Básico</h4><p>Inclui linguagens de programação (compiladores) e utilitários de sistema.</p></div>
+   <div class="info-box"><span class="ico">🖥️</span><h4>3. Sistema Operacional</h4><p>O "gerente" do hardware; interface entre o computador e o usuário (Windows, Linux, macOS).</p></div>
+ </div>
+
+ <div class="subsection-title">👨‍💻 Linguagens de Programação</div>
+ <p class="content-text">São conjuntos de convenções e regras para instruir o computador a executar tarefas — o meio de comunicação entre a pessoa e a máquina.</p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">🐍</span><h4>Python</h4><p>IA, Ciência de Dados e automação. Sintaxe simples, nível de dificuldade baixo.</p></div>
+   <div class="info-box"><span class="ico">🌐</span><h4>JavaScript</h4><p>Desenvolvimento Web (front-end e back-end). Dificuldade média.</p></div>
+   <div class="info-box"><span class="ico">☕</span><h4>Java</h4><p>Apps corporativos e Android. Dificuldade média/alta.</p></div>
+   <div class="info-box"><span class="ico">🗄️</span><h4>SQL</h4><p>Gerenciamento de bancos de dados. Dificuldade baixa.</p></div>
+ </div>
+
+ <div class="subsection-title">🧹 Utilitários de Sistema</div>
+ <p class="content-text">Softwares de apoio à solução de problemas de disco e memória: <b>desfragmentador</b>, <b>limpeza de disco</b>, <b>compactadores/descompactadores</b> de arquivos (ZIP, RAR) e programas <b>antivírus</b>.</p>
+
+ <div class="subsection-title">📜 Tipos de Licença de Software</div>
+ <div class="info-grid">
+   <div class="info-box" style="border-left-color:var(--accent)"><span class="ico">🔒</span><h4>Proprietário</h4><p>Protegido por licença; proíbe cópia/distribuição sem autorização. Ex: Windows, Photoshop, MS Office.</p></div>
+   <div class="info-box" style="border-left-color:var(--blue)"><span class="ico">🆓</span><h4>Freeware</h4><p>Gratuito, uso por tempo indeterminado, mas código-fonte fechado. Ex: Skype, Adobe Reader.</p></div>
+   <div class="info-box" style="border-left-color:var(--primary)"><span class="ico">🔓</span><h4>Open Source</h4><p>Código-fonte público e gratuito, pode ser estudado e modificado. Ex: Linux, Firefox, Apache.</p></div>
+ </div>
+ <p class="content-text">⚠️ <b>Software Pirata</b>: cópia, venda ou distribuição de software proprietário sem pagamento dos direitos autorais. <b>É crime previsto em lei!</b></p>
+
+ <div class="subsection-title">🧱 Explore: As Camadas do Software</div>
+ <p class="content-text">Clique em cada camada, da que liga o computador até a que você usa no dia a dia.</p>
+ <div id="idiag-m3"></div>`,
+ flashcards:[
+  {q:'Quais são as 3 categorias de Software?', a:'Software Aplicativo, Software Básico e Sistema Operacional.'},
+  {q:'O que é um Software Aplicativo?', a:'Programa desenvolvido para realizar tarefas específicas do usuário final (ex: Word, Excel).'},
+  {q:'O que é Software Básico?', a:'Conjunto de ferramentas (linguagens de programação e utilitários) que dá suporte para outros softwares funcionarem.'},
+  {q:'Qual é o papel do Sistema Operacional?', a:'Atuar como gerente do hardware e interface entre o computador e o usuário.'},
+  {q:'Para que é mais usado o Python?', a:'Inteligência Artificial, Ciência de Dados e automação de scripts.'},
+  {q:'Para que é mais usada a linguagem JavaScript?', a:'Desenvolvimento Web, tanto front-end quanto back-end (com Node.js).'},
+  {q:'O que são utilitários de sistema?', a:'Softwares de apoio para resolver problemas de disco e memória, como desfragmentador e limpeza de disco.'},
+  {q:'O que faz um programa antivírus?', a:'Detecta, bloqueia e remove vírus e outros softwares maliciosos do computador.'},
+  {q:'O que é Software Proprietário?', a:'Software protegido por licença que proíbe cópia ou distribuição sem autorização (ex: Windows, Photoshop).'},
+  {q:'O que é Freeware?', a:'Software gratuito que pode ser usado por tempo indeterminado, sem exigir pagamento (ex: Skype, Adobe Reader).'},
+  {q:'O que é Open Source (código aberto)?', a:'Software cujo código-fonte é público e gratuito, podendo ser estudado e modificado (ex: Linux, Firefox).'},
+  {q:'O que caracteriza um Software Pirata?', a:'Cópia, venda ou distribuição de software proprietário sem pagar os direitos autorais. É crime previsto em lei.'},
+  {q:'O que faz um compactador de arquivos?', a:'Reduz o tamanho de arquivos, agrupando-os em um único pacote (ex: ZIP, RAR).'},
+  {q:'Cite as 4 gerências principais de um Sistema Operacional.', a:'Gerência de Memória, de Processador, de Arquivos e de Dispositivos de Entrada/Saída.'},
+  {q:'O que a Gerência de Memória do SO controla?', a:'Quais partes da memória estão em uso e por quem, evitando que um programa interfira no espaço de outro.'},
+  {q:'O que a Gerência de Processador faz?', a:'Escalona qual tarefa (processo) deve ser executada pela CPU em cada momento.'}
+ ],
+ vf:[
+  {t:'O Sistema Operacional é um tipo de Software Aplicativo.', v:false, e:'O SO é uma categoria própria: gerencia o hardware e serve de interface para os demais programas.'},
+  {t:'Python é uma linguagem muito usada para Inteligência Artificial e Ciência de Dados.', v:true, e:'Correto — é uma das linguagens mais populares nessa área por sua sintaxe simples.'},
+  {t:'Freeware significa que o código-fonte do programa é aberto ao público.', v:false, e:'Isso descreve o Open Source. Freeware é apenas gratuito, mas o código pode continuar fechado.'},
+  {t:'Usar um software proprietário sem pagar por ele é considerado crime pela lei.', v:true, e:'Correto — a pirataria de software é crime previsto em lei.'},
+  {t:'Um desfragmentador de disco é um exemplo de vírus de computador.', v:false, e:'É um utilitário de sistema, usado para organizar dados no disco e melhorar o desempenho — não é malware.'},
+  {t:'O Linux é um exemplo de Sistema Operacional Open Source.', v:true, e:'Correto — seu código-fonte é público e pode ser modificado pela comunidade.'},
+  {t:'A Gerência de Arquivos do Sistema Operacional cuida de escalonar o uso do processador.', v:false, e:'Essa é a função da Gerência de Processador. A Gerência de Arquivos organiza como os dados são armazenados e acessados.'},
+  {t:'JavaScript é muito usada para dar interatividade a sites na internet.', v:true, e:'Correto — é amplamente usada tanto no front-end quanto no back-end (com Node.js).'},
+  {t:'Softwares utilitários substituem completamente a função do Sistema Operacional.', v:false, e:'Utilitários apenas auxiliam em tarefas específicas (ex: limpeza de disco); não substituem o SO.'},
+  {t:'O Microsoft Office é um exemplo de Software Aplicativo.', v:true, e:'Correto — é um conjunto de programas que realizam tarefas específicas para o usuário final.'}
+ ],
+ pblTitle:'Cenário: Montando um Escritório com Baixo Orçamento',
+ pblText:'Uma pequena ONG precisa equipar 5 computadores para trabalho administrativo, mas tem orçamento muito limitado para licenças de software.',
+ pblTasks:[
+  'Sugira alternativas Freeware ou Open Source para substituir o Microsoft Office e um antivírus pago.',
+  'Explique para o diretor da ONG por que baixar uma versão "crackeada" do Windows seria arriscado e ilegal.',
+  'Escolha uma linguagem de programação que a ONG poderia usar para criar um pequeno sistema de cadastro, e justifique.',
+  'Monte uma lista de utilitários de sistema (gratuitos) que ajudariam a manter os computadores funcionando bem.'
+ ]
+},
+
+{
+ id:'m4', icon:'🪟', title:'4. Sistemas Operacionais — Windows',
+ intro:'A evolução do Windows ao longo de décadas, as funções essenciais do Windows 11 e como ligar, desligar e hibernar corretamente o computador.',
+ html:`
+ <div class="subsection-title">🕰️ Linha do Tempo: A Evolução do Windows (1985–2026)</div>
+ <div class="timeline-wrap" tabindex="0" role="region" aria-label="Linha do tempo (role para os lados)"><div class="timeline">
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1985</div><div class="t-title">Windows 1.0</div><div class="t-desc">Primeira interface gráfica da Microsoft.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1987</div><div class="t-title">Windows 2.0</div><div class="t-desc">MS-DOS Executive, janelas sobrepostas.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1990-92</div><div class="t-title">Windows 3.x</div><div class="t-desc">Grande sucesso comercial.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1995</div><div class="t-title">Windows 95</div><div class="t-desc">Introduziu o Menu Iniciar e a Barra de Tarefas.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1998</div><div class="t-title">Windows 98</div><div class="t-desc">Suporte USB e Internet Explorer integrado.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">2001</div><div class="t-title">Windows XP</div><div class="t-desc">Unificou linhas; longevidade recorde.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">2007</div><div class="t-title">Windows Vista</div><div class="t-desc">Visual "Aero Glass", mais segurança.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">2009</div><div class="t-title">Windows 7</div><div class="t-desc">Rápido, estável e muito querido.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">2012</div><div class="t-title">Windows 8</div><div class="t-desc">Mudança radical para telas touch.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">2015</div><div class="t-title">Windows 10</div><div class="t-desc">"Windows como serviço" (atualização contínua).</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">2021+</div><div class="t-title">Windows 11</div><div class="t-desc">Menu Iniciar centralizado, IA (Copilot).</div></div>
+ </div></div>
+
+ <div class="subsection-title">⚙️ Fundamentos e Funções do Windows 11</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📊</span><h4>1. Gerenciamento de Recursos</h4><p>Gerencia CPU, memória e dispositivos de armazenamento de forma eficiente.</p></div>
+   <div class="info-box"><span class="ico">🖱️</span><h4>2. Interface Gráfica (GUI)</h4><p>Permite interagir com ícones, janelas, mouse e teclado.</p></div>
+   <div class="info-box"><span class="ico">🗂️</span><h4>3. Multitarefa</h4><p>Executa vários programas simultaneamente.</p></div>
+   <div class="info-box"><span class="ico">🔌</span><h4>4. Suporte a Hardware</h4><p>Compatível com impressoras, scanners, armazenamentos externos, etc.</p></div>
+   <div class="info-box"><span class="ico">📁</span><h4>5. Gerenciamento de Arquivos</h4><p>Cria pastas, move e organiza arquivos (Explorador de Arquivos).</p></div>
+   <div class="info-box"><span class="ico">🛡️</span><h4>6. Segurança</h4><p>Firewall e antivírus (Windows Defender) protegem contra ameaças.</p></div>
+   <div class="info-box"><span class="ico">📡</span><h4>7. Conectividade</h4><p>Suporte a redes, Wi-Fi e dispositivos conectados.</p></div>
+ </div>
+
+ <div class="subsection-title">🔌 Ligar e Desligar</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">😴</span><h4>Suspensão</h4><p>Modo de baixo consumo; retoma o trabalho rapidamente.</p></div>
+   <div class="info-box"><span class="ico">💤</span><h4>Hibernação</h4><p>Salva documentos e programas no disco rígido e desliga o computador.</p></div>
+   <div class="info-box"><span class="ico">🔀</span><h4>Suspensão Híbrida</h4><p>Combina suspensão e hibernação; projetada para desktops.</p></div>
+   <div class="info-box"><span class="ico">🔁</span><h4>Logoff/Trocar Usuário</h4><p>Encerra a sessão atual sem desligar a máquina, para outro usuário entrar.</p></div>
+ </div>
+
+ <div class="subsection-title">🐧 Outros Sistemas Operacionais</div>
+ <p class="content-text"><b>Linux</b>: Open Source, muito usado em servidores (distribuições: Ubuntu, Fedora, Debian). <b>macOS</b>: sistema da Apple, forte integração com seus dispositivos. <b>Android/iOS</b>: sistemas voltados para dispositivos móveis.</p>
+
+ <div class="subsection-title">🧱 Explore: As Camadas do Windows</div>
+ <p class="content-text">Clique em cada camada para entender o que acontece entre você apertar uma tecla e o Windows responder na tela.</p>
+ <div id="idiag-m4"></div>`,
+ flashcards:[
+  {q:'Em que ano surgiu o Windows 1.0?', a:'1985.'},
+  {q:'Qual foi o grande diferencial do Windows 95?', a:'Introduziu o Menu Iniciar e a Barra de Tarefas.'},
+  {q:'Qual versão do Windows trouxe suporte USB e o Internet Explorer integrado?', a:'Windows 98 (1998).'},
+  {q:'Qual versão do Windows unificou as linhas de consumo e corporativa, com grande longevidade?', a:'Windows XP (2001).'},
+  {q:'Qual versão trouxe a interface visual "Aero Glass"?', a:'Windows Vista (2007).'},
+  {q:'Qual versão do Windows é lembrada por ser rápida, estável e muito querida pelos usuários?', a:'Windows 7 (2009).'},
+  {q:'Qual versão trouxe mudança radical para telas touch, com blocos dinâmicos?', a:'Windows 8 (2012).'},
+  {q:'Qual é a versão atual do Windows, com Menu Iniciar centralizado e IA integrada (Copilot)?', a:'Windows 11.'},
+  {q:'Cite 3 das 7 funções principais do Windows 11.', a:'Gerenciamento de recursos, Interface gráfica (GUI), Multitarefa (entre outras: suporte a hardware, arquivos, segurança, conectividade).'},
+  {q:'O que é a suspensão do computador?', a:'Modo de baixo consumo de energia que permite retomar o trabalho rapidamente, sem desligar completamente.'},
+  {q:'O que é a hibernação?', a:'Estado que salva documentos e programas abertos no disco rígido e desliga o computador, economizando energia.'},
+  {q:'O que é a suspensão híbrida?', a:'Combinação de suspensão e hibernação, projetada especialmente para computadores desktop.'},
+  {q:'Cite 3 sistemas operacionais além do Windows.', a:'Linux, macOS e Android (ou iOS).'},
+  {q:'O que caracteriza o Linux como sistema operacional?', a:'É open source (código aberto), muito usado em servidores e por desenvolvedores.'},
+  {q:'Cite 3 distribuições Linux.', a:'Ubuntu, Fedora e Debian.'},
+  {q:'O que é a GUI (Graphical User Interface)?', a:'Interface gráfica que permite interagir com o SO por meio de ícones, janelas e mouse.'},
+  {q:'O que é a CLI (Command Line Interface)?', a:'Interface de linha de comando: mecanismo baseado em texto para interagir com o sistema operacional.'},
+  {q:'Qual atalho abre o Explorador de Arquivos no Windows?', a:'Windows + E.'}
+ ],
+ vf:[
+  {t:'O Windows 95 foi a primeira versão a introduzir o Menu Iniciar.', v:true, e:'Correto — essa foi uma das grandes novidades do Windows 95 em relação às versões anteriores.'},
+  {t:'O Windows Vista é anterior ao Windows XP.', v:false, e:'É o contrário: o Windows XP é de 2001 e o Windows Vista é de 2007 — portanto, o Vista é posterior.'},
+  {t:'A hibernação desliga completamente o computador, salvando o trabalho no disco rígido antes.', v:true, e:'Correto — diferente da suspensão, a hibernação grava tudo no HD/SSD e desliga a máquina.'},
+  {t:'O Linux é um sistema operacional proprietário, assim como o Windows.', v:false, e:'O Linux é Open Source (código aberto); o Windows é que é proprietário.'},
+  {t:'O Windows 11 é a única versão do Windows que já existiu.', v:false, e:'Existem diversas versões anteriores, como Windows 1.0, 95, 98, XP, Vista, 7, 8 e 10.'},
+  {t:'A suspensão híbrida combina suspensão e hibernação, sendo indicada para desktops.', v:true, e:'Correto — essa opção existe para casos em que a energia pode ser interrompida, como em computadores de mesa.'},
+  {t:'Multitarefa significa que o Windows só permite executar um programa por vez.', v:false, e:'É o oposto: multitarefa significa executar VÁRIOS programas simultaneamente.'},
+  {t:'O atalho Windows + E abre o Explorador de Arquivos no Windows.', v:true, e:'Correto — é um dos atalhos mais usados no dia a dia.'},
+  {t:'O Android é um sistema operacional voltado principalmente para computadores desktop.', v:false, e:'O Android é voltado principalmente para dispositivos móveis, como smartphones e tablets.'},
+  {t:'A CLI permite interagir com o sistema operacional digitando comandos de texto.', v:true, e:'Correto — ao contrário da GUI (gráfica), a CLI é baseada em texto.'}
+ ],
+ pblTitle:'Cenário: Escolhendo o Sistema Certo',
+ pblText:'Um pequeno escritório de contabilidade vai renovar seus computadores e pede sua opinião sobre qual sistema operacional adotar.',
+ pblTasks:[
+  'Compare Windows e Linux em termos de custo de licença e facilidade de uso para funcionários não-técnicos.',
+  'Explique em que situação você recomendaria colocar os computadores em "hibernação" em vez de "desligar".',
+  'Um funcionário reclama que o computador está lento com muitos programas abertos ao mesmo tempo. Que conceito estudado neste módulo explica isso, e o que você recomendaria?',
+  'Monte uma linha do tempo resumida (3 a 4 marcos) mostrando como o Windows evoluiu até hoje, para apresentar ao escritório.'
+ ]
+},
+
+{
+ id:'m5', icon:'🖱️', title:'5. Periféricos: Entrada, Saída e Híbridos',
+ intro:'Os dispositivos que conectam o usuário ao computador — do teclado ao monitor, passando pelos equipamentos que fazem as duas funções.',
+ html:`
+ <div class="subsection-title">📥 Periféricos de Entrada</div>
+ <p class="content-text">Dispositivos que <b>enviam</b> dados para o computador.</p>
+ <div class="hw-diagram">
+   <div class="hw-part"><span class="ico">⌨️</span>Teclado</div>
+   <div class="hw-part"><span class="ico">🖱️</span>Mouse</div>
+   <div class="hw-part"><span class="ico">🖨️</span>Scanner</div>
+   <div class="hw-part"><span class="ico">🎙️</span>Microfone</div>
+   <div class="hw-part"><span class="ico">📷</span>Webcam</div>
+   <div class="hw-part"><span class="ico">📊</span>Leitor de código de barras</div>
+ </div>
+
+ <div class="subsection-title">📤 Periféricos de Saída</div>
+ <p class="content-text">Dispositivos que <b>recebem</b> dados do computador e os apresentam ao usuário.</p>
+ <div class="hw-diagram">
+   <div class="hw-part"><span class="ico">🖥️</span>Monitor</div>
+   <div class="hw-part"><span class="ico">🖨️</span>Impressora</div>
+   <div class="hw-part"><span class="ico">🔊</span>Caixa de Som</div>
+   <div class="hw-part"><span class="ico">🎧</span>Fone de Ouvido</div>
+   <div class="hw-part"><span class="ico">📽️</span>Projetor</div>
+   <div class="hw-part"><span class="ico">📐</span>Plotter</div>
+ </div>
+
+ <div class="subsection-title">🔄 Periféricos Híbridos (Entrada e Saída)</div>
+ <p class="content-text">Dispositivos que funcionam <b>nas duas direções</b> ao mesmo tempo.</p>
+ <div class="hw-diagram">
+   <div class="hw-part"><span class="ico">📱</span>Monitor Touchscreen</div>
+   <div class="hw-part"><span class="ico">🖨️</span>Impressora Multifuncional</div>
+   <div class="hw-part"><span class="ico">🎧</span>Headset</div>
+   <div class="hw-part"><span class="ico">📶</span>Roteador/Modem</div>
+   <div class="hw-part"><span class="ico">💾</span>Pendrive / HD Externo</div>
+ </div>
+
+ <div class="subsection-title">🧱 Explore: O Caminho da Informação</div>
+ <p class="content-text">Clique nas etapas abaixo e veja por onde a informação passa, desde que ela entra até que você vê o resultado.</p>
+ <div id="idiag-m5"></div>`,
+ flashcards:[
+  {q:'O que é um periférico de entrada?', a:'Dispositivo que envia informações para o computador. Ex: Teclado, Mouse, Scanner.'},
+  {q:'O que é um periférico de saída?', a:'Dispositivo que recebe informações do computador. Ex: Monitor, Impressora, Caixa de som.'},
+  {q:'O que é um periférico híbrido?', a:'Dispositivo que funciona tanto como entrada quanto como saída. Ex: Monitor touchscreen, impressora multifuncional.'},
+  {q:'Qual é a função do Monitor?', a:'Exibir visualmente os dados e informações processados pelo computador (periférico de saída).'},
+  {q:'Qual é a função do Teclado?', a:'Enviar caracteres, números e comandos ao computador (periférico de entrada).'},
+  {q:'Qual é a função do Mouse?', a:'Controlar o cursor na tela e executar ações clicando em ícones e botões (periférico de entrada).'},
+  {q:'Qual é a função da Impressora?', a:'Imprimir documentos digitais em papel ou outros materiais (periférico de saída).'},
+  {q:'O que é um Scanner?', a:'Periférico de entrada que captura imagens de documentos físicos e as converte em formato digital.'},
+  {q:'O que é uma Webcam?', a:'Câmera digital (periférico de entrada) que captura vídeo para videoconferências.'},
+  {q:'O que é um Microfone?', a:'Periférico de entrada que capta som do ambiente e o converte em sinal digital.'},
+  {q:'Por que uma impressora multifuncional é considerada um periférico híbrido?', a:'Porque ela imprime (saída) e também digitaliza/copia documentos (entrada).'},
+  {q:'Por que um Monitor Touchscreen é um periférico híbrido?', a:'Porque exibe imagens (saída) e também recebe comandos de toque do usuário (entrada).'},
+  {q:'Cite um exemplo de periférico de saída usado para apresentações em sala de aula.', a:'O Projetor.'},
+  {q:'Qual periférico converte código de barras em dados digitais?', a:'O Leitor de código de barras (periférico de entrada).'}
+ ],
+ vf:[
+  {t:'Monitor e Impressora são periféricos de entrada.', v:false, e:'Monitor e Impressora são periféricos de SAÍDA. Teclado e Mouse é que são de ENTRADA.'},
+  {t:'O Mouse é um periférico de entrada, pois envia comandos ao computador.', v:true, e:'Correto — o mouse envia dados (posição, cliques) para o computador processar.'},
+  {t:'Um Headset (fone com microfone) pode ser considerado um periférico híbrido.', v:true, e:'Correto — o fone emite som (saída) e o microfone capta voz (entrada).'},
+  {t:'O Scanner é um periférico de saída, pois "solta" o documento digitalizado.', v:false, e:'O Scanner é um periférico de ENTRADA: ele envia a imagem capturada para o computador processar.'},
+  {t:'Uma impressora multifuncional só consegue imprimir, nada mais.', v:false, e:'Ela é híbrida: além de imprimir (saída), também digitaliza e copia documentos (entrada).'},
+  {t:'O Plotter é um periférico de saída usado geralmente para imprimir plantas e desenhos técnicos em grande formato.', v:true, e:'Correto — o plotter é uma impressora especializada em formatos grandes.'},
+  {t:'A Webcam é um periférico de saída porque exibe imagens na tela.', v:false, e:'A Webcam é um periférico de ENTRADA: ela captura vídeo e envia para o computador.'},
+  {t:'Roteadores e modems podem ser considerados periféricos híbridos, pois enviam e recebem dados da rede.', v:true, e:'Correto — eles trocam dados nos dois sentidos com a rede/internet.'},
+  {t:'Todo periférico de entrada também é, obrigatoriamente, um periférico de saída.', v:false, e:'Não — muitos periféricos são exclusivamente de entrada (ex: teclado, microfone) ou exclusivamente de saída (ex: monitor comum, caixa de som).'},
+  {t:'Caixas de som são periféricos de saída, pois reproduzem áudio processado pelo computador.', v:true, e:'Correto — elas recebem o sinal de áudio do computador e o transformam em som.'}
+ ],
+ pblTitle:'Cenário: Montando uma Sala de Videoconferência',
+ pblText:'Sua escola quer montar uma sala equipada para dar aulas online e receber visitantes com apresentações.',
+ pblTasks:[
+  'Liste os periféricos de entrada necessários para captar áudio e vídeo dos professores.',
+  'Liste os periféricos de saída necessários para que os alunos remotos consigam ver e ouvir a aula.',
+  'Sugira 2 periféricos híbridos que poderiam ser úteis nessa sala e explique por quê.',
+  'Se o orçamento for limitado, qual periférico você priorizaria primeiro e por quê?'
+ ]
+},
+
+{
+ id:'m6', icon:'⌨️', title:'6. Teclado e Atalhos',
+ intro:'Conheça as teclas especiais do teclado e os atalhos mais usados no dia a dia do Windows.',
+ html:`
+ <div class="subsection-title">🔑 Teclas Especiais</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">⎋</span><h4>ESC</h4><p>Cancela operações e fecha diálogos abertos.</p></div>
+   <div class="info-box"><span class="ico">⇥</span><h4>TAB</h4><p>Alterna entre elementos e campos da tela.</p></div>
+   <div class="info-box"><span class="ico">⌫</span><h4>BACKSPACE</h4><p>Apaga o caractere ANTERIOR ao cursor.</p></div>
+   <div class="info-box"><span class="ico">⌦</span><h4>DELETE</h4><p>Apaga o caractere À FRENTE do cursor, ou o item selecionado.</p></div>
+   <div class="info-box"><span class="ico">⇧</span><h4>SHIFT</h4><p>Ativa maiúsculas e funções alternativas de outras teclas.</p></div>
+   <div class="info-box"><span class="ico">⊞</span><h4>Tecla Windows</h4><p>Abre o Menu Iniciar e é usada em diversas combinações de atalho.</p></div>
+ </div>
+ <p class="content-text">Para acentuar palavras: <b>Shift + ´</b> = acento agudo (á é í ó ú) · <b>Shift + ^</b> = acento circunflexo (â ê ô).</p>
+
+ <div class="subsection-title">⚡ Atalhos Essenciais do Windows</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📋</span><h4>Ctrl + C</h4><p>Copia o item selecionado.</p></div>
+   <div class="info-box"><span class="ico">✂️</span><h4>Ctrl + X</h4><p>Recorta o item selecionado.</p></div>
+   <div class="info-box"><span class="ico">📥</span><h4>Ctrl + V</h4><p>Cola o conteúdo copiado/recortado.</p></div>
+   <div class="info-box"><span class="ico">↩️</span><h4>Ctrl + Z</h4><p>Desfaz a última ação.</p></div>
+   <div class="info-box"><span class="ico">↪️</span><h4>Ctrl + Y</h4><p>Refaz a ação que foi desfeita.</p></div>
+   <div class="info-box"><span class="ico">💾</span><h4>Ctrl + S</h4><p>Salva o arquivo aberto.</p></div>
+   <div class="info-box"><span class="ico">🖨️</span><h4>Ctrl + P</h4><p>Abre a janela de impressão.</p></div>
+   <div class="info-box"><span class="ico">🔍</span><h4>Ctrl + F</h4><p>Abre a busca por palavra na página/documento.</p></div>
+   <div class="info-box"><span class="ico">🔄</span><h4>Alt + Tab</h4><p>Alterna entre janelas abertas.</p></div>
+   <div class="info-box"><span class="ico">❌</span><h4>Alt + F4</h4><p>Fecha a janela/programa ativo.</p></div>
+   <div class="info-box"><span class="ico">📂</span><h4>Windows + E</h4><p>Abre o Explorador de Arquivos.</p></div>
+   <div class="info-box"><span class="ico">🖥️</span><h4>Windows + D</h4><p>Mostra a Área de Trabalho.</p></div>
+ </div>
+
+ <div class="subsection-title">🧱 Explore: As Zonas do Teclado</div>
+ <p class="content-text">Clique em cada zona do teclado para ver para que ela serve.</p>
+ <div id="idiag-m6"></div>`,
+ flashcards:[
+  {q:'O que faz a tecla ESC?', a:'Cancela operações em andamento e fecha diálogos abertos.'},
+  {q:'O que faz a tecla TAB?', a:'Alterna entre elementos da tela, navegando entre campos e janelas.'},
+  {q:'Qual a diferença entre BACKSPACE e DELETE?', a:'BACKSPACE apaga o caractere ANTES do cursor; DELETE apaga o caractere DEPOIS do cursor (ou o item selecionado).'},
+  {q:'Para que serve Shift + tecla de letra?', a:'Escreve a letra em maiúscula ou ativa a função alternativa (símbolo) da tecla.'},
+  {q:'O que faz Ctrl + C?', a:'Copia o texto ou arquivo selecionado para a área de transferência.'},
+  {q:'O que faz Ctrl + X?', a:'Corta (recorta) o texto ou arquivo selecionado, movendo-o para a área de transferência.'},
+  {q:'O que faz Ctrl + V?', a:'Cola o conteúdo que está na área de transferência.'},
+  {q:'O que faz Ctrl + Z?', a:'Desfaz a última ação realizada.'},
+  {q:'O que faz Ctrl + Y?', a:'Refaz a ação que havia sido desfeita com Ctrl+Z.'},
+  {q:'O que faz Ctrl + S?', a:'Salva o arquivo aberto em seu local original.'},
+  {q:'O que faz Ctrl + P?', a:'Abre a janela para imprimir o documento ou página ativa.'},
+  {q:'O que faz Ctrl + F?', a:'Abre uma janela para buscar uma palavra dentro do documento ou página.'},
+  {q:'O que faz Alt + Tab?', a:'Alterna entre as janelas/programas abertos.'},
+  {q:'O que faz Alt + F4?', a:'Fecha o item ativo ou sai do programa em uso.'},
+  {q:'Qual é o atalho para abrir o Explorador de Arquivos (Windows Explorer)?', a:'Windows + E.'},
+  {q:'Qual é o atalho para mostrar a Área de Trabalho, minimizando todas as janelas?', a:'Windows + D.'},
+  {q:'Como se digita a letra "á" (acento agudo) no teclado?', a:'Pressionando Shift + ´ (til de acento agudo) e depois a letra "a".'},
+  {q:'Qual atalho renomeia um arquivo selecionado no Windows?', a:'A tecla F2.'}
+ ],
+ vf:[
+  {t:'A tecla DELETE apaga o caractere que vem ANTES do cursor.', v:false, e:'É a tecla BACKSPACE que apaga o caractere anterior. O DELETE apaga o que vem depois do cursor.'},
+  {t:'Ctrl + Z desfaz a última ação realizada em praticamente qualquer programa do Windows.', v:true, e:'Correto — é um atalho universal para "desfazer" em editores de texto, planilhas, etc.'},
+  {t:'Ctrl + V copia o conteúdo selecionado para a área de transferência.', v:false, e:'Ctrl+V COLA o conteúdo. Quem copia é o Ctrl+C.'},
+  {t:'Alt + Tab é usado para alternar entre janelas ou programas abertos.', v:true, e:'Correto — é um dos atalhos mais usados para navegar entre aplicativos.'},
+  {t:'Windows + E abre a calculadora do sistema.', v:false, e:'Windows+E abre o EXPLORADOR DE ARQUIVOS, não a calculadora.'},
+  {t:'A tecla ESC serve para cancelar operações e fechar caixas de diálogo.', v:true, e:'Correto — é justamente essa a função da tecla Escape.'},
+  {t:'Para escrever uma letra com acento circunflexo (â, ê, ô), usa-se Shift + ´.', v:false, e:'O acento circunflexo usa Shift + ^. O Shift + ´ é usado para o acento AGUDO (á, é, í).'},
+  {t:'Ctrl + S salva o arquivo que está aberto no momento.', v:true, e:'Correto — é um dos atalhos mais importantes para não perder o trabalho.'},
+  {t:'Alt + F4 abre uma nova janela do navegador.', v:false, e:'Alt+F4 FECHA a janela ou o programa ativo — o efeito é o oposto de abrir algo novo.'},
+  {t:'Ctrl + F permite buscar uma palavra específica dentro de um documento ou página.', v:true, e:'Correto — é o atalho universal de "localizar" ou "buscar".'}
+ ],
+ pblTitle:'Cenário: Digitando um Trabalho com Agilidade',
+ pblText:'Um colega de turma está demorando muito para digitar um trabalho porque usa apenas o mouse para copiar, colar e desfazer erros.',
+ pblTasks:[
+  'Ensine a ele pelo menos 5 atalhos de teclado que tornariam o trabalho dele muito mais rápido.',
+  'Ele digitou "Educaçao" sem o acento no "ã". Explique como corrigir isso usando apenas o teclado (sem apagar tudo).',
+  'Ele apagou um parágrafo inteiro por engano. Qual atalho resolveria esse problema rapidamente?',
+  'Monte uma "cola" com os 10 atalhos mais úteis para quem está começando a usar o computador.'
+ ]
+},
+
+{
+ id:'m7', icon:'🌐', title:'7. Internet e Conceitos Web',
+ intro:'O que é a internet, como funcionam URLs, e-mails e as técnicas avançadas de busca no Google (Google Dorking).',
+ html:`
+ <div class="subsection-title">🌍 Página Web, URL e HTTP</div>
+ <p class="content-text">Uma <b>página web</b> (webpage) é uma "página" na World Wide Web, geralmente em formato HTML, com links de hipertexto que permitem navegar entre páginas.</p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">🔗</span><h4>URL</h4><p>Uniform Resource Locator: endereço de rede onde se encontra um recurso (arquivo, site, impressora). Ex: portal.ifs.edu.br</p></div>
+   <div class="info-box"><span class="ico">📡</span><h4>HTTP</h4><p>HyperText Transfer Protocol: protocolo responsável por tratar pedidos e respostas entre cliente e servidor na Web.</p></div>
+   <div class="info-box"><span class="ico">⬇️</span><h4>Download</h4><p>Baixar um arquivo da internet para o seu computador.</p></div>
+   <div class="info-box"><span class="ico">⬆️</span><h4>Upload</h4><p>Enviar um arquivo do seu computador para a internet.</p></div>
+ </div>
+
+ <div class="subsection-title">📧 Correio Eletrônico (E-mail)</div>
+ <p class="content-text">Ferramenta para enviar e receber mensagens de forma assíncrona pela internet. Estrutura do endereço: <b>nomeusuario@provedor.com</b></p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📥</span><h4>Inbox</h4><p>Caixa de entrada — mensagens novas recebidas.</p></div>
+   <div class="info-box"><span class="ico">🚫</span><h4>Spam</h4><p>Mensagens indesejadas, geralmente publicidade em massa.</p></div>
+   <div class="info-box"><span class="ico">👥</span><h4>CC (Com Cópia)</h4><p>Outra pessoa recebe a mensagem, mas não é a destinatária principal.</p></div>
+   <div class="info-box"><span class="ico">🙈</span><h4>CCO (Cópia Oculta)</h4><p>Outros destinatários não sabem que aquela pessoa também recebeu.</p></div>
+   <div class="info-box"><span class="ico">📎</span><h4>Anexo</h4><p>Arquivos extras enviados junto com o texto da mensagem.</p></div>
+ </div>
+
+ <div class="subsection-title">🔎 Buscas Avançadas no Google (Google Dorking)</div>
+ <p class="content-text">Operadores de pesquisa avançados ajudam a encontrar informações específicas na web:</p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">🏷️</span><h4>site:</h4><p>Limita a busca a um domínio. Ex: <code>site:ifs.edu.br edital</code></p></div>
+   <div class="info-box"><span class="ico">📄</span><h4>filetype:</h4><p>Busca um formato específico de arquivo. Ex: <code>linux filetype:pdf</code></p></div>
+   <div class="info-box"><span class="ico">🔤</span><h4>intitle:</h4><p>Procura palavras que aparecem no título da página. Ex: <code>intitle:IFS</code></p></div>
+   <div class="info-box"><span class="ico">🔗</span><h4>inurl:</h4><p>Procura palavras presentes na própria URL do site. Ex: <code>inurl:dicas</code></p></div>
+   <div class="info-box"><span class="ico">🔁</span><h4>related:</h4><p>Retorna sites semelhantes ao indicado. Ex: <code>related:google.com</code></p></div>
+   <div class="info-box"><span class="ico">➕</span><h4>+ (busca forçada)</h4><p>Força a busca de palavras comuns que normalmente seriam ignoradas.</p></div>
+   <div class="info-box"><span class="ico">➖</span><h4>- (busca excluída)</h4><p>Exclui resultados que contenham determinada palavra.</p></div>
+   <div class="info-box"><span class="ico">✳️</span><h4>* (curinga)</h4><p>Substitui uma palavra desconhecida em uma frase de busca.</p></div>
+ </div>
+
+ <div class="subsection-title">🧱 Explore: As Camadas da Comunicação na Internet</div>
+ <p class="content-text">Quando você abre um site, sua requisição passa por várias "camadas" até chegar ao servidor — e a resposta volta pelo mesmo caminho. Clique em cada uma para seguir o percurso.</p>
+ <div id="idiag-m7"></div>`,
+ flashcards:[
+  {q:'O que é uma URL?', a:'Uniform Resource Locator — o endereço de rede onde se encontra um recurso informático (site, arquivo, impressora, etc.).'},
+  {q:'O que é HTTP?', a:'HyperText Transfer Protocol — protocolo responsável por tratar pedidos e respostas entre cliente e servidor na Web.'},
+  {q:'Qual é a diferença entre Download e Upload?', a:'Download é baixar algo da internet; Upload é enviar um arquivo para a internet.'},
+  {q:'Qual é a estrutura básica de um endereço de e-mail?', a:'nomeusuario@provedor.com — nome de usuário, o símbolo @ (arroba) e o domínio/provedor.'},
+  {q:'O que é a Inbox de um e-mail?', a:'A caixa de entrada, onde chegam as mensagens novas recebidas.'},
+  {q:'O que é Spam?', a:'Mensagens indesejadas, geralmente de publicidade em massa, enviadas sem consentimento.'},
+  {q:'Qual é a diferença entre CC e CCO em um e-mail?', a:'Em CC (Com Cópia), todos veem quem recebeu cópia; em CCO (Cópia Oculta), os demais destinatários não sabem quem recebeu.'},
+  {q:'O que é um Anexo de e-mail?', a:'Um arquivo extra enviado junto com o texto da mensagem (foto, documento, etc.).'},
+  {q:'Para que serve o operador "site:" no Google?', a:'Para limitar a busca a um domínio específico. Ex: site:ifs.edu.br edital'},
+  {q:'Para que serve o operador "filetype:" no Google?', a:'Para buscar arquivos em um formato específico. Ex: linux filetype:pdf'},
+  {q:'Para que serve o operador "intitle:" no Google?', a:'Para buscar páginas que tenham determinada palavra no título.'},
+  {q:'Para que serve o operador "inurl:" no Google?', a:'Para encontrar páginas que tenham determinada palavra na própria URL do site.'},
+  {q:'Para que serve o operador "related:" no Google?', a:'Para encontrar sites relacionados ou semelhantes ao site indicado.'},
+  {q:'Para que serve o sinal de "+" numa busca do Google?', a:'Para forçar a busca de palavras (como pronomes e preposições) que normalmente seriam ignoradas por serem muito comuns.'},
+  {q:'Para que serve o sinal de "-" numa busca do Google?', a:'Para excluir resultados que contenham determinada palavra.'},
+  {q:'Para que serve o asterisco (*) numa busca do Google?', a:'Como curinga, substituindo uma palavra desconhecida dentro de uma frase de busca.'},
+  {q:'O que é considerado uso ilegítimo do Google Hacking (Dorking)?', a:'Acessar sistemas ou dados sem autorização, mesmo que estejam publicamente indexados.'},
+  {q:'Quem enviou o primeiro e-mail da história, em 1971?', a:'Ray Tomlinson, que também escolheu o símbolo @ (arroba) para separar usuário e servidor.'}
+ ],
+ vf:[
+  {t:'HTTP é a versão segura e criptografada do protocolo de transferência de hipertexto.', v:false, e:'Essa é a definição de HTTPS. O HTTP puro NÃO é criptografado.'},
+  {t:'Download significa baixar um arquivo da internet para o computador.', v:true, e:'Correto — é o sentido oposto do Upload.'},
+  {t:'Em uma cópia oculta (CCO), todos os destinatários sabem quem mais recebeu a mensagem.', v:false, e:'É o contrário: na CCO, os demais destinatários NÃO sabem quem recebeu cópia oculta.'},
+  {t:'O operador "site:" limita a pesquisa do Google a um domínio específico.', v:true, e:'Correto — por exemplo, "site:ifs.edu.br edital" busca apenas dentro do site do IFS.'},
+  {t:'O operador "filetype:pdf" busca apenas vídeos no Google.', v:false, e:'O "filetype:" busca por um FORMATO DE ARQUIVO específico (nesse caso, PDF), não vídeos.'},
+  {t:'Uma URL é o endereço que localiza um recurso na rede, como um site ou arquivo.', v:true, e:'Correto — URL significa "Localizador Padrão de Recursos".'},
+  {t:'Spam são mensagens importantes enviadas por contatos confiáveis.', v:false, e:'Spam são mensagens INDESEJADAS, geralmente publicidade em massa, e não mensagens confiáveis.'},
+  {t:'O símbolo "*" em uma busca do Google funciona como curinga, substituindo uma palavra desconhecida.', v:true, e:'Correto — útil quando não sabemos parte exata de uma frase.'},
+  {t:'Usar o Google Dorking para acessar dados privados sem autorização é uma prática legal e recomendada.', v:false, e:'É uma prática ILEGAL quando usada para acessar sistemas ou dados sem autorização, mesmo que estejam indexados publicamente.'},
+  {t:'O sinal de "-" antes de uma palavra serve para EXCLUIR resultados que contenham aquele termo.', v:true, e:'Correto — por exemplo, "Política -Amazonas" exclui resultados que mencionem "Amazonas".'},
+  {t:'O primeiro e-mail da história foi enviado na década de 1990.', v:false, e:'Foi enviado em 1971, por Ray Tomlinson — bem antes da popularização da internet nos anos 1990.'},
+  {t:'O operador "related:" retorna páginas parecidas ou semelhantes ao site indicado.', v:true, e:'Correto — por exemplo, "related:google.com" retorna sites parecidos com o Google.'}
+ ],
+ pblTitle:'Cenário: Pesquisando com Eficiência para um Trabalho Acadêmico',
+ pblText:'Você precisa encontrar, rapidamente, editais em PDF publicados apenas no site do IFS sobre bolsas de pesquisa, sem perder tempo com resultados irrelevantes de outros sites.',
+ pblTasks:[
+  'Monte a busca no Google combinando os operadores "site:" e "filetype:" para essa tarefa.',
+  'Explique como você usaria o operador "-" para excluir editais de "estágio" da sua busca.',
+  'Um colega recebeu um e-mail suspeito pedindo para clicar em um link para "atualizar a senha". Que cuidados ele deve ter antes de clicar?',
+  'Explique a diferença entre colocar um professor em CC ou em CCO num e-mail sobre um projeto de grupo, e quando usar cada um.'
+ ]
+},
+
+{
+ id:'m8', icon:'🛡️', title:'8. Segurança da Informação',
+ intro:'Conheça os principais tipos de malware, como funciona um golpe de phishing e as estratégias de defesa para proteger seus dados.',
+ html:`
+ <div class="subsection-title">☠️ Principais Tipos de Malware</div>
+ <div class="malware-grid">
+   <div class="malware-card"><span class="ico">🦠</span><h5>Vírus</h5><p>Precisa de intervenção humana para se espalhar (ex: abrir um arquivo infectado).</p></div>
+   <div class="malware-card"><span class="ico">🐛</span><h5>Worms (Vermes)</h5><p>Se espalha sozinho pela rede, sem precisar de ação humana.</p></div>
+   <div class="malware-card"><span class="ico">🎁</span><h5>Trojan (Cavalo de Troia)</h5><p>Se disfarça de programa legítimo para enganar o usuário.</p></div>
+   <div class="malware-card"><span class="ico">🔐</span><h5>Ransomware</h5><p>Criptografa os arquivos da vítima e exige resgate (pagamento) para liberá-los.</p></div>
+   <div class="malware-card"><span class="ico">🕵️</span><h5>Spyware</h5><p>Monitora e coleta dados do usuário secretamente (ex: keyloggers).</p></div>
+   <div class="malware-card"><span class="ico">🥷</span><h5>Rootkit</h5><p>Obtém acesso privilegiado ao sistema e se esconde da detecção.</p></div>
+   <div class="malware-card"><span class="ico">🤖</span><h5>Botnet</h5><p>Rede de computadores infectados controlados remotamente (ex: para ataques DDoS ou spam).</p></div>
+ </div>
+
+ <div class="subsection-title">🔄 Ciclo de Vida de uma Infecção</div>
+ <div class="timeline-wrap" tabindex="0" role="region" aria-label="Linha do tempo (role para os lados)"><div class="timeline">
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">1</div><div class="t-title">Vetor de Ataque</div><div class="t-desc">Phishing, e-mail malicioso, download infectado.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">2</div><div class="t-title">Execução</div><div class="t-desc">O malware é ativado no sistema da vítima.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">3</div><div class="t-title">Persistência</div><div class="t-desc">Mecanismos para continuar rodando mesmo após reiniciar.</div></div>
+   <div class="t-item"><div class="t-dot"></div><div class="t-year">4</div><div class="t-title">Propagação/Ação</div><div class="t-desc">Infecta outros dispositivos ou rouba (exfiltra) dados.</div></div>
+ </div></div>
+
+ <div class="subsection-title">🎣 Phishing (Fraude Digital)</div>
+ <p class="content-text">Ataque que combina meios técnicos e <b>engenharia social</b> para roubar dados pessoais e financeiros. Funciona assim:</p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📧</span><h4>1. Mensagens Enganosas</h4><p>E-mails genéricos, com links falsos e senso de urgência ("Ação necessária!").</p></div>
+   <div class="info-box"><span class="ico">🏦</span><h4>2. Páginas Falsas</h4><p>Sites que imitam bancos ou serviços reais, pedindo usuário e senha.</p></div>
+   <div class="info-box"><span class="ico">💳</span><h4>3. Dados Roubados</h4><p>Cartões de crédito, contas bancárias e senhas são coletados pelos criminosos.</p></div>
+ </div>
+
+ <div class="subsection-title">🛡️ Estratégias de Defesa</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">🦠</span><h4>Antivírus / EDR</h4><p>Proteção no computador (endpoint) contra malwares conhecidos.</p></div>
+   <div class="info-box"><span class="ico">🔥</span><h4>Firewall</h4><p>Controla o tráfego de rede, bloqueando acessos suspeitos.</p></div>
+   <div class="info-box"><span class="ico">🔄</span><h4>Atualizações (Patches)</h4><p>Corrigem falhas de segurança conhecidas nos softwares.</p></div>
+   <div class="info-box"><span class="ico">🎓</span><h4>Treinamento</h4><p>Conscientização humana contra golpes de phishing e engenharia social.</p></div>
+   <div class="info-box"><span class="ico">💾</span><h4>Backup Offline</h4><p>Cópias de segurança guardadas fora da rede, protegidas contra ransomware.</p></div>
+ </div>
+
+ <div class="subsection-title">🧱 Explore: As Camadas de Defesa Digital</div>
+ <p class="content-text">Pense nisso como um castelo com várias muralhas: quanto mais camadas de defesa, mais difícil é para um ataque chegar até seus dados. Clique em cada uma.</p>
+ <div id="idiag-m8"></div>`,
+ flashcards:[
+  {q:'O que é um Vírus de computador?', a:'Malware que precisa de intervenção humana (ex: abrir um arquivo) para se instalar e se espalhar.'},
+  {q:'O que são Worms (vermes)?', a:'Malwares que se espalham sozinhos pela rede, sem precisar de ação humana.'},
+  {q:'O que é um Trojan (Cavalo de Troia)?', a:'Malware que se disfarça de programa legítimo para enganar o usuário e se instalar no sistema.'},
+  {q:'O que é um Ransomware?', a:'Malware que criptografa os arquivos da vítima e exige pagamento de resgate para liberá-los.'},
+  {q:'O que é um Spyware?', a:'Malware que monitora e coleta dados do usuário secretamente, como um keylogger.'},
+  {q:'O que é um Rootkit?', a:'Malware que obtém acesso privilegiado ao sistema e se esconde para não ser detectado.'},
+  {q:'O que é uma Botnet?', a:'Uma rede de computadores infectados, controlados remotamente para ataques em massa (ex: DDoS, spam).'},
+  {q:'Quais são as 4 etapas do ciclo de vida de uma infecção por malware?', a:'Vetor de ataque, Execução, Persistência e Propagação/Ação.'},
+  {q:'O que é Phishing?', a:'Ataque que combina meios técnicos e engenharia social para roubar dados pessoais e financeiros por meio de mensagens e páginas falsas.'},
+  {q:'Como o Phishing costuma começar?', a:'Com uma mensagem enganosa (e-mail ou SMS) contendo um link falso e senso de urgência.'},
+  {q:'O que uma página falsa de Phishing tenta simular?', a:'Instituições conhecidas, como bancos, pedindo usuário e senha da vítima.'},
+  {q:'O que faz um Antivírus/EDR na defesa contra malware?', a:'Protege o computador (endpoint) detectando e bloqueando softwares maliciosos conhecidos.'},
+  {q:'O que faz um Firewall?', a:'Controla o tráfego de rede, bloqueando acessos e conexões suspeitas.'},
+  {q:'Por que é importante manter os softwares atualizados (patches)?', a:'Porque as atualizações corrigem falhas de segurança que poderiam ser exploradas por invasores.'},
+  {q:'Por que o backup offline é uma defesa importante contra ransomware?', a:'Porque, estando fora da rede, ele não é atingido caso o ransomware criptografe os arquivos conectados.'},
+  {q:'Por que o treinamento e a conscientização das pessoas são considerados uma camada de defesa?', a:'Porque muitos ataques (como phishing) exploram erros humanos, não apenas falhas técnicas.'},
+  {q:'O que caracteriza o Software Pirata em termos legais?', a:'Cópia, venda ou distribuição de software proprietário sem pagamento dos direitos autorais — é crime previsto em lei.'}
+ ],
+ vf:[
+  {t:'Um Vírus de computador se espalha sozinho, sem precisar de nenhuma ação do usuário.', v:false, e:'Essa é a característica do WORM. O Vírus precisa de intervenção humana (como abrir um arquivo) para se espalhar.'},
+  {t:'Ransomware criptografa os arquivos da vítima e exige pagamento para liberá-los.', v:true, e:'Correto — essa é justamente a definição de ransomware.'},
+  {t:'Um Trojan (Cavalo de Troia) se apresenta como um programa legítimo para enganar o usuário.', v:true, e:'Correto — daí a referência ao mito grego do Cavalo de Troia.'},
+  {t:'Uma Botnet é uma rede de servidores oficiais usados por empresas de segurança.', v:false, e:'Uma Botnet é uma rede de computadores INFECTADOS, controlados remotamente por criminosos, geralmente para ataques como DDoS ou envio de spam.'},
+  {t:'Phishing é um ataque puramente técnico, que não depende de engenganar a vítima.', v:false, e:'O Phishing combina meios técnicos com ENGENHARIA SOCIAL — ele depende de enganar a vítima para funcionar.'},
+  {t:'Um Spyware serve para monitorar e coletar dados do usuário sem que ele perceba.', v:true, e:'Correto — exemplos incluem keyloggers, que registram tudo que é digitado.'},
+  {t:'Manter os backups sempre conectados à rede é a melhor proteção contra ransomware.', v:false, e:'O ideal é manter backups OFFLINE (desconectados), pois um ransomware pode criptografar também os backups que estiverem conectados à rede.'},
+  {t:'Um Rootkit tenta se esconder no sistema para não ser detectado pelo usuário ou pelo antivírus.', v:true, e:'Correto — essa é uma característica central do Rootkit: obter acesso privilegiado e se ocultar.'},
+  {t:'Atualizações de segurança (patches) são desnecessárias se você já tem um bom antivírus instalado.', v:false, e:'As atualizações corrigem falhas específicas do software que o antivírus sozinho pode não cobrir; ambas as camadas são importantes.'},
+  {t:'Em um golpe de Phishing, a etapa final costuma ser o roubo de dados sensíveis, como senhas e números de cartão.', v:true, e:'Correto — esse é o objetivo final do golpe: coletar dados sensíveis da vítima.'},
+  {t:'Baixar e distribuir cópias de software proprietário sem pagar é uma prática legal, desde que seja para uso pessoal.', v:false, e:'É crime previsto em lei (pirataria de software), independentemente de ser para uso pessoal ou comercial.'},
+  {t:'O Firewall tem a função de controlar o tráfego de rede e bloquear acessos suspeitos.', v:true, e:'Correto — essa é a função principal de um firewall na camada de rede.'}
+ ],
+ pblTitle:'Cenário: Sua Empresa Sofreu uma Tentativa de Ataque',
+ pblText:'Um funcionário recebeu um e-mail dizendo "Sua conta será bloqueada em 24h, clique aqui para confirmar seus dados" e quase clicou no link.',
+ pblTasks:[
+  'Identifique quais elementos desse e-mail são características típicas de um ataque de Phishing.',
+  'Explique quais das 5 camadas de defesa estudadas (endpoint, rede, atualização, humana, recuperação) falhou ou quase falhou nesse caso, e qual delas evitou o problema.',
+  'Se o funcionário tivesse clicado e um ransomware tivesse infectado a rede, por que ter um backup offline salvaria a empresa?',
+  'Monte um checklist de 5 dicas para os funcionários identificarem e-mails de phishing no futuro.'
+ ]
+},
+
+{
+ id:'m9', icon:'📊', title:'9. Suítes de Escritório (Word, Excel, PowerPoint)',
+ intro:'Os principais programas do Microsoft 365, com destaque para a função SE do Excel e os recursos essenciais de Word e PowerPoint.',
+ html:`
+ <div class="subsection-title">☁️ Microsoft 365 (Pacote Office)</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📝</span><h4>Word</h4><p>Documentos de texto (.docx) — criação e formatação de documentos.</p></div>
+   <div class="info-box"><span class="ico">📈</span><h4>Excel</h4><p>Planilhas eletrônicas — análise de dados, fórmulas e gráficos.</p></div>
+   <div class="info-box"><span class="ico">🎨</span><h4>PowerPoint</h4><p>Apresentações visuais (.pptx) com slides.</p></div>
+   <div class="info-box"><span class="ico">📧</span><h4>Outlook</h4><p>E-mails e calendários corporativos.</p></div>
+   <div class="info-box"><span class="ico">☁️</span><h4>OneDrive</h4><p>Armazenamento em nuvem, permite colaboração em tempo real.</p></div>
+ </div>
+ <p class="content-text">O <b>LibreOffice</b> é a alternativa gratuita e open source: <b>Writer</b> (≈Word), <b>Calc</b> (≈Excel) e <b>Impress</b> (≈PowerPoint).</p>
+
+ <div class="subsection-title">📝 Processador de Texto (Word)</div>
+ <p class="content-text">Principais recursos: construção e formatação de textos, inserção de objetos (imagens, áudio, vídeo), inserção de sumários automáticos, referências bibliográficas e formatação em normas ABNT.</p>
+
+ <div class="subsection-title">📈 Planilha Eletrônica (Excel) — a Função SE</div>
+ <p class="content-text">A função <b>SE</b> é uma função comparativa: compara um valor e retorna um resultado de acordo com uma condição. Sintaxe:</p>
+ <p class="content-text" style="background:#f0f0f0;padding:.8rem;border-radius:6px;font-family:monospace">=SE(teste_lógico; valor_se_verdadeiro; valor_se_falso)</p>
+ <p class="content-text"><b>Exemplo real:</b> Para verificar se um aluno com média na célula A4 foi aprovado (média ≥ 7):</p>
+ <p class="content-text" style="background:#e8f5e9;padding:.8rem;border-radius:6px;font-family:monospace">=SE(A4&gt;=7;"Aprovado";"Reprovado")</p>
+ <p class="content-text">Para calcular a média de duas provas (células A2 e B2): <code>=SOMA(A2;B2)/2</code></p>
+
+ <div class="subsection-title">🎨 Software de Apresentação (PowerPoint)</div>
+ <p class="content-text">Principais recursos: formatação de textos, inserção de formas e figuras, inserção de efeitos de som e vídeo, inserção de gráficos e hiperlinks, transição de slides e configuração de Slide Mestre (para manter um padrão visual em toda a apresentação).</p>
+
+ <div class="subsection-title">🧱 Explore: Como a Função SE Decide</div>
+ <p class="content-text">Clique em cada etapa e veja exatamente como o Excel decide entre "Aprovado" e "Reprovado" usando a fórmula =SE(A4&gt;=7;"Aprovado";"Reprovado").</p>
+ <div id="idiag-m9"></div>`,
+ flashcards:[
+  {q:'O que é uma Suíte de Escritório?', a:'Conjunto de aplicativos integrados para criar documentos, planilhas, apresentações e gerenciar e-mails.'},
+  {q:'Quais são os 3 principais programas do Microsoft 365 para documentos, planilhas e apresentações?', a:'Word (documentos), Excel (planilhas) e PowerPoint (apresentações).'},
+  {q:'Qual é o equivalente do Word no LibreOffice?', a:'Writer.'},
+  {q:'Qual é o equivalente do Excel no LibreOffice?', a:'Calc.'},
+  {q:'Qual é o equivalente do PowerPoint no LibreOffice?', a:'Impress.'},
+  {q:'O que é o OneDrive?', a:'Serviço de armazenamento em nuvem da Microsoft, que permite colaboração em tempo real nos arquivos.'},
+  {q:'Cite 3 recursos do Word estudados.', a:'Formatação de textos, inserção de objetos (imagens/áudio/vídeo) e inserção de sumários automáticos.'},
+  {q:'O que a função SE do Excel faz?', a:'É uma função comparativa: testa uma condição e retorna um valor se ela for verdadeira, e outro valor se for falsa.'},
+  {q:'Qual é a sintaxe da função SE no Excel?', a:'=SE(teste_lógico; valor_se_verdadeiro; valor_se_falso)'},
+  {q:'Na fórmula =SE(A4>=7;"Aprovado";"Reprovado"), o que significa a parte "A4>=7"?', a:'É o teste_lógico — a condição que será testada (se o valor da célula A4 é maior ou igual a 7).'},
+  {q:'Por que é preciso colocar palavras como "Aprovado" entre aspas na função SE?', a:'Porque são textos (strings); sem as aspas, a função não reconhece corretamente o valor e não funciona.'},
+  {q:'O que faz a fórmula =SOMA(A2;B2)/2?', a:'Soma os valores das células A2 e B2 e divide o resultado por 2 — geralmente usada para calcular uma média.'},
+  {q:'Cite 3 recursos do PowerPoint estudados.', a:'Formatação de textos, inserção de formas/figuras e transição de slides.'},
+  {q:'O que é o Slide Mestre no PowerPoint?', a:'Um recurso que permite configurar um padrão visual (fontes, cores, logotipos) para toda a apresentação de uma só vez.'},
+  {q:'O que significa a extensão .docx?', a:'Formato de arquivo do Microsoft Word (documento de texto).'},
+  {q:'O que significa a extensão .pptx?', a:'Formato de arquivo do Microsoft PowerPoint (apresentação de slides).'}
+ ],
+ vf:[
+  {t:'O LibreOffice Writer é equivalente ao Microsoft Word.', v:true, e:'Correto — ambos são processadores de texto com funções semelhantes.'},
+  {t:'A função SE do Excel serve apenas para somar números, sem nenhuma comparação.', v:false, e:'A função SE é COMPARATIVA — ela testa uma condição lógica e retorna resultados diferentes conforme o teste seja verdadeiro ou falso.'},
+  {t:'Na fórmula =SE(A4>=7;"Aprovado";"Reprovado"), se A4 for igual a 5, o resultado será "Aprovado".', v:false, e:'Como 5 não é maior ou igual a 7, o teste lógico é falso, então o resultado será "Reprovado".'},
+  {t:'O OneDrive permite que várias pessoas editem o mesmo arquivo ao mesmo tempo, na nuvem.', v:true, e:'Correto — essa é a proposta da colaboração em tempo real do Microsoft 365.'},
+  {t:'PowerPoint é usado principalmente para criar planilhas com fórmulas.', v:false, e:'PowerPoint é usado para criar APRESENTAÇÕES com slides. Quem trabalha com planilhas e fórmulas é o Excel.'},
+  {t:'Em uma fórmula do Excel, textos como "Aprovado" devem ser escritos entre aspas.', v:true, e:'Correto — sem as aspas, o Excel tentaria interpretar "Aprovado" como um nome de célula ou variável, e a fórmula daria erro.'},
+  {t:'O Slide Mestre do PowerPoint serve para gravar um áudio de narração automática.', v:false, e:'O Slide Mestre serve para definir um PADRÃO VISUAL (fontes, cores, logotipo) para toda a apresentação, e não para narração.'},
+  {t:'O Calc, do LibreOffice, é equivalente ao Microsoft Excel.', v:true, e:'Correto — ambos são programas de planilha eletrônica.'},
+  {t:'A extensão .pptx indica um arquivo de planilha do Excel.', v:false, e:'A extensão .pptx é de arquivos do PowerPoint (apresentações). Planilhas do Excel usam .xlsx.'},
+  {t:'A fórmula =SOMA(A2;B2)/2 pode ser usada para calcular a média de duas notas armazenadas em A2 e B2.', v:true, e:'Correto — soma os dois valores e divide por 2, resultando na média aritmética simples.'}
+ ],
+ pblTitle:'Cenário: Automatizando o Boletim de Notas',
+ pblText:'Você é responsável por montar uma planilha no Excel para calcular automaticamente se os alunos foram aprovados, considerando que a média mínima do IFS é 6,0.',
+ pblTasks:[
+  'Escreva a fórmula da função SE que calcularia "Aprovado" ou "Reprovado" com base numa média armazenada na célula C4, considerando a média mínima 6,0.',
+  'Explique por que a fórmula não funcionaria corretamente se você escrevesse =SE(C4>=6,0;Aprovado;Reprovado) (sem as aspas em "Aprovado" e "Reprovado").',
+  'Depois de calcular as notas no Excel, você precisa apresentar um resumo para a coordenação. Qual programa da suíte de escritório você usaria e por quê?',
+  'Se o relatório final também precisar virar um documento formal, com sumário automático e capa, qual programa você usaria e quais recursos aplicaria?'
+ ]
+},
+
+{
+ id:'m10', icon:'📁', title:'10. Arquivos, Pastas e Comandos MS-DOS',
+ intro:'Como o sistema organiza arquivos e pastas, as extensões mais comuns e os comandos básicos usados no Prompt de Comando (MS-DOS).',
+ html:`
+ <div class="subsection-title">📄 Arquivos e Extensões</div>
+ <p class="content-text">Um <b>arquivo</b> é um conjunto de dados armazenado com um nome único e uma <b>extensão</b> que indica seu tipo e qual programa deve abri-lo.</p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📝</span><h4>.docx / .doc</h4><p>Documentos do Word.</p></div>
+   <div class="info-box"><span class="ico">📊</span><h4>.xlsx / .xls</h4><p>Planilhas do Excel.</p></div>
+   <div class="info-box"><span class="ico">🎨</span><h4>.pptx / .ppt</h4><p>Apresentações do PowerPoint.</p></div>
+   <div class="info-box"><span class="ico">📕</span><h4>.pdf</h4><p>Documento portátil — mantém a formatação em qualquer sistema.</p></div>
+   <div class="info-box"><span class="ico">🖼️</span><h4>.jpg / .png</h4><p>Arquivos de imagem.</p></div>
+   <div class="info-box"><span class="ico">🎬</span><h4>.mp4 / .avi</h4><p>Arquivos de vídeo.</p></div>
+   <div class="info-box"><span class="ico">⚙️</span><h4>.exe</h4><p>Programa executável (Executable).</p></div>
+   <div class="info-box"><span class="ico">🗜️</span><h4>.zip / .rar</h4><p>Arquivos compactados (agrupam e reduzem vários arquivos).</p></div>
+ </div>
+
+ <div class="subsection-title">📂 Pastas: Estrutura Hierárquica</div>
+ <p class="content-text">Uma <b>pasta</b> (diretório) organiza e armazena arquivos e outras pastas, formando uma estrutura em árvore, como em um fichário físico: a Raiz contém pastas de Nível 1, que contêm pastas de Nível 2, e assim por diante.</p>
+
+ <div class="subsection-title">💻 Comandos Básicos do MS-DOS (Prompt de Comando)</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📋</span><h4>DIR</h4><p>Lista arquivos e pastas do diretório atual.</p></div>
+   <div class="info-box"><span class="ico">📂</span><h4>CD [pasta]</h4><p>Navega para dentro de uma pasta. CD.. volta ao nível anterior.</p></div>
+   <div class="info-box"><span class="ico">➕</span><h4>MD (MKDIR) [pasta]</h4><p>Cria uma nova pasta (Make Directory).</p></div>
+   <div class="info-box"><span class="ico">➖</span><h4>RD [pasta]</h4><p>Remove um diretório vazio (Remove Directory).</p></div>
+   <div class="info-box"><span class="ico">📑</span><h4>COPY [origem] [destino]</h4><p>Copia arquivos de um local para outro.</p></div>
+   <div class="info-box"><span class="ico">🔀</span><h4>MOVE [origem] [destino]</h4><p>Move arquivos entre pastas.</p></div>
+   <div class="info-box"><span class="ico">🗑️</span><h4>DEL [arquivo]</h4><p>Exclui arquivos permanentemente.</p></div>
+   <div class="info-box"><span class="ico">✏️</span><h4>REN [antigo] [novo]</h4><p>Renomeia arquivos ou pastas.</p></div>
+   <div class="info-box"><span class="ico">🧹</span><h4>CLS</h4><p>Limpa a tela do Prompt de Comando.</p></div>
+   <div class="info-box"><span class="ico">❓</span><h4>HELP</h4><p>Exibe ajuda sobre os comandos disponíveis.</p></div>
+   <div class="info-box"><span class="ico">📅</span><h4>DATE / TIME</h4><p>Exibe ou altera a data e hora do sistema.</p></div>
+   <div class="info-box"><span class="ico">🏷️</span><h4>VER</h4><p>Exibe a versão do sistema operacional.</p></div>
+ </div>
+ <p class="content-text">Exemplo prático: o comando <code>echo "Olá Mundo" &gt; arquivo.txt</code> cria o arquivo <b>arquivo.txt</b> contendo o texto "Olá Mundo".</p>
+ <p class="content-text">💡 <b>Curinga:</b> o comando <code>DEL *.jpg</code> apaga todos os arquivos com extensão .jpg de uma vez, usando o caractere curinga (*).</p>
+
+ <div class="subsection-title">🧱 Explore: A Hierarquia de Pastas</div>
+ <p class="content-text">Clique em cada nível, do disco até o arquivo, e veja como o Windows organiza tudo em forma de árvore.</p>
+ <div id="idiag-m10"></div>`,
+ flashcards:[
+  {q:'O que é um arquivo?', a:'Um conjunto de dados armazenado com um nome único e uma extensão que indica seu tipo e conteúdo.'},
+  {q:'O que é uma pasta (diretório)?', a:'Um recipiente que organiza e armazena arquivos e outras pastas, formando uma estrutura hierárquica.'},
+  {q:'O que indica a extensão de um arquivo?', a:'O tipo de arquivo e qual programa deve abri-lo. Ex: .docx = Word, .xlsx = Excel.'},
+  {q:'O que significa a extensão .exe?', a:'Executable — arquivo executável que contém um programa instalável/executável.'},
+  {q:'O que significa a extensão .pdf?', a:'Portable Document Format — mantém a formatação do documento em qualquer sistema.'},
+  {q:'O que é um arquivo compactado (.zip/.rar)?', a:'Um arquivo que agrupa e reduz o tamanho de vários arquivos; precisa ser descompactado para uso.'},
+  {q:'O que faz o comando DIR no MS-DOS?', a:'Lista os arquivos e pastas do diretório atual.'},
+  {q:'O que faz o comando CD no MS-DOS?', a:'Altera (navega) o diretório atual. "CD.." volta para a pasta anterior.'},
+  {q:'O que faz o comando MD (ou MKDIR)?', a:'Cria uma nova pasta (Make Directory).'},
+  {q:'O que faz o comando RD?', a:'Remove um diretório vazio (Remove Directory).'},
+  {q:'Qual é a diferença entre COPY e MOVE no MS-DOS?', a:'COPY duplica o arquivo no destino, mantendo o original; MOVE transfere o arquivo, removendo-o da origem.'},
+  {q:'O que faz o comando DEL?', a:'Exclui arquivos permanentemente.'},
+  {q:'O que faz o comando REN?', a:'Renomeia arquivos ou diretórios.'},
+  {q:'O que faz o comando CLS?', a:'Limpa a tela do Prompt de Comando.'},
+  {q:'O que faz o comando VER no MS-DOS?', a:'Exibe a versão do sistema operacional.'},
+  {q:'Como criar um arquivo de texto chamado arquivo.txt contendo "Olá Mundo" via linha de comando?', a:'Usando o comando: echo "Olá Mundo" > arquivo.txt'},
+  {q:'O que faz o comando DEL *.jpg?', a:'Apaga todos os arquivos com extensão .jpg da pasta atual, usando o caractere curinga (*).'},
+  {q:'O que é um atalho de arquivo no Windows?', a:'Um link que aponta para um arquivo original sem duplicá-lo, economizando espaço em disco.'}
+ ],
+ vf:[
+  {t:'Um arquivo não precisa de extensão para ser reconhecido pelo computador.', v:false, e:'A extensão é o que identifica o tipo de arquivo e qual programa deve abri-lo; sem ela, o sistema pode não saber como tratá-lo.'},
+  {t:'O comando DIR lista os arquivos e pastas do diretório atual no MS-DOS.', v:true, e:'Correto — é um dos comandos mais básicos e usados de navegação.'},
+  {t:'O comando MD serve para apagar uma pasta.', v:false, e:'O MD (Make Directory) serve para CRIAR uma pasta. Quem remove um diretório vazio é o comando RD.'},
+  {t:'O comando COPY remove o arquivo do local de origem depois de copiá-lo.', v:false, e:'O COPY mantém o arquivo original na origem e cria uma cópia no destino. Quem remove da origem é o comando MOVE.'},
+  {t:'A extensão .pdf mantém a formatação do documento em qualquer sistema operacional.', v:true, e:'Correto — essa é uma das principais vantagens do formato PDF.'},
+  {t:'Um arquivo .zip é um exemplo de arquivo compactado que agrupa outros arquivos.', v:true, e:'Correto — arquivos ZIP reduzem o tamanho e agrupam múltiplos arquivos em um só.'},
+  {t:'O comando CLS serve para copiar arquivos entre pastas.', v:false, e:'O CLS apenas LIMPA A TELA do Prompt de Comando; não tem relação com copiar arquivos.'},
+  {t:'Uma pasta pode conter tanto arquivos quanto outras pastas dentro dela.', v:true, e:'Correto — essa é a base da estrutura hierárquica de diretórios (árvore de pastas).'},
+  {t:'O comando "echo Olá Mundo > arquivo.txt" exclui o arquivo arquivo.txt.', v:false, e:'Esse comando CRIA (ou sobrescreve) o arquivo arquivo.txt com o texto "Olá Mundo" dentro dele — não o exclui.'},
+  {t:'Um atalho de arquivo no Windows é uma cópia completa e independente do arquivo original.', v:false, e:'Um atalho é apenas um LINK que aponta para o arquivo original; ele não duplica o conteúdo, economizando espaço.'}
+ ],
+ pblTitle:'Cenário: Organizando o HD Bagunçado',
+ pblText:'Você está ajudando um amigo a organizar seu computador, que tem centenas de arquivos soltos na Área de Trabalho, sem nenhuma pasta organizando por tipo.',
+ pblTasks:[
+  'Proponha uma estrutura de pastas (com pelo menos 3 níveis) para organizar documentos, fotos e vídeos desse usuário.',
+  'Ele tem 50 arquivos de imagem (.jpg) misturados com documentos. Que comando do MS-DOS ajudaria a localizar e mover apenas esses arquivos rapidamente?',
+  'Explique a diferença entre simplesmente copiar os arquivos para uma pasta nova e criar um atalho para eles, e qual opção você recomendaria neste caso.',
+  'Ele quer excluir de uma vez todos os arquivos temporários com extensão .tmp de uma pasta. Escreva o comando do MS-DOS que faria isso usando curinga.'
+ ]
+},
+
+{
+ id:'m11', icon:'👨‍💻', title:'11. Iniciando na Programação',
+ intro:'O que é programação, os conceitos básicos para começar (algoritmo, lógica, variáveis, linguagens) e um guia comparativo Portugol × Python para dar os primeiros passos.',
+ html:`
+ <div class="subsection-title">❓ O que é Programação?</div>
+ <p class="content-text"><b>Programação</b> é a criação de um conjunto de regras e comandos que o computador consegue ler e executar. O computador é muito rápido e obediente, mas <b>não tem iniciativa própria</b> — ele apenas segue exatamente as ordens que recebe.</p>
+
+ <div class="subsection-title">🧩 Conceitos Básicos para Começar</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">📜</span><h4>Algoritmo</h4><p>Sequência de passos lógicos para resolver um problema — como uma receita de bolo: passos em ordem específica até chegar ao resultado.</p></div>
+   <div class="info-box"><span class="ico">🧠</span><h4>Lógica de Programação</h4><p>Forma de pensar de maneira estruturada para transformar um problema real em um algoritmo.</p></div>
+   <div class="info-box"><span class="ico">📦</span><h4>Variáveis</h4><p>"Caixas" na memória do computador usadas para guardar informações temporárias (nome de usuário, pontuação de um jogo, etc.).</p></div>
+   <div class="info-box"><span class="ico">🗣️</span><h4>Linguagem de Programação</h4><p>O "idioma" usado para conversar com o computador (Python, JavaScript...). Cada linguagem tem suas regras de escrita: a <b>sintaxe</b>.</p></div>
+ </div>
+
+ <div class="subsection-title">🚀 Como Dar os Primeiros Passos</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">1️⃣</span><h4>Foque na lógica primeiro</h4><p>Antes de escolher uma linguagem complexa, aprenda a pensar de forma lógica e resolver problemas passo a passo.</p></div>
+   <div class="info-box"><span class="ico">2️⃣</span><h4>Escolha apenas uma linguagem</h4><p>Tentar aprender várias ao mesmo tempo confunde a mente. Python ou JavaScript são ótimas recomendações para iniciantes.</p></div>
+   <div class="info-box"><span class="ico">3️⃣</span><h4>Pratique com projetos simples</h4><p>Crie pequenas ferramentas, como uma calculadora ou uma lista de tarefas, para fixar o aprendizado.</p></div>
+ </div>
+
+ <div class="subsection-title">🗺️ Guia de Bolso: Da Lógica ao Código (Portugol × Python)</div>
+
+ <p class="content-text"><b>1. Variáveis</b> — servem para guardar informações na memória do computador.</p>
+ <div class="info-grid">
+   <div class="info-box"><h4>Portugol</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">inteiro idade = 25
+cadeia nome = "Lucas"</pre></div>
+   <div class="info-box"><h4>Python</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">idade = 25
+nome = "Lucas"</pre></div>
+ </div>
+
+ <p class="content-text"><b>2. Condicionais</b> (if/elif/else) — fazem o computador tomar decisões com base em condições.</p>
+ <div class="info-grid">
+   <div class="info-box"><h4>Portugol</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">se (idade >= 18) {
+  escreva("Maior de idade")
+} senao se (idade == 17) {
+  escreva("Quase lá!")
+} senao {
+  escreva("Menor de idade")
+}</pre></div>
+   <div class="info-box"><h4>Python</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">if idade >= 18:
+    print("Maior de idade")
+elif idade == 17:
+    print("Quase lá!")
+else:
+    print("Menor de idade")</pre></div>
+ </div>
+
+ <p class="content-text"><b>3. Repetição com Condição</b> (while) — repete enquanto uma condição for verdadeira. Útil quando não sabemos quantas vezes vai repetir.</p>
+ <div class="info-grid">
+   <div class="info-box"><h4>Portugol</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">inteiro copos = 0
+enquanto (copos < 3) {
+  escreva("Colocando água...")
+  copos = copos + 1
+}</pre></div>
+   <div class="info-box"><h4>Python</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">copos = 0
+while copos < 3:
+    print("Colocando água...")
+    copos = copos + 1</pre></div>
+ </div>
+
+ <p class="content-text"><b>4. Repetição com Limite Definido</b> (for) — repete um número exato e conhecido de vezes.</p>
+ <div class="info-grid">
+   <div class="info-box"><h4>Portugol</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">para (inteiro i = 1; i <= 3; i++) {
+  escreva("Passo número ", i)
+}</pre></div>
+   <div class="info-box"><h4>Python</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">for i in range(1, 4):  # 1, 2, 3
+    print("Passo número", i)</pre></div>
+ </div>
+
+ <p class="content-text"><b>5. Listas / Vetores</b> (Arrays) — uma única variável que guarda um grupo de dados organizados.</p>
+ <div class="info-grid">
+   <div class="info-box"><h4>Portugol</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">cadeia compras[3] = {"Arroz","Feijão","Leite"}
+escreva(compras[0]) // Arroz</pre></div>
+   <div class="info-box"><h4>Python</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">compras = ["Arroz","Feijão","Leite"]
+print(compras[0])  # Arroz</pre></div>
+ </div>
+
+ <p class="content-text"><b>6. Funções</b> — blocos de código que realizam uma tarefa e podem ser chamados pelo nome a qualquer momento.</p>
+ <div class="info-grid">
+   <div class="info-box"><h4>Portugol</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">funcao saudar(cadeia nome) {
+  escreva("Olá, ", nome)
+}
+saudar("Lucas")</pre></div>
+   <div class="info-box"><h4>Python</h4><pre style="white-space:pre-wrap;font-family:monospace;font-size:.82rem;background:#f4f4f4;padding:.6rem;border-radius:4px">def saudar(nome):
+    print("Olá,", nome)
+
+saudar("Lucas")</pre></div>
+ </div>
+
+ <div class="subsection-title">🛠️ Resumo de Sintaxe (Para não esquecer)</div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">💬</span><h4>Textos (Strings)</h4><p>Sempre ficam entre aspas: "Texto".</p></div>
+   <div class="info-box"><span class="ico">↹</span><h4>Indentação (Python)</h4><p>Python não usa chaves {}. Ele usa 4 espaços de recuo (Tab) logo após os dois pontos ":" para mostrar o que está dentro do if ou do while.</p></div>
+ </div>
+
+ <div class="subsection-title">🧱 Explore: O Caminho de um Programa</div>
+ <p class="content-text">Clique em cada etapa e veja o que acontece desde a ideia no papel até o resultado aparecer na tela.</p>
+ <div id="idiag-m11"></div>
+
+ <div class="subsection-title">🎮 Jogo de Prática: Detetive do Código</div>
+ <p class="content-text">Leia o código Python de cada rodada e adivinhe o que ele imprime na tela. Teste sua lógica nas 7 rodadas abaixo!</p>
+ <div id="game-m11"></div>
+
+ <div class="subsection-title">🧩 Blockly Games — Pratique com Blocos</div>
+ <p class="content-text">O <b>Blockly Games</b> é uma plataforma gratuita e de código aberto, desenvolvida pelo Google, que ensina lógica de programação através de jogos com blocos (sem precisar digitar código) — ótima para fixar sequência, repetição e condição antes de partir para um código de verdade. Não possui indicação de idade: pode ser usada por qualquer pessoa.</p>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">🧩</span><h4>Quebra-cabeça</h4><p>Monta frases lógicas encaixando blocos — o primeiro contato com a ideia de "peças que se conectam".</p></div>
+   <div class="info-box"><span class="ico">🌀</span><h4>Labirinto</h4><p>Usa sequência e repetição (loops) para guiar um personagem até a saída.</p></div>
+   <div class="info-box"><span class="ico">🐦</span><h4>Pássaro</h4><p>Introduz condicionais (se/então) para o pássaro pegar o inseto certo.</p></div>
+   <div class="info-box"><span class="ico">🐢</span><h4>Tartaruga</h4><p>Desenha figuras geométricas dando comandos de movimento e ângulo.</p></div>
+   <div class="info-box"><span class="ico">🎬</span><h4>Filme</h4><p>Cria pequenas animações combinando formas e tempo.</p></div>
+   <div class="info-box"><span class="ico">🎵</span><h4>Música</h4><p>Compõe melodias simples usando blocos de notas e repetição.</p></div>
+ </div>
+ <div class="blockly-frame-wrap">
+   <div class="blockly-toolbar">
+     <span>🔗 blockly.games</span>
+     <a href="https://blockly.games/?lang=pt-br&ref=caiena.net" target="_blank" rel="noopener noreferrer" class="blockly-openbtn">Abrir em nova aba ↗</a>
+   </div>
+   <iframe class="blockly-iframe" src="https://blockly.games/?lang=pt-br&ref=caiena.net" title="Blockly Games" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+   <p class="blockly-note">⚠️ Alguns navegadores/redes bloqueiam a exibição de sites de terceiros dentro de uma janela como esta (é uma proteção de segurança do próprio site, não um erro desta página). Se a área acima aparecer em branco, clique em "Abrir em nova aba" para jogar normalmente — o link funciona do mesmo jeito.</p>
+ </div>
+
+ <div class="subsection-title">🖥️ Terminal de Prática — Seu Primeiro "Hello World"</div>
+ <p class="content-text">Chegou a hora de escrever seu primeiro programa! Este terminal <b>não é um interpretador real</b> — é um validador simples criado para este curso, que reconhece um subconjunto básico de comandos em Python e Portugol (exibir texto e criar variáveis) e explica em português o que der certo ou errado. Escolha a aba do idioma e clique em Executar.</p>
+ <div class="terminal-wrap">
+   <div class="terminal-tabs">
+     <button class="term-tab active" id="term-tab-python-m11" onclick="terminalSetMode('m11','python')" type="button">🐍 Python</button>
+     <button class="term-tab" id="term-tab-portugol-m11" onclick="terminalSetMode('m11','portugol')" type="button">📘 Portugol</button>
+   </div>
+   <textarea class="term-code" id="term-code-python-m11" spellcheck="false" style="display:block">print("Olá, mundo!")</textarea>
+   <textarea class="term-code" id="term-code-portugol-m11" spellcheck="false" style="display:none">escreva("Olá, mundo!")</textarea>
+   <div class="terminal-actions">
+     <button class="game-btn" onclick="terminalRun('m11')" type="button">▶️ Executar</button>
+     <button class="term-clear-btn" onclick="terminalClear('m11')" type="button">🧹 Limpar Tela</button>
+   </div>
+   <div class="terminal-output" id="term-output-m11"><span class="term-placeholder">A saída do seu programa vai aparecer aqui...</span></div>
+ </div>
+ <div class="info-grid">
+   <div class="info-box"><span class="ico">✅</span><h4>Dica</h4><p>Em Python, <code>print("A", "B")</code> imprime com um espaço entre os valores. Em Portugol, <code>escreva("A", "B")</code> NÃO coloca espaço — junte o texto manualmente se precisar.</p></div>
+   <div class="info-box"><span class="ico">🧪</span><h4>Experimente</h4><p>Tente criar uma variável (ex: <code>nome = "Ana"</code> em Python, ou <code>cadeia nome = "Ana"</code> em Portugol) e depois exiba ela com print/escreva.</p></div>
+ </div>`,
+ flashcards:[
+  {q:'O que é Programação?', a:'A criação de um conjunto de regras e comandos que o computador consegue ler e executar.'},
+  {q:'Por que dizemos que o computador "não tem iniciativa própria"?', a:'Porque ele é rápido e obediente, mas só executa exatamente o que foi programado, sem tomar decisões por conta própria.'},
+  {q:'O que é um Algoritmo?', a:'Uma sequência de passos lógicos para resolver um problema — como uma receita de bolo.'},
+  {q:'O que é Lógica de Programação?', a:'A forma de pensar de maneira estruturada para transformar um problema real em um algoritmo.'},
+  {q:'O que é uma Variável?', a:'Uma "caixa" na memória do computador usada para guardar informações temporárias.'},
+  {q:'O que é uma Linguagem de Programação?', a:'O "idioma" usado para se comunicar com o computador, como Python ou JavaScript.'},
+  {q:'O que é sintaxe?', a:'O conjunto de regras de escrita específicas de cada linguagem de programação.'},
+  {q:'Qual deve ser o primeiro foco de quem está aprendendo a programar?', a:'Aprender a pensar de forma lógica e resolver problemas passo a passo, antes de se preocupar com uma linguagem complexa.'},
+  {q:'Por que é recomendado aprender apenas uma linguagem por vez no início?', a:'Porque tentar aprender várias ao mesmo tempo pode confundir o iniciante.'},
+  {q:'Cite 2 linguagens recomendadas para quem está começando.', a:'Python e JavaScript.'},
+  {q:'O que uma estrutura condicional (if) permite ao computador fazer?', a:'Tomar decisões com base em uma condição, que pode ser verdadeira ou falsa.'},
+  {q:'Qual é a diferença entre while e for?', a:'O while repete enquanto uma condição for verdadeira (sem saber quantas vezes); o for repete um número exato e conhecido de vezes.'},
+  {q:'O que é uma Lista (Array/Vetor)?', a:'Uma única variável capaz de guardar um grupo organizado de vários dados.'},
+  {q:'Como se acessa o primeiro elemento de uma lista em Python?', a:'Usando o índice 0, como em compras[0].'},
+  {q:'O que é uma Função em programação?', a:'Um bloco de código que realiza uma tarefa específica e pode ser chamado pelo nome sempre que necessário.'},
+  {q:'Como o Python identifica o que está dentro de um bloco if ou while, sem usar chaves { }?', a:'Através da indentação: 4 espaços de recuo logo após os dois pontos (:).'},
+  {q:'Como devem ser escritos os textos (strings) dentro de um código?', a:'Sempre entre aspas, como em "Texto".'},
+  {q:'O que é Portugol?', a:'Uma pseudo-linguagem de programação escrita em português, usada para ensinar lógica antes de aprender uma linguagem real.'}
+ ],
+ vf:[
+  {t:'Programação é apenas digitar textos aleatórios que o computador entende sozinho.', v:false, e:'Programação é a criação de um conjunto de regras e comandos ESPECÍFICOS que o computador consegue ler e executar — não é aleatório.'},
+  {t:'Um algoritmo é uma sequência de passos lógicos para resolver um problema.', v:true, e:'Correto — assim como uma receita de bolo, com passos em uma ordem específica.'},
+  {t:'O computador tem iniciativa própria e pode decidir mudar sozinho as instruções que recebeu.', v:false, e:'O computador é obediente, mas NÃO tem iniciativa própria — ele só segue exatamente o que foi programado.'},
+  {t:'Uma variável funciona como uma "caixa" que guarda informações na memória do computador.', v:true, e:'Correto — é assim que uma variável é descrita nos conceitos básicos de programação.'},
+  {t:'É recomendado aprender várias linguagens de programação ao mesmo tempo para aprender mais rápido.', v:false, e:'O recomendado é focar em UMA linguagem por vez, pois aprender várias ao mesmo tempo pode confundir o iniciante.'},
+  {t:'O laço for é indicado quando sabemos exatamente quantas vezes queremos repetir algo.', v:true, e:'Correto — diferente do while, que repete enquanto uma condição for verdadeira, sem número fixo de repetições.'},
+  {t:'Em Python, o índice do primeiro elemento de uma lista é o número 1.', v:false, e:'Em Python (e na maioria das linguagens), o índice do primeiro elemento é 0, e não 1.'},
+  {t:'Uma função é um bloco de código que pode ser chamado várias vezes pelo nome, sem reescrever tudo de novo.', v:true, e:'Correto — essa é a grande vantagem de se usar funções.'},
+  {t:'O Python usa chaves { } para indicar o que está dentro de um bloco if ou while.', v:false, e:'O Python usa INDENTAÇÃO (espaços), não chaves. Chaves são usadas em outras linguagens, como no exemplo em Portugol.'},
+  {t:'Textos (strings) em programação devem ser escritos sempre entre aspas.', v:true, e:'Correto — como em "Olá Mundo", que aparece entre aspas no código.'}
+ ],
+ pblTitle:'Cenário: Criando um Sistema de Aprovação de Alunos',
+ pblText:'Você foi convidado a criar, usando lógica de programação, um pequeno sistema que decide automaticamente se um aluno está Aprovado, em Recuperação ou Reprovado, com base em sua nota final.',
+ pblTasks:[
+  'Escreva o algoritmo (em passos, no caderno) que decide entre "Aprovado" (nota ≥ 7), "Recuperação" (nota entre 5 e 6,9) e "Reprovado" (nota < 5).',
+  'Transforme esse algoritmo em código Python, usando if / elif / else.',
+  'Que nome de variável você usaria para guardar a nota do aluno? Justifique a escolha de um nome claro.',
+  'Se você precisasse repetir esse cálculo para 30 alunos de uma lista, qual estrutura de repetição (for ou while) você usaria, e por quê?'
+ ],
+ game:[
+  {code:'idade = 20\nif idade >= 18:\n    print("Maior de idade")\nelse:\n    print("Menor de idade")',
+   options:['Maior de idade','Menor de idade','Erro de sintaxe','20'], correct:0,
+   exp:'Como idade (20) é maior ou igual a 18, a condição do if é verdadeira, então o programa imprime "Maior de idade".'},
+  {code:'copos = 0\nwhile copos < 3:\n    print("Copo", copos)\n    copos = copos + 1',
+   options:['Imprime: Copo 0, Copo 1, Copo 2','Imprime: Copo 1, Copo 2, Copo 3','Repete para sempre (loop infinito)','Não imprime nada'], correct:0,
+   exp:'O laço começa com copos=0 e repete enquanto copos for menor que 3. Por isso imprime para 0, 1 e 2, parando quando copos chega a 3.'},
+  {code:'for i in range(1, 4):\n    print("Passo", i)',
+   options:['Passo 1, Passo 2, Passo 3','Passo 1, Passo 2, Passo 3, Passo 4','Passo 0, Passo 1, Passo 2','Dá erro de sintaxe'], correct:0,
+   exp:'range(1,4) gera os números 1, 2 e 3 — o número 4 NÃO é incluído. Por isso o resultado é "Passo 1", "Passo 2", "Passo 3".'},
+  {code:'compras = ["Arroz", "Feijão", "Leite"]\nprint(compras[0])',
+   options:['Arroz','Feijão','Leite','Erro, pois listas começam no índice 1'], correct:0,
+   exp:'Em Python, listas começam no índice 0. Por isso, compras[0] é o primeiro item da lista: "Arroz".'},
+  {code:'def saudar(nome):\n    print("Olá,", nome)\n\nsaudar("Ana")',
+   options:['Olá, Ana','saudar("Ana")','nome','Nada, pois falta chamar a função de novo'], correct:0,
+   exp:'A função saudar recebe "Ana" como parâmetro nome e, ao ser chamada com saudar("Ana"), imprime "Olá, Ana".'},
+  {code:'nota = 5\nif nota >= 7:\n    print("Aprovado")\nelif nota >= 5:\n    print("Recuperação")\nelse:\n    print("Reprovado")',
+   options:['Recuperação','Aprovado','Reprovado','Nenhuma das opções'], correct:0,
+   exp:'Como nota (5) não é maior ou igual a 7, o if é falso; mas 5 é maior ou igual a 5, então o elif é verdadeiro e imprime "Recuperação".'},
+  {code:'total = 0\nfor i in range(1, 4):\n    total = total + i\nprint(total)',
+   options:['6','3','10','Erro de sintaxe'], correct:0,
+   exp:'A cada volta do laço, total recebe a soma de si mesmo com i (1, depois 2, depois 3): 0+1=1, 1+2=3, 3+3=6. No final, imprime 6.'}
+ ]
+}
+];
+
+/* ===================== DIAGRAMAS INTERATIVOS DE CAMADAS ===================== */
+const layerDiagrams = {
+ m1:{ layers:[
+   {icon:'🔩', label:'Hardware', short:'A base física', color:'var(--blue)',
+    detail:'Tudo o que você pode tocar: processador, memória, teclado, tela. É a base que executa, de fato, todas as instruções do computador.'},
+   {icon:'🪟', label:'Sistema Operacional', short:'O gerente do sistema', color:'var(--primary)',
+    detail:'Organiza o hardware e permite que os programas funcionem — é a ponte entre a máquina e os softwares (ex: Windows, Linux).'},
+   {icon:'💿', label:'Softwares Aplicativos', short:'Os programas do dia a dia', color:'var(--orange)',
+    detail:'Os programas que usamos para tarefas específicas: navegador de internet, editor de texto, jogos, aplicativos de mensagem.'},
+   {icon:'🙋', label:'Usuário', short:'Quem usa tudo isso', color:'var(--accent)',
+    detail:'Você! É quem dá os comandos (cliques, digitação) e recebe os resultados processados por todas as camadas abaixo.'}
+ ]},
+ m3:{ layers:[
+   {icon:'🔌', label:'Firmware / BIOS', short:'O primeiro a rodar', color:'var(--purple)',
+    detail:'É o primeiro software executado, gravado diretamente no hardware. Ele inicializa a máquina antes mesmo do sistema operacional carregar.'},
+   {icon:'🪟', label:'Sistema Operacional', short:'Gerencia tudo', color:'var(--primary)',
+    detail:'Gerencia o hardware e dá suporte para todos os outros softwares funcionarem (Windows, Linux, macOS).'},
+   {icon:'🧹', label:'Utilitários de Sistema', short:'Ferramentas de manutenção', color:'var(--blue)',
+    detail:'Programas de apoio, como antivírus, compactadores de arquivo e ferramentas de limpeza/desfragmentação de disco.'},
+   {icon:'📝', label:'Aplicativos', short:'O que o usuário abre', color:'var(--orange)',
+    detail:'Os programas usados para tarefas específicas do dia a dia: editores de texto, planilhas, navegadores.'}
+ ]},
+ m4:{ layers:[
+   {icon:'🧠', label:'Kernel', short:'O núcleo do sistema', color:'var(--purple)',
+    detail:'Controla o hardware diretamente e gerencia processos, memória e permissões — é o "coração" do Windows.'},
+   {icon:'🔌', label:'Drivers', short:'Tradutores do hardware', color:'var(--blue)',
+    detail:'Pequenos programas que traduzem os comandos do Windows para cada peça de hardware específica (impressora, placa de vídeo, etc).'},
+   {icon:'🖥️', label:'Shell (Explorer)', short:'A interface gráfica', color:'var(--primary)',
+    detail:'A área de trabalho, as janelas, os ícones e a barra de tarefas — tudo o que você vê e clica na tela.'},
+   {icon:'💿', label:'Aplicativos', short:'O que você abre', color:'var(--orange)',
+    detail:'Os programas que o usuário abre por cima de tudo isso: Word, navegador, jogos, players de música.'}
+ ]},
+ m5:{ layers:[
+   {icon:'📥', label:'Entrada', short:'Dados chegam', color:'var(--blue)',
+    detail:'Teclado, mouse, scanner, microfone: levam informação do mundo real (sua ação) para dentro do computador.'},
+   {icon:'🧠', label:'Processamento', short:'CPU e RAM trabalham', color:'var(--purple)',
+    detail:'A CPU e a memória RAM recebem os dados de entrada e processam as instruções necessárias para gerar um resultado.'},
+   {icon:'📤', label:'Saída', short:'Resultado aparece', color:'var(--primary)',
+    detail:'Monitor, impressora, caixa de som: devolvem o resultado já processado de volta para você, em forma de imagem, papel ou som.'},
+   {icon:'🔄', label:'Híbridos', short:'Fazem os dois papéis', color:'var(--orange)',
+    detail:'Dispositivos que funcionam nos dois sentidos ao mesmo tempo, como telas touchscreen, impressoras multifuncionais e pendrives.'}
+ ]},
+ m6:{ layers:[
+   {icon:'🔢', label:'Teclas de Função (F1-F12)', short:'Ações especiais', color:'var(--blue)',
+    detail:'Executam ações que mudam de programa para programa. Ex: F5 geralmente atualiza uma página ou tela; F1 abre a Ajuda.'},
+   {icon:'🔤', label:'Teclado Alfanumérico', short:'Letras e números', color:'var(--primary)',
+    detail:'A área principal, com letras, números e símbolos — é onde você digita a maior parte do texto.'},
+   {icon:'🔢', label:'Teclado Numérico', short:'Números rápidos', color:'var(--orange)',
+    detail:'O bloco à direita do teclado, ideal para digitar números rapidamente quando a tecla Num Lock está ativada.'},
+   {icon:'⬆️', label:'Teclas de Navegação', short:'Mover sem o mouse', color:'var(--purple)',
+    detail:'Setas, Home, End, Page Up/Page Down: movem o cursor pelo texto ou pela tela sem precisar usar o mouse.'},
+   {icon:'⌨️', label:'Teclas Modificadoras', short:'A base dos atalhos', color:'var(--accent)',
+    detail:'Ctrl, Alt e Shift, quando combinadas com outras teclas, criam os atalhos do dia a dia, como Ctrl+C e Ctrl+V.'}
+ ]},
+ m7:{ layers:[
+   {icon:'💻', label:'Seu Computador/Navegador', short:'Você faz o pedido', color:'var(--blue)',
+    detail:'Você digita o endereço (URL) no navegador, que monta e envia um pedido (requisição) perguntando pela página.'},
+   {icon:'📡', label:'Roteador/Modem', short:'Sai da sua rede', color:'var(--primary)',
+    detail:'Recebe o pedido da sua rede local, seja por Wi-Fi ou cabo, e o envia para fora, em direção à internet.'},
+   {icon:'🏢', label:'Provedor de Internet (ISP)', short:'Encaminha pela rede', color:'var(--purple)',
+    detail:'A empresa que fornece sua internet encaminha a requisição pelos grandes links até encontrar o servidor correto.'},
+   {icon:'🖥️', label:'Servidor Web', short:'Onde o site mora', color:'var(--orange)',
+    detail:'O computador que guarda o site recebe o pedido, monta a página solicitada e prepara a resposta para devolver.'},
+   {icon:'🔄', label:'Resposta ao Navegador', short:'A página chega', color:'var(--accent)',
+    detail:'A resposta volta pelo mesmo caminho, em sentido inverso, e o navegador exibe a página na sua tela — tudo em poucos segundos.'}
+ ]},
+ m8:{ layers:[
+   {icon:'🔑', label:'Senhas Fortes e MFA', short:'A primeira barreira', color:'var(--blue)',
+    detail:'Dificulta o acesso indevido às suas contas. A autenticação em duas etapas (MFA) exige uma segunda confirmação além da senha.'},
+   {icon:'🛡️', label:'Antivírus', short:'Detecta ameaças', color:'var(--primary)',
+    detail:'Identifica e bloqueia arquivos maliciosos conhecidos antes que eles consigam causar dano ao sistema.'},
+   {icon:'🧱', label:'Firewall', short:'Controla o tráfego', color:'var(--purple)',
+    detail:'Controla o que entra e sai da rede, bloqueando conexões suspeitas vindas de fora.'},
+   {icon:'💾', label:'Backup', short:'Sua rede de segurança', color:'var(--orange)',
+    detail:'Garante que, mesmo que algo dê errado (como um ransomware), seus dados não sejam perdidos para sempre.'},
+   {icon:'🧠', label:'Usuário Consciente', short:'A camada mais importante', color:'var(--accent)',
+    detail:'Pensar antes de clicar em links suspeitos ou abrir anexos desconhecidos é o que evita a maioria dos ataques — nenhuma ferramenta substitui isso.'}
+ ]},
+ m9:{ layers:[
+   {icon:'📥', label:'Célula com a Nota', short:'O Excel lê o valor', color:'var(--blue)',
+    detail:'O Excel lê o valor guardado em uma célula, por exemplo, a nota do aluno armazenada em A4.'},
+   {icon:'❓', label:'Teste Lógico', short:'A condição é verificada', color:'var(--primary)',
+    detail:'A fórmula verifica se a condição é verdadeira, como em A4>=7 (a nota é maior ou igual a 7?).'},
+   {icon:'✅', label:'Se Verdadeiro', short:'Condição atendida', color:'var(--success)',
+    detail:'Se a condição for verdadeira, o Excel escreve o primeiro resultado definido na fórmula, como "Aprovado".'},
+   {icon:'❌', label:'Se Falso', short:'Condição não atendida', color:'var(--error)',
+    detail:'Se a condição não for atendida, o Excel escreve o segundo resultado definido na fórmula, como "Reprovado".'}
+ ]},
+ m10:{ layers:[
+   {icon:'💽', label:'Disco (C:)', short:'A raiz de tudo', color:'var(--blue)',
+    detail:'Representa o próprio HD ou SSD do computador — é o ponto de partida de toda a estrutura de pastas.'},
+   {icon:'📁', label:'Pasta Principal', short:'Uma grande gaveta', color:'var(--primary)',
+    detail:'Uma grande "gaveta" dentro do disco, usada para organizar arquivos por assunto, como "Documentos" ou "Trabalho".'},
+   {icon:'📂', label:'Subpasta', short:'Organiza ainda mais', color:'var(--orange)',
+    detail:'Uma gaveta menor dentro da pasta principal, para organizar ainda mais os arquivos, como "Trabalho/2026".'},
+   {icon:'📄', label:'Arquivo', short:'O item final', color:'var(--purple)',
+    detail:'O documento, imagem ou planilha em si — o item que realmente guarda a informação, dentro de toda essa estrutura.'}
+ ]},
+ m11:{ layers:[
+   {icon:'🧠', label:'Algoritmo', short:'A ideia organizada', color:'var(--blue)',
+    detail:'A ideia organizada em passos lógicos, ainda no papel ou na cabeça do programador — antes de qualquer código ser escrito.'},
+   {icon:'⌨️', label:'Código-Fonte', short:'A ideia em linguagem', color:'var(--primary)',
+    detail:'O algoritmo é escrito em uma linguagem de programação, como Python ou Portugol, seguindo a sintaxe de cada uma.'},
+   {icon:'⚙️', label:'Tradução', short:'Interpretador/Compilador', color:'var(--purple)',
+    detail:'Um interpretador ou compilador transforma o código-fonte em instruções que o processador realmente entende.'},
+   {icon:'🖥️', label:'Execução', short:'O resultado aparece', color:'var(--orange)',
+    detail:'O computador executa as instruções traduzidas e mostra o resultado na tela — como o "Olá, mundo!" do seu primeiro programa.'}
+ ]}
+};
+
+function renderLayerDiagram(mid, data){
+  const el = document.getElementById('idiag-'+mid);
+  if(!el || !data) return;
+  el.innerHTML = '<div class="layerdiagram"><div class="layerdiagram-stack" id="ldstack-'+mid+'"></div>'
+    + '<div class="layerdiagram-detail" id="lddetail-'+mid+'"><p class="content-text">👆 Clique em uma camada ao lado para ver os detalhes.</p></div></div>';
+  const stack = document.getElementById('ldstack-'+mid);
+  data.layers.forEach((layer, i)=>{
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'layer-btn';
+    btn.style.setProperty('--layer-color', layer.color || 'var(--primary)');
+    btn.innerHTML = '<span class="layer-num">'+(i+1)+'</span><span class="layer-icon">'+layer.icon+'</span>'
+      + '<span><span class="layer-label">'+layer.label+'</span><span class="layer-short">'+layer.short+'</span></span>';
+    btn.onclick = function(){ selectLayer(mid, i); };
+    stack.appendChild(btn);
+  });
+}
+
+function selectLayer(mid, i){
+  const data = layerDiagrams[mid];
+  if(!data) return;
+  const stack = document.getElementById('ldstack-'+mid);
+  stack.querySelectorAll('.layer-btn').forEach((b,idx)=> b.classList.toggle('active', idx===i));
+  const layer = data.layers[i];
+  document.getElementById('lddetail-'+mid).innerHTML = '<h4>'+layer.icon+' '+layer.label+'</h4><p class="content-text">'+layer.detail+'</p>';
+}
+
+/* ===================== DIAGRAMA COM HOTSPOTS (HARDWARE) ===================== */
+const hwHotspots = [
+ {id:1, top:'22%', left:'50%', label:'Placa-Mãe', detail:'A placa-mãe (motherboard) é o circuito que conecta e permite a comunicação entre todos os componentes do computador.'},
+ {id:2, top:'32%', left:'30%', label:'Processador (CPU)', detail:'É o "cérebro" do computador: executa as instruções e faz os cálculos necessários para tudo funcionar.'},
+ {id:3, top:'28%', left:'70%', label:'Memória RAM', detail:'Memória de trabalho, volátil (perde os dados quando o computador é desligado). Guarda temporariamente o que está em uso.'},
+ {id:4, top:'63%', left:'50%', label:'Armazenamento (HD/SSD)', detail:'Guarda os dados permanentemente. O HDD é um disco magnético mais lento; o SSD é memória flash, muito mais rápida.'},
+ {id:5, top:'85%', left:'78%', label:'Fonte de Alimentação', detail:'Converte a energia da tomada para o formato que cada componente do computador precisa para funcionar.'}
+];
+
+function renderHwHotspots(){
+  const wrap = document.getElementById('hw-hotspots-m2');
+  if(!wrap) return;
+  let html = '<div class="hw-hotspot-wrap"><div class="case-decor case-top"></div><div class="case-decor case-board"></div><div class="case-decor case-bay"></div>';
+  hwHotspots.forEach(h=>{
+    html += '<button type="button" class="hotspot-dot" style="top:'+h.top+';left:'+h.left+'" data-id="'+h.id+'" onclick="selectHotspot('+h.id+')">'+h.id+'</button>';
+  });
+  html += '</div><p class="hotspot-hint">Clique nos números para descobrir o que cada peça faz</p>'
+    + '<div class="hotspot-detail" id="hotspot-detail-m2"><p class="content-text">👆 Clique em um número no desenho para começar.</p></div>';
+  wrap.innerHTML = html;
+}
+
+function selectHotspot(id){
+  document.querySelectorAll('#hw-hotspots-m2 .hotspot-dot').forEach(b=> b.classList.toggle('active', parseInt(b.dataset.id)===id));
+  const h = hwHotspots.find(x=>x.id===id);
+  document.getElementById('hotspot-detail-m2').innerHTML = '<h4>🔩 '+h.label+'</h4><p class="content-text">'+h.detail+'</p>';
+}
+
+/* ===================== RENDERIZAÇÃO ===================== */
+function init(){
+  renderNavigation();
+  renderModules();
+  document.getElementById('moduleCounter').textContent = '1/' + modules.length;
+  showModule(modules[0].id);
+}
+
+function renderNavigation(){
+  const nav = document.getElementById('navContainer');
+  modules.forEach((m,i)=>{
+    const btn = document.createElement('button');
+    btn.className='nav-btn';
+    btn.innerHTML = `<span class="num">${i+1}</span>${m.title.split('.').slice(1).join('.').trim().split('—')[0].split('-')[0].trim()}`;
+    btn.onclick=()=>showModule(m.id);
+    nav.appendChild(btn);
+  });
+}
+
+function renderModules(){
+  const container = document.getElementById('modulesContainer');
+  modules.forEach(m=>{
+    const div = document.createElement('div');
+    div.className='module'; div.id=m.id;
+
+    let html = `
+      <div class="content-section">
+        <div class="module-header">
+          <span class="module-icon">${m.icon}</span>
+          <h2 class="section-title">${m.title}</h2>
+        </div>
+        <p class="module-intro">${m.intro}</p>
+        ${m.html}
+
+        <div class="activity-tabs">
+          <button class="activity-tab active" onclick="switchActivity(this,'flashcard')">📇 Flashcards (${m.flashcards.length})</button>
+          <button class="activity-tab" onclick="switchActivity(this,'pbl')">💡 PBL — Problema Real</button>
+          <button class="activity-tab" onclick="switchActivity(this,'vf')">✓/✗ Verdadeiro ou Falso (${m.vf.length})</button>
+          ${m.game ? `<button class="activity-tab" onclick="switchActivity(this,'game')">🎮 Jogo de Lógica (${m.game.length})</button>` : ''}
+        </div>
+
+        <div class="activity-content active" data-type="flashcard">
+          <p class="activity-count">Clique em cada card para revelar a resposta. Total: ${m.flashcards.length} cards.</p>
+          <div class="flashcard-container">
+            ${m.flashcards.map((c,i)=>`
+              <div class="flashcard" onclick="this.classList.toggle('revealed')">
+                <div class="flashcard-label">${i+1}/${m.flashcards.length}</div>
+                <div class="flashcard-question">${c.q}</div>
+                <div class="flashcard-answer">${c.a}</div>
+                <div class="flashcard-hint">👆 clique para revelar</div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="activity-content" data-type="pbl">
+          <div class="pbl-scenario">
+            <div class="pbl-title">🎯 ${m.pblTitle}</div>
+            <div class="pbl-text">${m.pblText}</div>
+            <div class="pbl-tasks">
+              ${m.pblTasks.map((t,i)=>`<div class="pbl-task"><span class="pbl-task-number">${i+1}.</span>${t}</div>`).join('')}
+            </div>
+            <div class="pbl-tip">✏️ <b>Dica:</b> resolva esta atividade no caderno antes de comparar com um colega. Justifique cada resposta com base no conteúdo estudado neste módulo.</div>
+          </div>
+        </div>
+
+        <div class="activity-content" data-type="vf">
+          <p class="activity-count">Leia cada afirmação, escolha Verdadeiro ou Falso e veja a justificativa. Total: ${m.vf.length} questões.</p>
+          <div class="vf-container">
+            ${m.vf.map((q,i)=>`
+              <div class="vf-question">
+                <div class="vf-question-text"><b>${i+1}.</b> ${q.t}</div>
+                <div class="vf-buttons">
+                  <button class="vf-btn vf-btn-true" onclick="responderVF(this,true,${q.v})">✓ Verdadeiro</button>
+                  <button class="vf-btn vf-btn-false" onclick="responderVF(this,false,${q.v})">✗ Falso</button>
+                </div>
+                <div class="vf-answer">
+                  <div class="vf-answer-label"></div>
+                  <div class="vf-answer-text">${q.e}</div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        ${m.game ? `<div class="activity-content" data-type="game"><div id="game-${m.id}"></div></div>` : ''}
+      </div>`;
+
+    div.innerHTML = html;
+    container.appendChild(div);
+    if(m.game) initGame(m);
+    if(layerDiagrams[m.id]) renderLayerDiagram(m.id, layerDiagrams[m.id]);
+    if(m.id==='m2') renderHwHotspots();
+  });
+}
+
+/* ===================== JOGO: DETETIVE DO CÓDIGO ===================== */
+function initGame(m){
+  const state = { round:0, score:0, answered:false };
+  renderGameRound(m, state);
+}
+
+function renderGameRound(m, state){
+  const box = document.getElementById('game-'+m.id);
+  const rounds = m.game;
+  if(state.round >= rounds.length){
+    box.innerHTML = `
+      <div class="game-result">
+        <div class="game-result-score">🏆 ${state.score} / ${rounds.length}</div>
+        <p class="content-text">${state.score===rounds.length ? 'Perfeito! Você entendeu muito bem a lógica dos códigos! 🎉' : state.score>=rounds.length/2 ? 'Muito bom! Releia as explicações das que errou e tente de novo.' : 'Continue praticando! Releia os exemplos do guia acima e tente novamente.'}</p>
+        <button class="game-btn" onclick="(function(){ const st={round:0,score:0,answered:false}; renderGameRound(modules.find(x=>x.id==='${m.id}'), st); })()">🔄 Jogar Novamente</button>
+      </div>`;
+    return;
+  }
+  const r = rounds[state.round];
+  box.innerHTML = `
+    <div class="game-card">
+      <div class="game-progress">Rodada ${state.round+1} de ${rounds.length} &nbsp;·&nbsp; Pontuação: ${state.score}</div>
+      <p class="content-text"><b>O que este código imprime?</b></p>
+      <pre class="game-code">${r.code.replace(/</g,'&lt;')}</pre>
+      <div class="game-options">
+        ${r.options.map((op,i)=>`<button class="game-opt-btn" data-i="${i}">${op}</button>`).join('')}
+      </div>
+      <div class="game-feedback"></div>
+    </div>`;
+
+  box.querySelectorAll('.game-opt-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(state.answered) return;
+      state.answered = true;
+      const chosen = parseInt(btn.dataset.i);
+      const correct = (chosen === r.correct);
+      if(correct) state.score++;
+      box.querySelectorAll('.game-opt-btn').forEach(b=>{
+        b.disabled = true;
+        if(parseInt(b.dataset.i) === r.correct) b.classList.add('opt-correct');
+        else if(b === btn) b.classList.add('opt-wrong');
+      });
+      const fb = box.querySelector('.game-feedback');
+      fb.innerHTML = `<div class="game-explain ${correct?'ok':'no'}">${correct?'✅ Certo!':'❌ Quase lá.'} ${r.exp}</div>
+                      <button class="game-btn" id="nextRoundBtn">Próxima rodada ➡️</button>`;
+      document.getElementById('nextRoundBtn').onclick = ()=>{
+        state.round++; state.answered=false;
+        renderGameRound(m, state);
+      };
+    });
+  });
+}
+
+/* ===================== TERMINAL DE PRÁTICA (PYTHON x PORTUGOL) ===================== */
+const termLang = {};
+const TERMINAL_TEMPLATES = {
+  python:  'print("Olá, mundo!")',
+  portugol:'escreva("Olá, mundo!")'
+};
+
+function terminalSetMode(mid, lang){
+  termLang[mid] = lang;
+  document.getElementById('term-tab-python-'+mid).classList.toggle('active', lang==='python');
+  document.getElementById('term-tab-portugol-'+mid).classList.toggle('active', lang==='portugol');
+  document.getElementById('term-code-python-'+mid).style.display = (lang==='python') ? 'block' : 'none';
+  document.getElementById('term-code-portugol-'+mid).style.display = (lang==='portugol') ? 'block' : 'none';
+}
+
+function terminalClear(mid){
+  const lang = termLang[mid] || 'python';
+  document.getElementById('term-code-'+lang+'-'+mid).value = TERMINAL_TEMPLATES[lang];
+  document.getElementById('term-output-'+mid).innerHTML = '<span class="term-placeholder">A saída do seu programa vai aparecer aqui...</span>';
+}
+
+function termSplitTopLevel(str, sep){
+  const args = [];
+  let cur = '', inS=false, inD=false;
+  for(let i=0;i<str.length;i++){
+    const c = str[i];
+    if(c === "'" && !inD) inS = !inS;
+    else if(c === '"' && !inS) inD = !inD;
+    if(c === sep && !inS && !inD){ args.push(cur); cur=''; }
+    else cur += c;
+  }
+  args.push(cur);
+  return args;
+}
+
+function termSplitArgs(str){
+  if(str.trim()==='') return [];
+  return termSplitTopLevel(str, ',').filter(a=>a.trim()!=='');
+}
+
+function termAvaliarExpressao(str, vars, lang){
+  str = str.trim();
+  if(str === '') throw new Error('Encontrei um valor vazio onde era esperado um texto, número ou variável.');
+  const partes = termSplitTopLevel(str, '+');
+  if(partes.length > 1 && partes.every(p=>p.trim()!=='')){
+    const valores = partes.map(p=>termAvaliarExpressao(p.trim(), vars, lang));
+    const algumaString = valores.some(v=>v.type==='string');
+    if(algumaString) return {type:'string', value: valores.map(v=>String(v.value)).join('')};
+    return {type:'number', value: valores.reduce((a,v)=>a+Number(v.value),0)};
+  }
+  if((str.startsWith('"') && str.endsWith('"') && str.length>=2) || (str.startsWith("'") && str.endsWith("'") && str.length>=2)){
+    return {type:'string', value: str.slice(1,-1)};
+  }
+  if(/^-?\d+(\.\d+)?$/.test(str)) return {type:'number', value: parseFloat(str)};
+  if(lang==='python'){
+    if(str==='True') return {type:'boolean', value:true};
+    if(str==='False') return {type:'boolean', value:false};
+  } else {
+    if(str==='verdadeiro') return {type:'boolean', value:true};
+    if(str==='falso') return {type:'boolean', value:false};
+  }
+  if(/^[a-zA-Z_]\w*$/.test(str)){
+    if(str in vars) return vars[str];
+    throw new Error('A variável "'+str+'" foi usada mas ainda não foi criada.');
+  }
+  throw new Error('Não entendi o valor "'+str+'". Use um texto entre aspas, um número, ou o nome de uma variável já criada.');
+}
+
+function termProcessarPython(line, vars, outputs){
+  let m = line.match(/^print\s*\((.*)\)$/);
+  if(m){
+    const vals = termSplitArgs(m[1]).map(a=>termAvaliarExpressao(a.trim(), vars, 'python'));
+    outputs.push(vals.map(v=>String(v.value)).join(' '));
+    return;
+  }
+  m = line.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+  if(m){
+    vars[m[1]] = termAvaliarExpressao(m[2].trim(), vars, 'python');
+    return;
+  }
+  throw new Error('Comando não reconhecido: "'+line+'". Em Python, use print(...) para exibir algo na tela ou nome = valor para criar uma variável.');
+}
+
+function termProcessarPortugol(line, vars, outputs){
+  let m = line.match(/^escreva\s*\((.*)\)$/);
+  if(m){
+    const vals = termSplitArgs(m[1]).map(a=>termAvaliarExpressao(a.trim(), vars, 'portugol'));
+    outputs.push(vals.map(v=>String(v.value)).join(''));
+    return;
+  }
+  m = line.match(/^(inteiro|real|cadeia|logico)\s+([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+  if(m){
+    vars[m[2]] = termAvaliarExpressao(m[3].trim(), vars, 'portugol');
+    return;
+  }
+  m = line.match(/^([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+  if(m){
+    if(!(m[1] in vars)) throw new Error('A variável "'+m[1]+'" foi usada sem ser declarada antes. Em Portugol, declare o tipo primeiro, por exemplo: inteiro '+m[1]+' = valor');
+    vars[m[1]] = termAvaliarExpressao(m[2].trim(), vars, 'portugol');
+    return;
+  }
+  throw new Error('Comando não reconhecido: "'+line+'". Em Portugol, use escreva(...) para exibir algo na tela ou tipo nome = valor (ex: inteiro idade = 10) para criar uma variável.');
+}
+
+function terminalRun(mid){
+  const lang = termLang[mid] || 'python';
+  const code = document.getElementById('term-code-'+lang+'-'+mid).value;
+  const outEl = document.getElementById('term-output-'+mid);
+  const lines = code.split('\n');
+  const vars = {};
+  const outputs = [];
+  let erro = null;
+
+  for(let i=0;i<lines.length;i++){
+    const lineNum = i+1;
+    const line = lines[i].trim();
+    if(line === '') continue;
+    if(lang==='python' && line.startsWith('#')) continue;
+    if(lang==='portugol' && line.startsWith('//')) continue;
+
+    const abre = (line.match(/\(/g)||[]).length;
+    const fecha = (line.match(/\)/g)||[]).length;
+    if(abre !== fecha){ erro = {linha:lineNum, msg:'Parênteses não fechados corretamente. Verifique se cada "(" tem um ")" correspondente.'}; break; }
+    const aspasD = (line.match(/"/g)||[]).length;
+    const aspasS = (line.match(/'/g)||[]).length;
+    if(aspasD % 2 !== 0 || aspasS % 2 !== 0){ erro = {linha:lineNum, msg:'Aspas não fechadas corretamente. Todo texto entre aspas precisa começar e terminar com o mesmo tipo de aspas.'}; break; }
+
+    try{
+      if(lang==='python') termProcessarPython(line, vars, outputs);
+      else termProcessarPortugol(line, vars, outputs);
+    }catch(e){
+      erro = {linha:lineNum, msg:e.message};
+      break;
+    }
+  }
+
+  let html = '';
+  outputs.forEach(o=>{ html += '<span class="term-line-ok">'+o.replace(/</g,'&lt;')+'</span>'; });
+  if(erro){
+    html += '<span class="term-line-error">❌ Erro na linha '+erro.linha+': '+erro.msg+'</span>';
+  } else if(outputs.length === 0){
+    html += '<span class="term-placeholder">⚠️ O programa rodou mas não gerou nenhuma saída (nenhum print/escreva encontrado).</span>';
+  } else {
+    html += '<span class="term-summary-ok">✅ Programa executado com sucesso!</span>';
+  }
+  outEl.innerHTML = html;
+}
+
+function showModule(id){
+  document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx = modules.findIndex(m=>m.id===id);
+  const btns = document.querySelectorAll('.nav-btn');
+  if(btns[idx]) btns[idx].classList.add('active');
+  document.getElementById('moduleCounter').textContent = (idx+1)+'/'+modules.length;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function switchActivity(btn,type){
+  const section = btn.closest('.content-section');
+  section.querySelectorAll('.activity-tab').forEach(b=>b.classList.remove('active'));
+  section.querySelectorAll('.activity-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  section.querySelector(`.activity-content[data-type="${type}"]`).classList.add('active');
+}
+
+function responderVF(btn, resposta, correta){
+  const q = btn.closest('.vf-question');
+  const isCorrect = (resposta === correta);
+  const answer = q.querySelector('.vf-answer');
+  const label = q.querySelector('.vf-answer-label');
+  answer.classList.add('show');
+  if(isCorrect){
+    answer.classList.add('correct'); answer.classList.remove('incorrect');
+    label.textContent = '✅ Você acertou! A afirmação é ' + (correta ? 'VERDADEIRA' : 'FALSA') + '.';
+  } else {
+    answer.classList.add('incorrect'); answer.classList.remove('correct');
+    label.textContent = '❌ Resposta incorreta. A afirmação é, na verdade, ' + (correta ? 'VERDADEIRA' : 'FALSA') + '.';
+  }
+  q.querySelectorAll('.vf-btn').forEach(b=>b.disabled=true);
+}
+
+init();
+</script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

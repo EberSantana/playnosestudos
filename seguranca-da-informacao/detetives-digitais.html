@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="UTF-8">
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&]professor\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Detetives Digitais · Segurança da Informação</title>
+<meta name="description" content="Treinamento interativo sobre desinformação, checagem de fatos, deepfakes e algoritmos — Prof. Eber Santana, IFS Tobias Barreto.">
+<style>
+/* ===== Design plan =====
+Layout: investigation-board app — sticky case-file header, a "desk" of module
+folders on the home screen, each module opens into four tabbed drawers
+(Caderno, Flashcards, PBL, V/F). Redaction-bar reveal motif ties the theme
+(evidence you uncover) to the pedagogy (answers revealed only after a try).
+*/
+:root{
+  --bg:#f4efe4; --bg-raised:#ffffff; --ink:#201a12; --ink-soft:#5b5040;
+  --line:#d8cdb4; --accent:#9b3b2e; --accent-ink:#ffffff;
+  --tag-true:#2f6b4f; --tag-false:#9b3b2e; --folder:#e4d8b8;
+  --shadow:0 2px 10px rgba(32,26,18,.12);
+  --font-display:'Special Elite',"Courier New",monospace;
+  --font-body:'Source Sans 3',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',"Courier New",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#191611; --bg-raised:#231e17; --ink:#f1e9d8; --ink-soft:#bcae8f;
+    --line:#3a3226; --accent:#e2795f; --accent-ink:#1a1410;
+    --tag-true:#5fb98a; --tag-false:#e2795f; --folder:#2b241a;
+    --shadow:0 2px 14px rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#191611; --bg-raised:#231e17; --ink:#f1e9d8; --ink-soft:#bcae8f;
+  --line:#3a3226; --accent:#e2795f; --accent-ink:#1a1410;
+  --tag-true:#5fb98a; --tag-false:#e2795f; --folder:#2b241a;
+  --shadow:0 2px 14px rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--font-body);
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  min-height:100%;
+}
+h1,h2,h3,.display{font-family:var(--font-display); text-wrap:balance; letter-spacing:.3px}
+.mono{font-family:var(--font-mono)}
+p{line-height:1.55}
+button{font-family:inherit}
+a{color:var(--accent)}
+
+body::before{
+  content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px);
+  z-index:20; background:var(--bg-raised);
+}
+header.app{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:15;
+  background:var(--bg-raised); border-bottom:2px solid var(--line);
+  padding-block:10px; margin-inline:-16px; padding-inline:16px;
+}
+header.app .row1{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+header.app .stamp{
+  width:34px; height:34px; border-radius:50%; border:2px solid var(--accent);
+  display:flex; align-items:center; justify-content:center; color:var(--accent);
+  font-family:var(--font-display); font-size:16px; flex:none;
+}
+header.app h1{font-size:19px; margin:0; line-height:1.1}
+header.app .sub{font-size:11px; color:var(--ink-soft); margin:2px 0 0}
+nav.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{
+  flex:none; background:none; border:1px solid var(--line); color:var(--ink-soft);
+  padding:7px 12px; border-radius:999px; font-size:12.5px; cursor:pointer;
+  white-space:nowrap;
+}
+nav.tabs button.active{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600}
+
+main{padding-block:18px 48px; max-width:720px; margin-inline:auto}
+.lede{font-size:14.5px; color:var(--ink-soft); margin-top:-4px}
+
+.deck{display:grid; gap:12px; margin-top:16px}
+.folder{
+  background:var(--folder); border:1px solid var(--line); border-radius:10px;
+  padding:14px 14px 14px 16px; box-shadow:var(--shadow); cursor:pointer;
+  display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
+  position:relative; overflow:hidden; text-align:left; width:100%; color:var(--ink);
+}
+.folder::before{
+  content:attr(data-num); position:absolute; right:10px; top:6px; font-family:var(--font-mono);
+  font-size:34px; font-weight:700; color:var(--accent); opacity:.14;
+}
+.folder h3{margin:0 0 4px; font-size:17px}
+.folder p{margin:0; font-size:12.5px; color:var(--ink-soft); max-width:46ch}
+.folder .meter{margin-top:8px; font-size:11px; color:var(--ink-soft)}
+.chev{font-size:20px; color:var(--accent)}
+
+.drawer-nav{display:flex; gap:6px; margin:14px 0 16px; flex-wrap:wrap}
+.drawer-nav button{
+  background:var(--bg-raised); border:1px solid var(--line); color:var(--ink);
+  padding:8px 13px; border-radius:8px; font-size:13px; cursor:pointer;
+}
+.drawer-nav button.active{border-color:var(--accent); color:var(--accent); font-weight:700}
+
+.back{background:none;border:none;color:var(--accent);font-size:13px;padding:0;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:4px}
+
+.card{background:var(--bg-raised); border:1px solid var(--line); border-radius:10px; padding:16px; box-shadow:var(--shadow)}
+.card + .card{margin-top:12px}
+.tagline{font-family:var(--font-mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin:0 0 6px}
+
+ol.activities{padding-left:20px; margin:0}
+ol.activities li{margin-bottom:14px; line-height:1.5}
+ol.activities li::marker{font-family:var(--font-mono); color:var(--accent); font-weight:700}
+
+.fc-wrap{perspective:1200px; margin-bottom:12px}
+.fc{
+  position:relative; min-height:118px; border-radius:10px; cursor:pointer;
+  transform-style:preserve-3d; transition:transform .5s;
+}
+.fc.flipped{transform:rotateY(180deg)}
+.fc-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:10px;
+  border:1px solid var(--line); padding:16px; display:flex; flex-direction:column;
+  justify-content:center; box-shadow:var(--shadow);
+}
+.fc-front{background:var(--bg-raised)}
+.fc-back{background:var(--accent); color:var(--accent-ink); transform:rotateY(180deg)}
+.fc-label{font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:1px; opacity:.7; margin-bottom:6px}
+.fc-term{font-family:var(--font-display); font-size:18px; margin:0}
+.fc-def{font-size:14px; margin:0; line-height:1.4}
+.fc-progress{font-size:11.5px; color:var(--ink-soft); margin-bottom:10px; display:flex; justify-content:space-between}
+.fc-controls{display:flex; justify-content:space-between; margin-top:12px; gap:10px}
+.fc-controls button{
+  flex:1; background:var(--bg-raised); border:1px solid var(--line); color:var(--ink);
+  padding:10px; border-radius:8px; font-size:13px; cursor:pointer;
+}
+
+.pbl-brief{border-left:3px solid var(--accent); padding-left:12px; margin:10px 0 16px; font-size:14.5px}
+.pbl-q{background:var(--bg-raised); border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:10px; font-size:14px}
+.pbl-q .num{font-family:var(--font-mono); color:var(--accent); font-weight:700; margin-right:6px}
+
+.vf-score{display:flex; gap:14px; align-items:center; margin-bottom:14px; font-family:var(--font-mono); font-size:13px}
+.vf-score .big{font-size:22px; font-weight:700; color:var(--accent)}
+.vf-q{background:var(--bg-raised); border:1px solid var(--line); border-radius:10px; padding:14px; margin-bottom:12px}
+.vf-q .stmt{font-size:14.5px; margin:0 0 10px; line-height:1.45}
+.vf-btns{display:flex; gap:8px}
+.vf-btns button{
+  flex:1; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--bg);
+  color:var(--ink); font-size:13.5px; font-weight:600; cursor:pointer;
+}
+.vf-btns button[data-choice="true"]{border-color:var(--tag-true)}
+.vf-btns button[data-choice="false"]{border-color:var(--tag-false)}
+.vf-reveal{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:13.5px; display:none}
+.vf-reveal.show{display:block}
+.vf-reveal .verdict{font-family:var(--font-mono); font-weight:700; letter-spacing:.5px; display:inline-block; padding:2px 8px; border-radius:4px; margin-bottom:6px; font-size:11.5px}
+.vf-reveal.correct .verdict{background:var(--tag-true); color:#fff}
+.vf-reveal.incorrect .verdict{background:var(--tag-false); color:#fff}
+.vf-reset{margin-top:6px; background:none; border:1px solid var(--accent); color:var(--accent); padding:10px 16px; border-radius:8px; font-size:13px; cursor:pointer}
+
+.tools-cat h3{font-size:15px; margin:20px 0 8px; display:flex; align-items:center; gap:8px}
+.tools-cat h3:first-child{margin-top:4px}
+.tool{background:var(--bg-raised); border:1px solid var(--line); border-radius:9px; padding:11px 13px; margin-bottom:8px}
+.tool a{font-weight:700; font-size:14px; text-decoration:none; display:block; margin-bottom:3px}
+.tool p{margin:0; font-size:12.5px; color:var(--ink-soft)}
+
+.plan-row{display:grid; grid-template-columns:auto 1fr; gap:10px; padding:10px 0; border-bottom:1px solid var(--line)}
+.plan-row:last-child{border-bottom:none}
+.plan-row .when{font-family:var(--font-mono); font-size:12px; color:var(--accent); white-space:nowrap; padding-top:2px}
+.plan-row .what b{display:block; font-size:14px; margin-bottom:2px}
+.plan-row .what p{margin:0; font-size:12.5px; color:var(--ink-soft)}
+
+.obj-list{padding-left:18px; margin:0; font-size:13.5px}
+.obj-list li{margin-bottom:6px}
+
+footer.note{font-size:11.5px; color:var(--ink-soft); text-align:center; margin-top:30px; padding-bottom:10px}
+.topback{display:inline-block; font-size:12.5px; color:var(--accent); text-decoration:none; margin:10px 0 2px}
+.topback:hover{text-decoration:underline}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<script src="../aparencia.js"></script>
+</head>
+<body>
+
+<header class="app">
+  <div class="row1">
+    <div class="stamp">DD</div>
+    <div>
+      <h1>Detetives Digitais</h1>
+      <p class="sub">Treinamento de letramento digital &amp; combate à desinformação</p>
+    </div>
+  </div>
+  <nav class="tabs" id="mainTabs"></nav>
+</header>
+
+<nav aria-label="Voltar"><a class="topback" href="./" style="margin-left:0">&larr; Segurança da Informação</a></nav>
+<main id="main"></main>
+
+<footer class="note">Prof. Eber Santana · IFS Campus Tobias Barreto — material de apoio para uso em sala de aula.</footer>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- DATA ---------- */
+
+var modules = [
+  {
+    id:"desinformacao", num:"01", title:"O que é Desinformação",
+    blurb:"Conceitos-base: desinformação, misinformação, malinformação e os sinais de alerta de uma notícia falsa.",
+    caderno:[
+      "Defina com suas palavras <b>desinformação</b>, <b>informação errônea</b> (misinformation) e <b>malinformação</b>. Dê um exemplo real de cada tipo que você já viu circular numa rede social ou grupo de família.",
+      "Escolha uma notícia que apareceu no seu WhatsApp ou feed nesta semana. Liste por escrito 3 sinais de alerta que ela apresenta (título sensacionalista, fonte desconhecida, falta de data, etc.).",
+      "Monte uma linha do tempo de como uma fake news costuma 'viajar': da criação até o compartilhamento em massa. Use pelo menos 5 etapas, com setas."
+    ],
+    flashcards:[
+      ["Desinformação","Conteúdo falso criado e espalhado de propósito, com intenção clara de enganar."],
+      ["Informação errônea (misinformation)","Conteúdo falso compartilhado sem intenção de enganar — quem espalha acredita que é verdade."],
+      ["Malinformação","Informação verdadeira usada fora de contexto para causar dano, como um vazamento de dados privados."],
+      ["Fake news","Termo popular e impreciso; pesquisadores preferem o termo 'desinformação', mais específico."],
+      ["Viés de confirmação","Tendência de acreditar com mais facilidade em informações que já confirmam o que a pessoa pensa."],
+      ["Clickbait","Título exagerado criado só para gerar cliques, nem sempre fiel ao conteúdo da matéria."],
+      ["Deepfake","Mídia — vídeo, áudio ou imagem — manipulada por inteligência artificial para parecer real."],
+      ["Bulo","Sinônimo de boato: informação falsa espalhada boca a boca ou pela internet."],
+      ["Checagem de fatos","Processo de verificar se uma informação é verdadeira antes de compartilhar ou publicar."],
+      ["Fonte primária","Origem original de uma informação — quem viveu, registrou ou presenciou o fato."],
+      ["Astroturfing","Simular um apoio popular espontâneo que, na verdade, é organizado ou pago."],
+      ["Infodemia","Excesso de informação, verdadeira e falsa, que dificulta encontrar fontes confiáveis — termo usado pela OMS."]
+    ],
+    pbl:{
+      scenario:"Você é editor(a) do jornal escolar e recebe, uma hora antes do fechamento da edição, uma denúncia anônima sobre a merenda da escola — com uma foto chocante anexada.",
+      questions:[
+        "Quais as três primeiras perguntas que você faria antes de considerar publicar essa denúncia?",
+        "Como você verificaria se a foto é realmente daquela escola e daquele dia?",
+        "A quem, dentro ou fora da escola, você recorreria para confirmar a informação?",
+        "O que fazer se não for possível confirmar tudo a tempo do fechamento da edição?",
+        "Se a notícia for publicada e depois se revelar falsa, como você redigiria uma nota de retratação?"
+      ]
+    },
+    vf:[
+      ["Toda notícia falsa é compartilhada por pessoas mal-intencionadas.",false,"A maioria das pessoas compartilha por engano — é misinformation, não desinformação: elas acreditam que é verdade."],
+      ["Desinformação é, por definição, criada de propósito para enganar.",true,"É exatamente essa intenção de enganar que diferencia desinformação de um simples erro."],
+      ["Fotos verdadeiras não podem ser usadas para desinformar.",false,"Podem ser tiradas de contexto — isso é malinformação — e causar o mesmo dano que uma foto falsa."],
+      ["Quanto mais uma notícia é compartilhada, mais verdadeira ela é.",false,"Viralidade não é critério de veracidade; conteúdo falso costuma até viralizar mais rápido que o verdadeiro."],
+      ["O viés de confirmação afeta só pessoas com pouca escolaridade.",false,"É um viés cognitivo universal: afeta qualquer pessoa, inclusive especialistas e jornalistas."],
+      ["Títulos em letras maiúsculas e com muitas exclamações são sinal de alerta.",true,"É uma técnica clássica de sensacionalismo e clickbait, usada para gerar reação emocional rápida."],
+      ["Se uma notícia tem muitas curtidas e comentários, pode-se confiar nela.",false,"Engajamento é moldado por algoritmos e até por bots — não garante que o conteúdo seja verdadeiro."],
+      ["A OMS usou o termo 'infodemia' durante a pandemia de Covid-19.",true,"A Organização Mundial da Saúde popularizou o termo para descrever o excesso de informação, verdadeira e falsa, sobre a doença."],
+      ["Checar a data de publicação de uma notícia é irrelevante.",false,"Notícias antigas são frequentemente recicladas e reapresentadas fora do contexto original."],
+      ["Sites com domínio .com.br são sempre confiáveis.",false,"O domínio não garante, por si só, a credibilidade da fonte."],
+      ["Um print de tela sem link de origem é um sinal de alerta.",true,"Sem link, fica impossível checar a fonte original — isso costuma esconder uma informação duvidosa."],
+      ["Astroturfing é uma técnica legítima de marketing orgânico.",false,"É uma simulação artificial de apoio popular, considerada antiética por esconder quem está por trás da ação."],
+      ["Memes nunca podem ser veículo de desinformação.",false,"Memes espalham desinformação de forma rápida e informal, muitas vezes passando despercebidos."],
+      ["Checar múltiplas fontes independentes reduz o risco de cair em desinformação.",true,"Cruzar fontes diferentes é uma das defesas mais eficazes contra conteúdo falso."],
+      ["Conteúdo que gera forte emoção costuma ser compartilhado com menos reflexão.",true,"Raiva, medo e indignação aceleram o compartilhamento, muitas vezes antes de qualquer checagem."]
+    ]
+  },
+  {
+    id:"checagem", num:"02", title:"Checagem de Fatos",
+    blurb:"Métodos e agências de fact-checking: como verificar uma informação antes de compartilhar ou publicar.",
+    caderno:[
+      "Escolha uma notícia atual e aplique por escrito o método <b>SIFT</b> (Pare, Investigue a fonte, busque melhor cobertura, rastreie a origem).",
+      "Visite um site de fact-checking brasileiro (Aos Fatos, Agência Lupa, Comprova ou Fato ou Fake) e resuma, em um parágrafo, uma checagem publicada nesta semana.",
+      "Crie um checklist pessoal com 5 perguntas que você vai se fazer antes de compartilhar qualquer notícia a partir de agora."
+    ],
+    flashcards:[
+      ["SIFT","Método de checagem rápida: Pare, Investigue a fonte, busque (Find) melhor cobertura, rastreie (Trace) a origem da afirmação."],
+      ["Busca reversa de imagem","Técnica para descobrir onde e quando uma imagem já apareceu na internet."],
+      ["Google Fact Check Explorer","Ferramenta do Google que reúne checagens já feitas por agências parceiras no mundo todo."],
+      ["TinEye","Buscador de imagens reversas: mostra onde e quando uma foto já foi publicada antes."],
+      ["Aos Fatos","Agência brasileira pioneira em fact-checking, fundada em 2015."],
+      ["Agência Lupa","Primeira agência de fact-checking do Brasil, parte do Núcleo Jornalismo."],
+      ["Comprova","Coalizão de veículos de imprensa brasileiros que checa desinformação em eleições e crises."],
+      ["Fato ou Fake","Projeto de checagem de fatos mantido pelo Grupo Globo."],
+      ["Agência Pública","Agência de jornalismo investigativo brasileira que também produz checagens."],
+      ["e-farsas","Um dos primeiros sites brasileiros dedicados a checar boatos, no ar desde os anos 2000."],
+      ["IFCN","Rede internacional (International Fact-Checking Network) que certifica agências seguindo um código de princípios."],
+      ["Selo de verificação","Marca usada por uma agência para indicar que confirmou ou desmentiu oficialmente um conteúdo."]
+    ],
+    pbl:{
+      scenario:"Em período eleitoral, circula no grupo de WhatsApp da família um áudio dizendo que um candidato vai confiscar a poupança. Sua avó já está se arrumando para sacar o dinheiro no banco.",
+      questions:[
+        "Como você conversaria com sua avó sem fazer ela se sentir mal por ter acreditado no áudio?",
+        "Em quais sites brasileiros de checagem você procuraria essa informação primeiro?",
+        "Que palavras-chave você usaria para buscar se essa afirmação já foi checada por alguma agência?",
+        "Como explicar, de forma simples, por que um áudio anônimo não é prova de nada?",
+        "E se a checagem demorar e a decisão precisar ser tomada logo — por exemplo, ela já está na fila do banco — o que fazer?"
+      ]
+    },
+    vf:[
+      ["O método SIFT recomenda parar antes de reagir ou compartilhar algo.",true,"Esse é justamente o primeiro passo do método: Stop — parar antes de qualquer reação."],
+      ["A Agência Lupa foi a primeira agência de fact-checking do Brasil.",true,"A Lupa é considerada pioneira no fact-checking organizado no país."],
+      ["Busca reversa de imagem só funciona com o Google.",false,"Existem várias ferramentas, como TinEye e outros buscadores de imagem, além do Google Lens."],
+      ["O Comprova atua principalmente em períodos de eleições e crises.",true,"É uma coalizão de veículos criada justamente para reforçar a checagem nesses momentos críticos."],
+      ["Qualquer site pode se autodeclarar 'agência de fact-checking' sem nenhum critério.",false,"Redes como a IFCN exigem um código de princípios e processo de verificação para certificar agências."],
+      ["É possível checar um áudio viral de WhatsApp, não só textos ou imagens.",true,"Existem ferramentas e agências especializadas também em verificar áudios que circulam em aplicativos de mensagem."],
+      ["Se uma checagem oficial ainda não saiu sobre um boato, isso prova que ele é verdadeiro.",false,"A ausência de checagem só significa que ainda não foi verificado — não é prova de veracidade."],
+      ["O e-farsas existe desde os anos 2000.",true,"É um dos pioneiros brasileiros na checagem de boatos online."],
+      ["Fato ou Fake é um projeto de checagem ligado ao Grupo Globo.",true,"O projeto é mantido pela emissora e seus veículos associados."],
+      ["A Agência Pública só publica reportagens, nunca faz checagens.",false,"Além de jornalismo investigativo, a Agência Pública também produz conteúdo de checagem."],
+      ["Ferramentas de checagem só podem ser usadas por jornalistas profissionais.",false,"Qualquer pessoa pode usar essas ferramentas gratuitamente."],
+      ["Uma notícia pode ser parcialmente verdadeira e parcialmente falsa.",true,"Por isso agências usam classificações como 'impreciso' ou 'fora de contexto', além de verdadeiro/falso."],
+      ["Comparar várias fontes jornalísticas independentes é parte do método SIFT.",true,"Esse é o passo 'Find better coverage' — buscar cobertura melhor e comparar fontes."],
+      ["A checagem de fatos é uma invenção recente, criada só depois das redes sociais.",false,"O jornalismo de verificação existe há décadas; o fact-checking organizado cresceu, mas não nasceu com as redes."],
+      ["Depois que uma notícia é desmentida, ela costuma parar de circular imediatamente.",false,"Conteúdo desmentido frequentemente continua circulando — é o chamado efeito de 'ilusão de verdade'."]
+    ]
+  },
+  {
+    id:"deepfake", num:"03", title:"Deepfakes e Imagens Manipuladas",
+    blurb:"Como mídias sintéticas são criadas, que sinais denunciam manipulação e quais ferramentas ajudam a investigar.",
+    caderno:[
+      "Pesquise um caso real de deepfake (vídeo, áudio ou imagem) que viralizou. Descreva o que aconteceu e qual foi o impacto.",
+      "Liste por escrito 5 sinais visuais que podem indicar que uma imagem ou vídeo foi manipulado por IA.",
+      "Simule, em texto, como você explicaria a um familiar mais velho o que é um deepfake, usando uma analogia do dia a dia."
+    ],
+    flashcards:[
+      ["Deepfake","Vídeo, áudio ou imagem sintética gerada por IA para fazer parecer que uma pessoa real disse ou fez algo que nunca aconteceu."],
+      ["GAN (Rede Adversarial Generativa)","Tecnologia de IA em que duas redes neurais competem entre si para gerar imagens cada vez mais realistas."],
+      ["Imagem sintética","Imagem inteira gerada por IA (ex: Midjourney, DALL-E), sem partir de uma foto real."],
+      ["Edição fora de contexto","Foto real, mas usada com legenda, data ou local errados para enganar quem vê."],
+      ["Metadados (EXIF)","Dados escondidos num arquivo de imagem — data, local, câmera usada — que ajudam a verificar sua origem."],
+      ["Artefato visual","Pequena falha ou inconsistência (mãos estranhas, sombra errada, piscar irregular) que pode denunciar manipulação por IA."],
+      ["FotoForensics","Ferramenta online que analisa a compressão de uma imagem (ELA) para apontar áreas possivelmente editadas."],
+      ["Forensically","Conjunto de ferramentas forenses gratuitas para analisar fotos em busca de sinais de manipulação."],
+      ["Clonagem de voz","Técnica de IA que recria a voz de uma pessoa a partir de poucos segundos de áudio original."],
+      ["Marca de conteúdo sintético","Identificação, visível ou nos metadados, que indica que um conteúdo foi gerado por IA."],
+      ["C2PA","Padrão técnico (Coalition for Content Provenance and Authenticity) para registrar a origem e o histórico de edição de uma mídia."],
+      ["Hive Moderation","Serviço online que ajuda a estimar a probabilidade de uma imagem ter sido gerada por IA."]
+    ],
+    pbl:{
+      scenario:"Um vídeo circula mostrando um professor da sua escola dizendo algo ofensivo em sala de aula. O vídeo parece real, mas o professor nega ter dito aquilo.",
+      questions:[
+        "Que detalhes técnicos você observaria no vídeo — boca, piscar de olhos, iluminação, áudio?",
+        "Como você faria uma busca reversa de um quadro (frame) do vídeo para ver se ele já apareceu em outro contexto?",
+        "Quem na escola deveria ser informado antes de qualquer decisão ser tomada com base no vídeo?",
+        "Que ferramentas vocês poderiam usar juntos para tentar confirmar se o vídeo é autêntico?",
+        "Mesmo sem certeza absoluta, qual atitude é mais responsável — compartilhar, denunciar ou aguardar apuração? Justifique."
+      ]
+    },
+    vf:[
+      ["Deepfakes só podem ser feitos a partir de vídeos, nunca de áudio.",false,"A clonagem de voz é um tipo de deepfake de áudio, cada vez mais usado em golpes."],
+      ["GANs usam duas redes neurais competindo entre si para gerar imagens realistas.",true,"Uma rede gera imagens e a outra tenta identificar se são falsas — essa disputa melhora o resultado."],
+      ["É sempre fácil identificar um deepfake a olho nu.",false,"Deepfakes avançados podem ser muito difíceis de detectar sem ferramentas especializadas."],
+      ["Mãos e dedos com formato estranho são um sinal clássico de imagem gerada por IA.",true,"Embora os modelos tenham melhorado bastante nisso, ainda é um dos erros mais comuns a se checar."],
+      ["Metadados (EXIF) de uma imagem podem ajudar a verificar quando e onde ela foi tirada.",true,"Quando preservados, esses dados são uma pista valiosa sobre a origem real do arquivo."],
+      ["Uma foto real usada com legenda falsa não é considerada desinformação.",false,"É um tipo muito comum de desinformação: o conteúdo fora de contexto engana tanto quanto uma foto falsa."],
+      ["O padrão C2PA tenta registrar a origem e as edições de um conteúdo digital.",true,"É uma iniciativa da indústria para dar mais rastreabilidade a fotos e vídeos."],
+      ["Ferramentas como FotoForensics podem apontar áreas com compressão diferente, sugerindo edição.",true,"A análise de níveis de erro (ELA) ajuda a visualizar partes da imagem que foram alteradas."],
+      ["Toda imagem gerada por IA é obrigatoriamente marcada com uma marca d'água visível.",false,"Nem toda ferramenta aplica isso, e marcas d'água podem ser removidas ou ausentes."],
+      ["Clonar uma voz por IA exige horas de gravação da pessoa original.",false,"Alguns sistemas conseguem gerar uma clonagem convincente a partir de poucos segundos de áudio."],
+      ["Mesmo um deepfake bem feito pode ser contestado checando a fonte e o contexto, não só a imagem.",true,"De onde veio o vídeo e quem o publicou primeiro são pistas tão importantes quanto a análise técnica."],
+      ["Vídeos deepfake já foram usados em golpes financeiros, se passando por executivos de empresas.",true,"Há casos documentados de fraudes bem-sucedidas usando voz e imagem sintéticas de executivos."],
+      ["Se um vídeo está em alta resolução, pode-se confiar nele sem checar a fonte.",false,"Qualidade técnica não garante autenticidade — a checagem da origem continua necessária."],
+      ["Denunciar e aguardar apuração costuma ser mais responsável do que compartilhar algo suspeito sem confirmação.",true,"Evita ampliar um possível dano antes que a veracidade seja esclarecida."],
+      ["Ferramentas de detecção de deepfake são 100% precisas.",false,"São um apoio útil, mas erram; a checagem humana de fonte e contexto continua essencial."]
+    ]
+  },
+  {
+    id:"algoritmos", num:"04", title:"Como os Algoritmos Funcionam",
+    blurb:"Recomendação, engajamento, bolhas de filtro e câmaras de eco: por que cada feed é diferente.",
+    caderno:[
+      "Observe seu feed de uma rede social por 10 minutos. Anote que tipo de conteúdo aparece mais e tente explicar por quê.",
+      "Explique com suas palavras a diferença entre <b>bolha de filtro</b> e <b>câmara de eco</b>.",
+      "Desenhe um esquema simples de como você imagina que um algoritmo de recomendação decide o que te mostrar."
+    ],
+    flashcards:[
+      ["Algoritmo de recomendação","Sistema que decide automaticamente qual conteúdo mostrar a cada pessoa, com base nos seus dados de comportamento."],
+      ["Engajamento","Métrica — curtidas, comentários, tempo de tela, compartilhamentos — usada pelas plataformas para medir o sucesso de um conteúdo."],
+      ["Bolha de filtro","Efeito em que o algoritmo só mostra conteúdo parecido com o que você já consome, isolando de outras visões."],
+      ["Câmara de eco","Ambiente social — não só algorítmico — em que só se ouvem opiniões parecidas com as próprias, reforçando crenças."],
+      ["Rastreamento de comportamento","Coleta de dados sobre cliques, tempo de visualização e interações para personalizar o feed."],
+      ["Viralização","Crescimento rápido e exponencial do alcance de um conteúdo, favorecido por reações emocionais fortes."],
+      ["Shadowban","Redução informal e não anunciada do alcance de um conteúdo ou perfil, sem aviso ao usuário."],
+      ["Personalização","Processo de adaptar o conteúdo mostrado a cada pessoa com base no seu histórico de uso."],
+      ["Caixa-preta algorítmica","Expressão usada quando não se sabe exatamente como um algoritmo toma suas decisões."],
+      ["Conteúdo orgânico x patrocinado","Diferença entre o conteúdo que aparece naturalmente e o que é pago para aparecer — anúncio."],
+      ["Polarização","Afastamento de opiniões para extremos opostos, intensificado por bolhas e câmaras de eco."],
+      ["Letramento algorítmico","Capacidade de entender como algoritmos influenciam o que vemos, para tomar decisões mais conscientes sobre isso."]
+    ],
+    pbl:{
+      scenario:"Você percebe que seu feed está cada vez mais tomado por conteúdo extremo sobre um assunto que te interessou há poucas semanas — e amigos com interesses diferentes veem coisas completamente diferentes.",
+      questions:[
+        "Por que o algoritmo tende a mostrar conteúdo cada vez mais extremo sobre o mesmo assunto?",
+        "Que ações práticas você pode tomar nas configurações do aplicativo para 'sair' um pouco da bolha de filtro?",
+        "Como isso pode afetar uma conversa entre você e um amigo que vê um feed completamente diferente do seu?",
+        "As plataformas têm alguma responsabilidade sobre o que o algoritmo prioriza mostrar? Por quê?",
+        "Como equilibrar o uso de redes sociais sabendo que o algoritmo quer prender sua atenção o máximo de tempo possível?"
+      ]
+    },
+    vf:[
+      ["Algoritmos de redes sociais mostram o conteúdo em ordem cronológica, do mais recente ao mais antigo.",false,"A maioria usa algoritmos de recomendação baseados em engajamento, não a ordem de publicação."],
+      ["Conteúdo que gera forte reação emocional tende a ser mais promovido pelos algoritmos.",true,"Emoções intensas, como raiva e indignação, aumentam o engajamento — e por isso costumam ser favorecidas."],
+      ["Bolha de filtro e câmara de eco são exatamente a mesma coisa.",false,"Bolha de filtro é um efeito algorítmico; câmara de eco é também um efeito social, de quem você escolhe seguir."],
+      ["Shadowban significa que a plataforma sempre avisa claramente quando reduz o alcance de um perfil.",false,"Normalmente não há aviso explícito — por isso o termo 'shadow' (sombra)."],
+      ["É possível influenciar o que o algoritmo mostra ajustando suas próprias interações.",true,"Curtidas, tempo de tela e o que você segue ou silencia moldam as próximas recomendações."],
+      ["Todo conteúdo patrocinado deveria ser identificado como anúncio nas plataformas.",true,"É uma exigência de transparência, ainda que a identificação às vezes seja discreta."],
+      ["Algoritmos de recomendação são neutros e não têm nenhum viés.",false,"Refletem escolhas de design feitas por pessoas e podem amplificar vieses existentes."],
+      ["Duas pessoas pesquisando o mesmo termo no mesmo app podem ver resultados diferentes.",true,"A personalização faz com que o histórico de cada pessoa influencie os resultados mostrados."],
+      ["Ficar exposto só a opiniões parecidas às suas pode aumentar a polarização.",true,"A falta de contato com outros pontos de vista tende a radicalizar as posições ao longo do tempo."],
+      ["Entender como o algoritmo funciona não muda em nada a forma como usamos as redes.",false,"Entender o mecanismo ajuda a tomar decisões mais conscientes sobre o próprio consumo de conteúdo."],
+      ["Um dos principais objetivos de muitos algoritmos de recomendação é maximizar o tempo de tela.",true,"Mais tempo de uso costuma significar mais oportunidades de mostrar anúncios."],
+      ["'Caixa-preta algorítmica' significa que o código do algoritmo é público e fácil de entender.",false,"É o oposto: a expressão descreve justamente a falta de transparência sobre como ele decide."],
+      ["Em algumas plataformas é possível ajustar interesses ou limpar o histórico para mudar as recomendações.",true,"Muitos apps oferecem configurações de privacidade e personalização que afetam o feed."],
+      ["Algoritmos de recomendação só existem em redes sociais.",false,"Também aparecem em plataformas de streaming, lojas online, buscadores e muito mais."],
+      ["Ser crítico sobre o algoritmo significa parar de usar redes sociais completamente.",false,"Letramento algorítmico é sobre uso consciente, não sobre abandonar as plataformas."]
+    ]
+  }
+];
+
+var tools = [
+  {cat:"Checagem de fatos (geral)", items:[
+    ["Google Fact Check Explorer","toolbox.google.com/factcheck/explorer","Reúne checagens já publicadas por agências parceiras no mundo todo, pesquisáveis por tema ou palavra-chave."],
+    ["Aos Fatos","aosfatos.org","Agência brasileira pioneira em fact-checking, com checagens de discursos, áudios e posts virais."],
+    ["Agência Lupa","lupa.uol.com.br","Primeira agência de fact-checking do Brasil, com classificação clara de verdadeiro, falso ou impreciso."],
+    ["Comprova","projetocomprova.com.br","Coalizão de veículos de imprensa que reforça a checagem em períodos de eleição e crise."],
+    ["Fato ou Fake","g1.globo.com/fato-ou-fake","Projeto de checagem mantido pelo Grupo Globo."],
+    ["e-farsas","e-farsas.com","Um dos pioneiros brasileiros em desmentir boatos e correntes da internet."]
+  ]},
+  {cat:"Busca reversa de imagem", items:[
+    ["Google Lens / Google Imagens","images.google.com","Permite enviar ou colar uma imagem para ver onde e quando ela já apareceu na web."],
+    ["TinEye","tineye.com","Buscador de imagem reversa especializado em rastrear a origem e o histórico de uma foto."]
+  ]},
+  {cat:"Análise forense de imagem e vídeo", items:[
+    ["FotoForensics","fotoforensics.com","Aplica análise de nível de erro (ELA) para destacar áreas possivelmente editadas numa imagem."],
+    ["Forensically","29a.ch/photo-forensics","Conjunto gratuito de ferramentas forenses: clone detection, análise de ruído, metadados e mais."],
+    ["InVID-WeVerify","weverify.eu / invid-project.eu","Extensão de navegador para verificar vídeos e imagens virais, com extração de quadros e busca reversa integrada."]
+  ]},
+  {cat:"Detecção de conteúdo sintético / IA", items:[
+    ["Hive Moderation","hivemoderation.com","Estima a probabilidade de uma imagem ter sido gerada por inteligência artificial."],
+    ["C2PA — Content Credentials","contentcredentials.org","Padrão da indústria para verificar a origem e o histórico de edição de uma mídia digital."]
+  ]},
+  {cat:"Educação midiática e letramento digital", items:[
+    ["Educamídia","educamidia.org.br","Materiais e cursos gratuitos de educação midiática para professores e estudantes brasileiros."],
+    ["IFCN — Code of Principles","ifcn.poynter.org","Código internacional de princípios que certifica agências sérias de fact-checking."]
+  ]}
+];
+
+var planRows = [
+  ["Abertura (15 min)","Levantamento rápido: quem já compartilhou algo que depois descobriu ser falso? Sem julgamento, só mapeando a turma."],
+  ["Módulo 1 — Desinformação (50 min)","Conceitos no quadro + flashcards em duplas + rodada de V/F coletiva, com justificativa em voz alta."],
+  ["Módulo 2 — Checagem de Fatos (50 min)","Demonstração ao vivo de uma checagem real num site parceiro, seguida do PBL em grupos de 4."],
+  ["Módulo 3 — Deepfakes (50 min)","Mostrar 1–2 exemplos reais (com contexto e alerta prévio) + análise coletiva de artefatos visuais."],
+  ["Módulo 4 — Algoritmos (50 min)","Cada aluno observa o próprio feed por 5 min e compara com o colega ao lado; discussão sobre bolhas."],
+  ["Encerramento (20 min)","Cada grupo apresenta 1 aprendizado do PBL do seu módulo + checklist pessoal de checagem para levar para casa."]
+];
+
+var objectives = [
+  "Diferenciar desinformação, informação errônea e malinformação com exemplos concretos.",
+  "Aplicar um método simples de checagem (SIFT) antes de compartilhar qualquer conteúdo.",
+  "Reconhecer sinais visuais e de contexto que indicam deepfakes ou imagens manipuladas.",
+  "Explicar, com palavras próprias, como algoritmos de recomendação moldam o que cada pessoa vê.",
+  "Usar pelo menos uma ferramenta real de checagem ou busca reversa de imagem."
+];
+
+/* ---------- STATE / PERSISTENCE ---------- */
+var state = {view:"home", moduleId:null, drawer:"caderno"};
+var progress = {};
+try{
+  var saved = localStorage.getItem("dd_progress_v1");
+  if(saved) progress = JSON.parse(saved);
+}catch(e){}
+function saveProgress(){
+  try{ localStorage.setItem("dd_progress_v1", JSON.stringify(progress)); }catch(e){}
+  if(window.progressoMudou) window.progressoMudou();
+}
+function getModProg(id){
+  if(!progress[id]) progress[id] = {vf:{}};
+  if(!progress[id].vf) progress[id].vf = {};
+  return progress[id];
+}
+
+/* ---------- NAV ---------- */
+var mainTabKeys = [
+  {k:"home", label:"Início"},
+  {k:"tools", label:"Ferramentas"},
+  {k:"guide", label:"Guia do Professor"}
+];
+function renderTabs(){
+  var nav = document.getElementById("mainTabs");
+  var html = "";
+  mainTabKeys.forEach(function(t){
+    var active = (state.view===t.k) ? " active" : "";
+    html += '<button class="'+active.trim()+'" onclick="DD.go(\''+t.k+'\')">'+t.label+'</button>';
+  });
+  nav.innerHTML = html;
+}
+
+function esc(s){ return s; } // content is author-authored, no user input to escape
+
+function go(view, moduleId){
+  state.view = view;
+  if(moduleId) state.moduleId = moduleId;
+  if(view!=="module") state.drawer = "caderno";
+  render();
+  window.scrollTo(0,0);
+}
+
+function openModule(id){
+  state.moduleId = id;
+  state.drawer = "caderno";
+  state.view = "module";
+  render();
+  window.scrollTo(0,0);
+}
+
+/* ---------- RENDER: HOME ---------- */
+function renderHome(){
+  var html = '<h2 style="margin:0 0 4px">Caderno de Investigação</h2>';
+  html += '<p class="lede">Quatro módulos para treinar o olhar crítico diante do que circula nas telas. Cada um tem atividades para o caderno, flashcards, um estudo de caso (PBL) e uma rodada de Verdadeiro ou Falso com justificativa.</p>';
+  html += '<div class="deck">';
+  modules.forEach(function(m){
+    var mp = getModProg(m.id);
+    var vfAnswered = Object.keys(mp.vf).length;
+    var vfCorrect = 0;
+    Object.keys(mp.vf).forEach(function(k){ if(mp.vf[k].correct) vfCorrect++; });
+    var meter = vfAnswered ? (vfCorrect+"/"+vfAnswered+" acertos no V/F") : "ainda não iniciado";
+    html += '<button class="folder" data-num="'+m.num+'" onclick="DD.openModule(\''+m.id+'\')">'+
+      '<div><h3>'+m.title+'</h3><p>'+m.blurb+'</p><div class="meter mono">'+meter+'</div></div>'+
+      '<div class="chev">&#8250;</div></button>';
+  });
+  html += '</div>';
+  document.getElementById("main").innerHTML = html;
+}
+
+/* ---------- RENDER: MODULE ---------- */
+var drawerKeys = [
+  {k:"caderno", label:"Caderno"},
+  {k:"flashcards", label:"Flashcards"},
+  {k:"pbl", label:"Estudo de caso"},
+  {k:"vf", label:"V ou F"}
+];
+
+function renderModule(){
+  var m = modules.filter(function(x){return x.id===state.moduleId})[0];
+  if(!m){ go("home"); return; }
+  var html = '<button class="back" onclick="DD.go(\'home\')">&#8249; Todos os módulos</button>';
+  html += '<h2 style="margin:0 0 2px">'+m.num+' · '+m.title+'</h2>';
+  html += '<p class="lede" style="margin-top:4px">'+m.blurb+'</p>';
+  html += '<div class="drawer-nav">';
+  drawerKeys.forEach(function(d){
+    var active = (state.drawer===d.k) ? " active" : "";
+    html += '<button class="'+active.trim()+'" onclick="DD.setDrawer(\''+d.k+'\')">'+d.label+'</button>';
+  });
+  html += '</div><div id="drawerBody"></div>';
+  document.getElementById("main").innerHTML = html;
+  renderDrawer(m);
+}
+
+function setDrawer(k){ state.drawer = k; renderModule(); }
+
+function renderDrawer(m){
+  var body = document.getElementById("drawerBody");
+  if(state.drawer==="caderno") body.innerHTML = cadernoHtml(m);
+  else if(state.drawer==="flashcards") body.innerHTML = flashcardsHtml(m);
+  else if(state.drawer==="pbl") body.innerHTML = pblHtml(m);
+  else if(state.drawer==="vf") body.innerHTML = vfHtml(m);
+  if(state.drawer==="flashcards") initFlashcards(m);
+  if(state.drawer==="vf") initVf(m);
+}
+
+function cadernoHtml(m){
+  var html = '<div class="card"><p class="tagline">Atividades para o caderno</p><ol class="activities">';
+  m.caderno.forEach(function(a){ html += "<li>"+a+"</li>"; });
+  html += "</ol></div>";
+  return html;
+}
+
+/* ---- Flashcards ---- */
+var fcIndex = {};
+function flashcardsHtml(m){
+  if(fcIndex[m.id]===undefined) fcIndex[m.id]=0;
+  var i = fcIndex[m.id];
+  var total = m.flashcards.length;
+  var card = m.flashcards[i];
+  var html = '<div class="fc-progress"><span>Carta '+(i+1)+' de '+total+'</span><span>toque para virar</span></div>';
+  html += '<div class="fc-wrap"><div class="fc" id="fcCard" onclick="DD.flipCard()">'+
+    '<div class="fc-face fc-front"><p class="fc-label">Termo</p><h3 class="fc-term">'+card[0]+'</h3></div>'+
+    '<div class="fc-face fc-back"><p class="fc-label">Definição</p><p class="fc-def">'+card[1]+'</p></div>'+
+    '</div></div>';
+  html += '<div class="fc-controls">'+
+    '<button onclick="DD.fcNav(-1)">&#8249; Anterior</button>'+
+    '<button onclick="DD.fcNav(1)">Próxima &#8250;</button></div>';
+  return html;
+}
+function initFlashcards(m){ /* nothing extra needed, flip handled inline */ }
+function flipCard(){
+  var el = document.getElementById("fcCard");
+  if(el) el.classList.toggle("flipped");
+}
+function fcNav(dir){
+  var m = modules.filter(function(x){return x.id===state.moduleId})[0];
+  var total = m.flashcards.length;
+  fcIndex[m.id] = ((fcIndex[m.id]+dir)+total)%total;
+  document.getElementById("drawerBody").innerHTML = flashcardsHtml(m);
+}
+
+/* ---- PBL ---- */
+function pblHtml(m){
+  var html = '<div class="card"><p class="tagline">Estudo de caso</p><p class="pbl-brief">'+m.pbl.scenario+'</p>';
+  html += '<p class="tagline" style="margin-top:14px">Perguntas para discussão em grupo</p>';
+  m.pbl.questions.forEach(function(q,i){
+    html += '<div class="pbl-q"><span class="num">P'+(i+1)+'</span>'+q+'</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+/* ---- V/F ---- */
+function vfHtml(m){
+  var mp = getModProg(m.id);
+  var answered = Object.keys(mp.vf).length;
+  var correct = 0;
+  Object.keys(mp.vf).forEach(function(k){ if(mp.vf[k].correct) correct++; });
+  var html = '<div class="vf-score"><span class="big">'+correct+'/'+m.vf.length+'</span><span>acertos'+(answered?(' · '+answered+' respondidas'):'')+'</span></div>';
+  m.vf.forEach(function(item, i){
+    var saved = mp.vf[i];
+    html += '<div class="vf-q" data-idx="'+i+'"><p class="stmt">'+item[0]+'</p>';
+    html += '<div class="vf-btns">'+
+      '<button data-choice="true" onclick="DD.answerVf(\''+m.id+'\','+i+',true)">Verdadeiro</button>'+
+      '<button data-choice="false" onclick="DD.answerVf(\''+m.id+'\','+i+',false)">Falso</button>'+
+      '</div>';
+    var revealClass = "vf-reveal";
+    if(saved) revealClass += " show " + (saved.correct?"correct":"incorrect");
+    html += '<div class="'+revealClass+'" id="reveal-'+i+'">';
+    if(saved){
+      html += vfRevealContent(item, saved);
+    }
+    html += '</div></div>';
+  });
+  html += '<button class="vf-reset" onclick="DD.resetVf(\''+m.id+'\')">Reiniciar esta rodada</button>';
+  return html;
+}
+function vfRevealContent(item, saved){
+  var verdictTxt = item[1] ? "VERDADEIRO" : "FALSO";
+  var c = saved.correct ? "Você acertou." : "Você errou — resposta certa: "+verdictTxt+".";
+  return '<span class="verdict">'+verdictTxt+'</span><p style="margin:4px 0 0">'+c+' '+item[2]+'</p>';
+}
+function initVf(m){} // interaction via inline onclick
+function answerVf(modId, idx, choice){
+  var m = modules.filter(function(x){return x.id===modId})[0];
+  var mp = getModProg(modId);
+  if(mp.vf[idx]) return; // already answered, locked
+  var item = m.vf[idx];
+  var correct = (choice === item[1]);
+  mp.vf[idx] = {choice:choice, correct:correct};
+  saveProgress();
+  // re-render just this question + score
+  var qEl = document.querySelector('.vf-q[data-idx="'+idx+'"]');
+  var reveal = document.getElementById("reveal-"+idx);
+  reveal.className = "vf-reveal show " + (correct?"correct":"incorrect");
+  reveal.innerHTML = vfRevealContent(item, mp.vf[idx]);
+  // update score header
+  var answered = Object.keys(mp.vf).length;
+  var correctCt = 0;
+  Object.keys(mp.vf).forEach(function(k){ if(mp.vf[k].correct) correctCt++; });
+  var scoreEl = document.querySelector(".vf-score");
+  if(scoreEl) scoreEl.innerHTML = '<span class="big">'+correctCt+'/'+m.vf.length+'</span><span>acertos · '+answered+' respondidas</span>';
+}
+function resetVf(modId){
+  progress[modId] = {vf:{}};
+  saveProgress();
+  renderModule();
+}
+
+/* ---------- RENDER: TOOLS ---------- */
+function renderTools(){
+  var html = '<h2 style="margin:0 0 4px">Caixa de Ferramentas</h2>';
+  html += '<p class="lede">Sites e extensões reais para aplicar em sala — todos gratuitos para uso básico.</p>';
+  tools.forEach(function(cat){
+    html += '<div class="tools-cat"><h3>'+cat.cat+'</h3>';
+    cat.items.forEach(function(t){
+      html += '<div class="tool"><a href="https://'+t[1]+'" target="_blank" rel="noopener">'+t[0]+'</a><p class="mono" style="margin-bottom:4px;color:var(--accent);font-size:11px">'+t[1]+'</p><p>'+t[2]+'</p></div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById("main").innerHTML = html;
+}
+
+/* ---------- RENDER: TEACHER GUIDE ---------- */
+function renderGuide(){
+  var html = '<h2 style="margin:0 0 4px">Guia do Professor</h2>';
+  html += '<p class="lede">Sequência sugerida para uma oficina de aproximadamente 3h30 (ou dividida em 4 encontros de 50 min, um por módulo).</p>';
+  html += '<div class="card"><p class="tagline">Objetivos de aprendizagem</p><ul class="obj-list">';
+  objectives.forEach(function(o){ html += "<li>"+o+"</li>"; });
+  html += '</ul></div>';
+  html += '<div class="card" style="margin-top:14px"><p class="tagline">Roteiro sugerido</p>';
+  planRows.forEach(function(r){
+    html += '<div class="plan-row"><div class="when">'+r[0]+'</div><div class="what"><p>'+r[1]+'</p></div></div>';
+  });
+  html += '</div>';
+  html += '<div class="card" style="margin-top:14px"><p class="tagline">Avaliação</p>'+
+    '<p style="margin:0">Use a pontuação do V/F de cada módulo como termômetro de compreensão (não como nota final) e peça que cada grupo entregue por escrito as respostas do estudo de caso (PBL) do seu módulo — isso avalia aplicação, não só memorização.</p></div>';
+  document.getElementById("main").innerHTML = html;
+}
+
+/* ---------- MAIN RENDER ---------- */
+function render(){
+  renderTabs();
+  if(state.view==="home") renderHome();
+  else if(state.view==="module") renderModule();
+  else if(state.view==="tools") renderTools();
+  else if(state.view==="guide") renderGuide();
+}
+
+window.DD = {go:go, openModule:openModule, setDrawer:setDrawer, flipCard:flipCard, fcNav:fcNav, answerVf:answerVf, resetVf:resetVf};
+
+if(window.claude && window.claude.hot){
+  window.claude.hot.ready ? window.claude.hot.ready(function(data){ if(data&&data.state) state=data.state; render(); }) : render();
+  if(window.claude.hot.snapshot) window.claude.hot.snapshot(function(){ return {state:state}; });
+}else{
+  render();
+}
+
+window.PROGRESSO_ID = "detetives-digitais-v1";
+window.PROGRESSO_DADOS = function(){
+  var feitas=0, total=0, pontos=0, correctas=0, detalhe={};
+  modules.forEach(function(m){
+    var mp = getModProg(m.id);
+    var respondidas = Object.keys(mp.vf).length;
+    var acertos = 0;
+    Object.keys(mp.vf).forEach(function(k){ if(mp.vf[k].correct) acertos++; });
+    feitas += respondidas; total += m.vf.length; correctas += acertos;
+    detalhe[m.id] = respondidas + "/" + m.vf.length + " (" + acertos + " certas)";
+  });
+  pontos = feitas*10 + correctas*5;
+  return { feitas: feitas, total: total, pontos: pontos, detalhe: detalhe };
+};
+})();
+</script>
+<script src="../config.js"></script>
+<script src="../progresso-turma.js"></script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

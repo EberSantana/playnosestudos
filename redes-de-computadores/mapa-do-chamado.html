@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="UTF-8">
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&]professor\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Mapa do Chamado · Redes de Computadores</title>
+<meta name="description" content="TCP/IP na prática: IP, portas, TCP x UDP e diagnóstico de chamados camada por camada.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Chakra+Petch:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* ===== Design plan =====
+Layout: network-ops console — sticky header with a tab strip (Mapa / Caderno /
+Flashcards / PBL / V ou F). Hero opens with the IP→Porta→Camada route motif
+from the source reel (um chamado é lido camada por camada: nome, caminho,
+porta). Terminal-styled command blocks tie it to real tooling (ipconfig,
+ping, nslookup, Test-NetConnection).
+*/
+:root{
+  --bg:#ECF0EE; --panel:#FFFFFF; --sunk:#E1E8E4; --ink:#16261C; --ink-2:#3F4F5B; --muted:#5B6871;
+  --line:#D5DDDA; --accent:#1F5135; --accent-ink:#FFFFFF; --accent-soft:#DCEAE1;
+  --ok:#1F5135; --ok-soft:#DCEAE1; --bad:#9B3B2E; --bad-soft:#F6DEDA;
+  --term-bg:#101915; --term-ink:#CFE8D8; --term-accent:#6FCF97;
+  --cond:"Chakra Petch",system-ui,sans-serif;
+  --sans:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:12px; --shadow:0 2px 10px rgba(16,25,21,.10);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0F1513; --panel:#16201B; --sunk:#1C2822; --ink:#E4ECE7; --ink-2:#B8C6C0; --muted:#8699A4;
+    --line:#2A3A33; --accent:#6BAA68; --accent-ink:#0A140D; --accent-soft:#1E3327;
+    --ok:#6BAA68; --ok-soft:#1E3327; --bad:#D98A7E; --bad-soft:#3A201C;
+    --term-bg:#0A120D; --term-ink:#BEE8CC; --term-accent:#6FCF97;
+    --shadow:0 2px 14px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0F1513; --panel:#16201B; --sunk:#1C2822; --ink:#E4ECE7; --ink-2:#B8C6C0; --muted:#8699A4;
+  --line:#2A3A33; --accent:#6BAA68; --accent-ink:#0A140D; --accent-soft:#1E3327;
+  --ok:#6BAA68; --ok-soft:#1E3327; --bad:#D98A7E; --bad-soft:#3A201C;
+  --term-bg:#0A120D; --term-ink:#BEE8CC; --term-accent:#6FCF97;
+  --shadow:0 2px 14px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:16px; line-height:1.55;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+}
+h1,h2,h3,.cond{font-family:var(--cond); text-wrap:balance}
+code,.mono{font-family:var(--mono)}
+a{color:var(--accent)}
+button{font-family:inherit}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--panel)}
+header.app{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:15; background:var(--panel);
+  border-bottom:1px solid var(--line); margin-inline:-16px; padding-inline:16px; padding-block:10px;
+}
+.back{display:inline-block; color:var(--accent); text-decoration:none; font-size:13px; margin-bottom:6px}
+.back:hover{text-decoration:underline}
+.titlerow{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+.badge{
+  flex:none; width:36px; height:36px; border-radius:9px; background:var(--accent); color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:13px;
+}
+header.app h1{font-size:19px; margin:0; line-height:1.15}
+header.app .sub{font-size:11.5px; color:var(--muted); margin:2px 0 0}
+nav.tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{
+  flex:none; background:none; border:1px solid var(--line); color:var(--ink-2); padding:7px 12px;
+  border-radius:999px; font-size:12.5px; cursor:pointer; white-space:nowrap;
+}
+nav.tabs button.active{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:700}
+
+main{padding-block:18px 48px; max-width:760px; margin-inline:auto}
+.lede{font-size:14.5px; color:var(--ink-2); margin-top:-4px}
+
+.card{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:16px; box-shadow:var(--shadow)}
+.card + .card{margin-top:12px}
+.tagline{font-family:var(--mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--accent); margin:0 0 8px}
+
+/* ---- Mapa (hero route) ---- */
+.route{display:flex; flex-direction:column; gap:10px; margin-top:14px}
+.hop{
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; align-items:start;
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px; box-shadow:var(--shadow);
+}
+.hop .n{
+  width:30px; height:30px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:13px; flex:none;
+}
+.hop h3{margin:0 0 4px; font-size:16.5px}
+.hop p{margin:0; font-size:13.5px; color:var(--ink-2)}
+.hop .term{margin-top:8px}
+
+.term{
+  background:var(--term-bg); color:var(--term-ink); border-radius:8px; padding:10px 12px;
+  font-family:var(--mono); font-size:12.5px; overflow-x:auto; white-space:pre;
+}
+.term .cmd::before{content:"> "; color:var(--term-accent)}
+
+.portgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px; margin-top:8px}
+.port{background:var(--sunk); border:1px solid var(--line); border-radius:8px; padding:10px}
+.port .num{font-family:var(--mono); font-weight:700; color:var(--accent); font-size:15px}
+.port .svc{font-size:12.5px; color:var(--ink-2); margin-top:2px}
+
+.handshake{display:flex; flex-direction:column; gap:6px; margin-top:10px}
+.hstep{display:grid; grid-template-columns:70px 1fr; gap:10px; align-items:center; font-size:13px}
+.hstep .dir{font-family:var(--mono); font-weight:700; color:var(--accent); text-align:center; background:var(--accent-soft); border-radius:6px; padding:4px 0}
+
+.layers{display:grid; gap:6px; margin-top:10px}
+.layer{
+  display:grid; grid-template-columns:110px 1fr; gap:10px; align-items:center;
+  background:var(--sunk); border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+}
+.layer .name{font-family:var(--cond); font-weight:600; font-size:14px}
+.layer .ex{font-size:12px; color:var(--muted)}
+
+/* ---- Caderno ---- */
+ol.activities{padding-left:20px; margin:0}
+ol.activities li{margin-bottom:14px; line-height:1.5}
+ol.activities li::marker{font-family:var(--mono); color:var(--accent); font-weight:700}
+
+/* ---- Flashcards ---- */
+.fc-wrap{perspective:1200px; margin-bottom:12px}
+.fc{position:relative; min-height:118px; border-radius:var(--r); cursor:pointer; transform-style:preserve-3d; transition:transform .5s}
+.fc.flipped{transform:rotateY(180deg)}
+.fc-face{position:absolute; inset:0; backface-visibility:hidden; border-radius:var(--r); border:1px solid var(--line); padding:16px; display:flex; flex-direction:column; justify-content:center; box-shadow:var(--shadow)}
+.fc-front{background:var(--panel)}
+.fc-back{background:var(--accent); color:var(--accent-ink); transform:rotateY(180deg)}
+.fc-label{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:1px; opacity:.75; margin-bottom:6px}
+.fc-term{font-family:var(--cond); font-size:18px; margin:0}
+.fc-def{font-size:14px; margin:0; line-height:1.4}
+.fc-progress{font-size:11.5px; color:var(--muted); margin-bottom:10px; display:flex; justify-content:space-between}
+.fc-controls{display:flex; justify-content:space-between; margin-top:12px; gap:10px}
+.fc-controls button{flex:1; background:var(--panel); border:1px solid var(--line); color:var(--ink); padding:10px; border-radius:8px; font-size:13px; cursor:pointer}
+
+/* ---- PBL ---- */
+.pbl-brief{border-left:3px solid var(--accent); padding-left:12px; margin:10px 0 16px; font-size:14.5px}
+.pbl-q{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:10px; font-size:14px}
+.pbl-q .num{font-family:var(--mono); color:var(--accent); font-weight:700; margin-right:6px}
+
+/* ---- V/F ---- */
+.vf-score{display:flex; gap:14px; align-items:center; margin-bottom:14px; font-family:var(--mono); font-size:13px}
+.vf-score .big{font-size:22px; font-weight:700; color:var(--accent)}
+.vf-q{background:var(--panel); border:1px solid var(--line); border-radius:var(--r); padding:14px; margin-bottom:12px}
+.vf-q .stmt{font-size:14.5px; margin:0 0 10px; line-height:1.45}
+.vf-btns{display:flex; gap:8px}
+.vf-btns button{flex:1; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--sunk); color:var(--ink); font-size:13.5px; font-weight:600; cursor:pointer}
+.vf-btns button[data-choice="true"]{border-color:var(--ok)}
+.vf-btns button[data-choice="false"]{border-color:var(--bad)}
+.vf-reveal{margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); font-size:13.5px; display:none}
+.vf-reveal.show{display:block}
+.vf-reveal .verdict{font-family:var(--mono); font-weight:700; letter-spacing:.5px; display:inline-block; padding:2px 8px; border-radius:4px; margin-bottom:6px; font-size:11.5px}
+.vf-reveal.correct .verdict{background:var(--ok); color:var(--accent-ink)}
+.vf-reveal.incorrect .verdict{background:var(--bad); color:#fff}
+.vf-reset{margin-top:6px; background:none; border:1px solid var(--accent); color:var(--accent); padding:10px 16px; border-radius:8px; font-size:13px; cursor:pointer}
+
+.credit{font-size:11.5px; color:var(--muted); text-align:center; margin-top:28px; padding-bottom:10px}
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+
+<header class="app">
+  <a class="back" href="./">&larr; Redes de Computadores</a>
+  <div class="titlerow">
+    <div class="badge">IP</div>
+    <div>
+      <h1>Mapa do Chamado</h1>
+      <p class="sub">TCP/IP na prática: leia um chamado de rede camada por camada</p>
+    </div>
+  </div>
+  <nav class="tabs" id="mainTabs"></nav>
+</header>
+
+<main id="main"></main>
+
+<p class="credit" role="contentinfo">Prof. Eber Santana · IFS Campus Tobias Barreto — inspirado no conteúdo de <span class="mono">@tininjaconsult</span>. Fontes: documentação oficial da Microsoft e RFC&nbsp;1122.</p>
+
+<script>
+(function(){
+"use strict";
+
+var tabs = [
+  {k:"mapa", label:"O Mapa"},
+  {k:"caderno", label:"Caderno"},
+  {k:"flashcards", label:"Flashcards"},
+  {k:"pbl", label:"O Chamado"},
+  {k:"vf", label:"V ou F"}
+];
+
+var caderno = [
+  "Rode <code>ipconfig</code> (Windows) ou <code>ip addr</code> (Linux) no seu computador. Anote o endereço IP, a máscara de sub-rede e o gateway padrão.",
+  "Monte uma tabela com 6 portas comuns (inclua 443, 445, 3389, 80, 53 e 22) e o serviço que cada uma representa.",
+  "Desenhe as quatro camadas do modelo TCP/IP (aplicação, transporte, internet, enlace) e, ao lado de cada uma, escreva um protocolo ou exemplo real.",
+  "Explique com suas palavras a diferença entre o aperto de mão do TCP (SYN → SYN-ACK → ACK) e o envio sem confirmação do UDP. Por que o DNS usa UDP na maior parte do tempo?",
+  "Simule um chamado: 'o usuário não consegue acessar o sistema no servidor'. Escreva, na ordem certa, os três comandos que você rodaria para diagnosticar nome, caminho e porta."
+];
+
+var flashcards = [
+  ["Endereço IP","Identificador numérico de uma máquina na rede, como um endereço postal. Aparece em ipconfig/ip addr junto com máscara e gateway."],
+  ["Máscara de sub-rede","Define qual parte do IP identifica a rede e qual parte identifica o host dentro dela."],
+  ["Gateway padrão","A 'porta de saída' da rede local — para onde o tráfego vai quando o destino não está na mesma rede."],
+  ["Porta (porta TCP/UDP)","Número que identifica o serviço específico dentro de uma máquina, como o número de uma sala dentro de um prédio."],
+  ["Porta 443","HTTPS — tráfego web seguro e criptografado."],
+  ["Porta 445","SMB — compartilhamento de arquivos e pastas no Windows."],
+  ["Porta 3389","RDP — Área de Trabalho Remota do Windows."],
+  ["Porta 53","DNS — tradução de nomes de domínio em endereços IP, normalmente sobre UDP."],
+  ["TCP","Protocolo de entrega confirmada: faz o aperto de mão (SYN, SYN-ACK, ACK) e reenvia o que se perde no caminho."],
+  ["UDP","Protocolo de entrega sem confirmação: mais rápido, mas não garante que o pacote chegou nem reenvia perdas."],
+  ["Aperto de mão TCP (three-way handshake)","Sequência SYN → SYN-ACK → ACK que estabelece uma conexão TCP confiável antes de enviar dados."],
+  ["Camada de aplicação","Camada onde ficam os protocolos que o usuário usa direta ou indiretamente: HTTP, DNS, SMB, RDP."],
+  ["Camada de transporte","Camada responsável por como os dados são entregues: TCP (confirmado) ou UDP (sem confirmação)."],
+  ["Camada de internet","Camada do endereçamento e roteamento: é aqui que o IP decide o caminho entre redes."],
+  ["Camada de enlace","Camada mais próxima do cabo ou do Wi-Fi: trata do endereço físico (MAC) e da entrega dentro da rede local."],
+  ["nslookup","Comando que testa a camada de nome: verifica se um domínio é traduzido corretamente para um IP."],
+  ["ping","Comando que testa a camada de caminho: verifica se existe rota e resposta entre sua máquina e o destino."],
+  ["Test-NetConnection","Comando do PowerShell que testa a camada de porta: verifica se um serviço específico está respondendo naquele endereço."]
+];
+
+var pbl = {
+  scenario:"Chegou um chamado: 'Não consigo acessar o sistema financeiro no servidor srv-fin.escola.local'. O usuário diz que ontem funcionava normalmente e que não mudou nada no computador dele.",
+  questions:[
+    "Qual comando você rodaria primeiro para checar se o nome <code>srv-fin.escola.local</code> está sendo traduzido para um IP corretamente? O que um erro nesse comando já indicaria?",
+    "Supondo que o nome resolveu normalmente, qual o próximo comando para checar se existe caminho (rota) até o servidor? O que uma resposta com perda de pacotes sugeriria?",
+    "Se o caminho está OK mas o sistema ainda não abre, qual porta você suspeitaria e como testaria especificamente essa porta, sem depender só do navegador?",
+    "O usuário mencionou que só ele está com esse problema. Isso muda em qual camada você focaria a investigação primeiro? Justifique.",
+    "Escreva, em ordem, o roteiro de diagnóstico completo (nome → caminho → porta) que você devolveria documentado no chamado, incluindo os comandos usados em cada etapa."
+  ]
+};
+
+var vf = [
+  ["O endereço IP, a máscara de sub-rede e o gateway aparecem juntos no comando ipconfig.",true,"O ipconfig (Windows) mostra justamente esses três dados de configuração de rede da interface."],
+  ["A porta identifica qual máquina da rede está sendo acessada.",false,"Quem identifica a máquina é o endereço IP; a porta identifica o serviço específico dentro dessa máquina."],
+  ["A porta 443 é usada para tráfego web seguro (HTTPS).",true,"É a porta padrão do HTTPS, usada para conexões web criptografadas."],
+  ["A porta 445 é usada para Área de Trabalho Remota (RDP).",false,"A porta 445 é do SMB, compartilhamento de arquivos. A Área de Trabalho Remota usa a porta 3389."],
+  ["O TCP garante entrega confirmada por meio de um aperto de mão (handshake).",true,"O three-way handshake (SYN → SYN-ACK → ACK) estabelece a conexão antes de qualquer dado ser trocado."],
+  ["O UDP reenvia automaticamente qualquer pacote perdido no caminho.",false,"Isso é característica do TCP. O UDP envia sem confirmação e não reenvia perdas por conta própria."],
+  ["O DNS normalmente funciona sobre a porta 53.",true,"A porta 53 é a porta padrão usada pelo serviço de DNS para traduzir nomes em endereços IP."],
+  ["O modelo TCP/IP tem sete camadas, assim como o modelo OSI.",false,"O modelo TCP/IP tem quatro camadas: aplicação, transporte, internet e enlace. O modelo de sete camadas é o OSI."],
+  ["A camada de aplicação é onde ficam protocolos como HTTP, DNS e SMB.",true,"Esses protocolos operam na camada mais próxima do usuário e dos programas, a camada de aplicação."],
+  ["O comando ping serve principalmente para testar se uma porta específica está aberta.",false,"O ping testa se existe caminho (rota) e resposta até o destino; testar uma porta específica é função de ferramentas como o Test-NetConnection."],
+  ["O nslookup é útil para checar se a tradução de nome para IP está funcionando.",true,"É exatamente para isso que o nslookup serve: testar a resolução de nomes (DNS)."],
+  ["Se apenas um usuário está com problema de acesso e os demais não, o foco inicial tende a ser a camada de enlace/configuração local, não o servidor inteiro.",true,"Um problema isolado num único usuário aponta mais para a máquina ou conexão dele do que para uma falha geral do servidor."],
+  ["Testar nome, caminho e porta nessa ordem (nslookup → ping → Test-NetConnection) ajuda a isolar em qual camada está o problema.",true,"Seguir essa ordem por camada é justamente o método sugerido para 'ler' um chamado de rede com mais eficiência."],
+  ["Documentar os comandos usados no chamado não tem utilidade prática para o time de suporte.",false,"Documentar o diagnóstico ajuda outros técnicos a entenderem rapidamente o que já foi testado, evitando retrabalho."]
+];
+
+/* ---------- STATE / PERSISTENCE ---------- */
+var state = {view:"mapa"};
+var progress = {vf:{}};
+try{
+  var saved = localStorage.getItem("mdc_progress_v1");
+  if(saved) progress = JSON.parse(saved);
+  if(!progress.vf) progress.vf = {};
+}catch(e){}
+function saveProgress(){
+  try{ localStorage.setItem("mdc_progress_v1", JSON.stringify(progress)); }catch(e){}
+  if(window.progressoMudou) window.progressoMudou();
+}
+
+function renderTabs(){
+  var nav = document.getElementById("mainTabs");
+  var html = "";
+  tabs.forEach(function(t){
+    var active = (state.view===t.k) ? " active" : "";
+    html += '<button class="'+active.trim()+'" onclick="MDC.go(\''+t.k+'\')">'+t.label+'</button>';
+  });
+  nav.innerHTML = html;
+}
+function go(view){ state.view = view; render(); window.scrollTo(0,0); }
+
+/* ---- Mapa ---- */
+function mapaHtml(){
+  var html = '<p class="lede">Um chamado de rede se lê de cima pra baixo, como um mapa: o endereço, a porta, o tipo de entrega e, por fim, a camada que está falhando.</p>';
+
+  html += '<div class="route">';
+  html += '<div class="hop"><div class="n">1</div><div>'+
+    '<h3>IP = o endereço da máquina</h3>'+
+    '<p>No <code>ipconfig</code> aparecem três dados juntos: o endereço, a máscara de sub-rede e o <b>gateway</b> — a porta de saída da rede local.</p>'+
+    '<div class="term"><div class="cmd">ipconfig</div>IPv4 Address. . . . . . . . : 192.168.1.42\nSubnet Mask . . . . . . . . : 255.255.255.0\nDefault Gateway . . . . . . : 192.168.1.1</div>'+
+    '</div></div>';
+
+  html += '<div class="hop"><div class="n">2</div><div>'+
+    '<h3>Porta = o caminho até o serviço</h3>'+
+    '<p>Dentro da mesma máquina, a porta diz qual serviço você quer alcançar.</p>'+
+    '<div class="portgrid">'+
+      '<div class="port"><div class="num">443</div><div class="svc">Site seguro (HTTPS)</div></div>'+
+      '<div class="port"><div class="num">445</div><div class="svc">Pasta compartilhada (SMB)</div></div>'+
+      '<div class="port"><div class="num">3389</div><div class="svc">Área de trabalho remota (RDP)</div></div>'+
+      '<div class="port"><div class="num">53</div><div class="svc">DNS</div></div>'+
+    '</div></div></div>';
+
+  html += '<div class="hop"><div class="n">3</div><div>'+
+    '<h3>TCP = entrega confirmada · UDP = sem confirmação</h3>'+
+    '<p>O TCP combina a conversa antes de mandar dado de verdade — e reenvia o que se perde. O DNS, por exemplo, costuma usar UDP.</p>'+
+    '<div class="handshake">'+
+      '<div class="hstep"><div class="dir">Cliente →</div><div>SYN — “quero conectar”</div></div>'+
+      '<div class="hstep"><div class="dir">← Servidor</div><div>SYN-ACK — “recebi, pode mandar”</div></div>'+
+      '<div class="hstep"><div class="dir">Cliente →</div><div>ACK — “combinado, aí vai o dado”</div></div>'+
+    '</div></div></div>';
+
+  html += '<div class="hop"><div class="n">4</div><div>'+
+    '<h3>Quatro camadas</h3>'+
+    '<p>Todo chamado passa, direta ou indiretamente, por essas quatro camadas do modelo TCP/IP.</p>'+
+    '<div class="layers">'+
+      '<div class="layer"><div class="name">Aplicação</div><div class="ex">HTTP, DNS, SMB, RDP</div></div>'+
+      '<div class="layer"><div class="name">Transporte</div><div class="ex">TCP, UDP</div></div>'+
+      '<div class="layer"><div class="name">Internet</div><div class="ex">IP, roteamento</div></div>'+
+      '<div class="layer"><div class="name">Enlace</div><div class="ex">Wi-Fi, cabo, endereço MAC</div></div>'+
+    '</div></div></div>';
+
+  html += '<div class="hop"><div class="n">5</div><div>'+
+    '<h3>Leia o chamado por camada</h3>'+
+    '<p>Nome → caminho → porta. Três comandos, três perguntas.</p>'+
+    '<div class="term"><div class="cmd">nslookup srv-fin.escola.local</div>— o nome resolve para um IP?\n\n<span class="cmd">ping srv-fin.escola.local</span>— existe caminho e resposta?\n\n<span class="cmd">Test-NetConnection srv-fin.escola.local -Port 443</span>— a porta do serviço está aberta?</div>'+
+    '</div></div>';
+  html += '</div>';
+
+  html += '<div class="card" style="margin-top:14px"><p class="tagline">Para discutir em turma</p><p style="margin:0">Qual camada costuma dar mais dor de cabeça nos seus chamados: nome, caminho ou porta?</p></div>';
+  return html;
+}
+
+/* ---- Caderno ---- */
+function cadernoHtml(){
+  var html = '<div class="card"><p class="tagline">Atividades para o caderno</p><ol class="activities">';
+  caderno.forEach(function(a){ html += "<li>"+a+"</li>"; });
+  html += "</ol></div>";
+  return html;
+}
+
+/* ---- Flashcards ---- */
+var fcIndex = 0;
+function flashcardsHtml(){
+  var total = flashcards.length;
+  var card = flashcards[fcIndex];
+  var html = '<div class="fc-progress"><span>Carta '+(fcIndex+1)+' de '+total+'</span><span>toque para virar</span></div>';
+  html += '<div class="fc-wrap"><div class="fc" id="fcCard" onclick="MDC.flipCard()">'+
+    '<div class="fc-face fc-front"><p class="fc-label">Termo</p><h3 class="fc-term">'+card[0]+'</h3></div>'+
+    '<div class="fc-face fc-back"><p class="fc-label">Definição</p><p class="fc-def">'+card[1]+'</p></div>'+
+    '</div></div>';
+  html += '<div class="fc-controls"><button onclick="MDC.fcNav(-1)">&#8249; Anterior</button><button onclick="MDC.fcNav(1)">Próxima &#8250;</button></div>';
+  return html;
+}
+function flipCard(){ var el=document.getElementById("fcCard"); if(el) el.classList.toggle("flipped"); }
+function fcNav(dir){
+  fcIndex = ((fcIndex+dir)+flashcards.length)%flashcards.length;
+  document.getElementById("main").innerHTML = flashcardsHtml();
+}
+
+/* ---- PBL ---- */
+function pblHtml(){
+  var html = '<div class="card"><p class="tagline">O chamado</p><p class="pbl-brief">'+pbl.scenario+'</p>';
+  html += '<p class="tagline" style="margin-top:14px">Roteiro de diagnóstico — responda em grupo</p>';
+  pbl.questions.forEach(function(q,i){
+    html += '<div class="pbl-q"><span class="num">'+(i+1)+'</span>'+q+'</div>';
+  });
+  html += '</div>';
+  return html;
+}
+
+/* ---- V/F ---- */
+function vfHtml(){
+  var answered = Object.keys(progress.vf).length;
+  var correct = 0;
+  Object.keys(progress.vf).forEach(function(k){ if(progress.vf[k].correct) correct++; });
+  var html = '<div class="vf-score"><span class="big">'+correct+'/'+vf.length+'</span><span>acertos'+(answered?(' · '+answered+' respondidas'):'')+'</span></div>';
+  vf.forEach(function(item, i){
+    var saved = progress.vf[i];
+    html += '<div class="vf-q" data-idx="'+i+'"><p class="stmt">'+item[0]+'</p>';
+    html += '<div class="vf-btns">'+
+      '<button data-choice="true" onclick="MDC.answerVf('+i+',true)">Verdadeiro</button>'+
+      '<button data-choice="false" onclick="MDC.answerVf('+i+',false)">Falso</button>'+
+      '</div>';
+    var revealClass = "vf-reveal";
+    if(saved) revealClass += " show " + (saved.correct?"correct":"incorrect");
+    html += '<div class="'+revealClass+'" id="reveal-'+i+'">';
+    if(saved) html += vfRevealContent(item, saved);
+    html += '</div></div>';
+  });
+  html += '<button class="vf-reset" onclick="MDC.resetVf()">Reiniciar esta rodada</button>';
+  return html;
+}
+function vfRevealContent(item, saved){
+  var verdictTxt = item[1] ? "VERDADEIRO" : "FALSO";
+  var c = saved.correct ? "Você acertou." : "Você errou — resposta certa: "+verdictTxt+".";
+  return '<span class="verdict">'+verdictTxt+'</span><p style="margin:4px 0 0">'+c+' '+item[2]+'</p>';
+}
+function answerVf(idx, choice){
+  if(progress.vf[idx]) return;
+  var item = vf[idx];
+  var correct = (choice === item[1]);
+  progress.vf[idx] = {choice:choice, correct:correct};
+  saveProgress();
+  var reveal = document.getElementById("reveal-"+idx);
+  reveal.className = "vf-reveal show " + (correct?"correct":"incorrect");
+  reveal.innerHTML = vfRevealContent(item, progress.vf[idx]);
+  var answered = Object.keys(progress.vf).length;
+  var correctCt = 0;
+  Object.keys(progress.vf).forEach(function(k){ if(progress.vf[k].correct) correctCt++; });
+  var scoreEl = document.querySelector(".vf-score");
+  if(scoreEl) scoreEl.innerHTML = '<span class="big">'+correctCt+'/'+vf.length+'</span><span>acertos · '+answered+' respondidas</span>';
+}
+function resetVf(){ progress.vf = {}; saveProgress(); document.getElementById("main").innerHTML = vfHtml(); }
+
+/* ---------- MAIN RENDER ---------- */
+function render(){
+  renderTabs();
+  var m = document.getElementById("main");
+  if(state.view==="mapa") m.innerHTML = mapaHtml();
+  else if(state.view==="caderno") m.innerHTML = cadernoHtml();
+  else if(state.view==="flashcards") m.innerHTML = flashcardsHtml();
+  else if(state.view==="pbl") m.innerHTML = pblHtml();
+  else if(state.view==="vf") m.innerHTML = vfHtml();
+}
+
+window.MDC = {go:go, flipCard:flipCard, fcNav:fcNav, answerVf:answerVf, resetVf:resetVf};
+
+if(window.claude && window.claude.hot){
+  window.claude.hot.ready ? window.claude.hot.ready(function(data){ if(data&&data.state) state=data.state; render(); }) : render();
+  if(window.claude.hot.snapshot) window.claude.hot.snapshot(function(){ return {state:state}; });
+}else{
+  render();
+}
+
+window.PROGRESSO_ID = "mapa-do-chamado-v1";
+window.PROGRESSO_DADOS = function(){
+  var respondidas = Object.keys(progress.vf).length;
+  var acertos = 0;
+  Object.keys(progress.vf).forEach(function(k){ if(progress.vf[k].correct) acertos++; });
+  var pontos = respondidas*10 + acertos*5;
+  return { feitas: respondidas, total: vf.length, pontos: pontos, detalhe: { vf: respondidas + "/" + vf.length + " (" + acertos + " certas)" } };
+};
+})();
+</script>
+<script src="../config.js"></script>
+<script src="../progresso-turma.js"></script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

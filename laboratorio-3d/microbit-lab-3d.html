@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="utf-8">
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&]professor\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>micro:bit Lab 3D</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@500;600;700&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: bancada do micro:bit. Palco 3D e painel de sensores à esquerda, lição, código e console à direita. */
+:root{
+  --bg:#eceef5; --surface:#f8f9fc; --surface2:#e0e3ee; --fg:#161a2b; --muted:#555a7a; --line:#c8cce0;
+  --accent:#c4182f; --accent-fg:#ffffff; --amber:#8a5a00; --amber-bg:#f6ecd2;
+  --stage:#d9dde8; --floor:#c8ccd8; --code-bg:#12141f; --code-fg:#dfe3f5; --code-line:#2a2f48;
+  --good:#12804f; --bad:#b83225; --led-off:#2a1518;
+  --font-display:"Lexend","Segoe UI",system-ui,sans-serif;
+  --font-body:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d0f1a; --surface:#161a2a; --surface2:#1f2438; --fg:#e6e9f6; --muted:#9298b8; --line:#2b3150;
+    --accent:#ff5a6e; --accent-fg:#2a0309; --amber:#f2b84b; --amber-bg:#2a2412;
+    --stage:#101324; --floor:#181c30; --code-bg:#080a12; --code-fg:#dbe0f5; --code-line:#222741;
+    --good:#43d18a; --bad:#ff7a6b; --led-off:#2a1518; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d0f1a; --surface:#161a2a; --surface2:#1f2438; --fg:#e6e9f6; --muted:#9298b8; --line:#2b3150;
+  --accent:#ff5a6e; --accent-fg:#2a0309; --amber:#f2b84b; --amber-bg:#2a2412;
+  --stage:#101324; --floor:#181c30; --code-bg:#080a12; --code-fg:#dbe0f5; --code-line:#222741;
+  --good:#43d18a; --bad:#ff7a6b; --led-off:#2a1518; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  background:var(--bg); color:var(--fg); font-family:var(--font-body); font-size:15.5px; line-height:1.5;
+  padding-block:18px 28px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px));
+}
+.app{max-width:1280px; margin:0 auto; display:flex; flex-direction:column; gap:14px}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.top{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px}
+.brand{display:flex; align-items:center; gap:12px; min-width:0}
+.brand svg{flex:none; color:var(--accent)}
+h1{margin:0; font-family:var(--font-display); font-weight:700; font-size:25px; line-height:1.1}
+.brand p{margin:2px 0 0; color:var(--muted); font-size:13.5px}
+.progress{display:flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:12px; color:var(--muted)}
+.bar{width:140px; height:6px; background:var(--surface2); border-radius:3px; overflow:hidden}
+.bar i{display:block; height:100%; width:0; background:var(--accent); transition:width .4s}
+
+.lessons{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin}
+.lessons button{flex:none; display:flex; align-items:center; gap:8px; padding:7px 12px 7px 8px; border:1px solid var(--line); background:var(--surface); border-radius:8px; cursor:pointer; font-size:13.5px; font-weight:700; white-space:nowrap}
+.lessons button .n{display:grid; place-items:center; width:22px; height:22px; border-radius:6px; font-family:var(--font-mono); font-size:12px; background:var(--surface2); color:var(--muted)}
+.lessons button[aria-current="true"]{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+.lessons button[aria-current="true"] .n{background:var(--accent); color:var(--accent-fg)}
+.lessons button.done .n{background:var(--good); color:#fff}
+.lessons button:hover{background:var(--surface2)}
+
+.grid{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:16px; align-items:start}
+.left,.right{display:flex; flex-direction:column; gap:12px; min-width:0}
+@media (max-width:980px){ .grid{grid-template-columns:minmax(0,1fr)} }
+
+.stage{position:relative; width:100%; aspect-ratio:4/3; min-height:300px; max-height:70vh; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--stage); touch-action:none}
+.stage canvas{display:block; width:100%; height:100%}
+.hint{position:absolute; left:10px; bottom:10px; right:10px; pointer-events:none; font-size:12px; font-family:var(--font-mono); color:var(--muted); text-shadow:0 0 6px var(--stage), 0 0 2px var(--stage)}
+.glfail{position:absolute; inset:0; display:grid; place-items:center; padding:24px; text-align:center; color:var(--ink)}
+.glfail[hidden]{display:none}
+
+.panel{border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:14px; display:flex; flex-direction:column; gap:14px}
+.panel h3{margin:0 0 6px; font-family:var(--font-display); font-size:14px; font-weight:600; letter-spacing:.02em}
+.row{display:flex; flex-wrap:wrap; gap:16px; align-items:center}
+.disp{display:grid; grid-template-columns:repeat(5,22px); gap:5px; padding:10px; background:#0b0a0f; border-radius:8px; border:1px solid var(--code-line)}
+.disp i{width:22px; height:22px; border-radius:4px; background:var(--led-off); transition:background .05s, box-shadow .05s}
+.btns{display:flex; flex-wrap:wrap; gap:8px}
+.btn{border:1px solid var(--line); background:var(--bg); border-radius:8px; padding:8px 14px; cursor:pointer; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px; user-select:none; touch-action:none}
+.btn:hover{background:var(--surface2)}
+.btn.primary{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn[disabled]{opacity:.45; cursor:default}
+.btn.held{background:var(--accent); color:var(--accent-fg); border-color:var(--accent)}
+.sliders{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px 18px}
+.sl{display:grid; grid-template-columns:1fr auto; gap:2px 8px; font-size:13px; align-items:center}
+.sl input{grid-column:1/-1; width:100%; accent-color:var(--accent)}
+.sl output{font-family:var(--font-mono); font-size:12.5px; font-variant-numeric:tabular-nums; color:var(--muted)}
+.tone{font-family:var(--font-mono); font-size:12.5px; color:var(--muted)}
+.tone b{color:var(--accent)}
+.radio[hidden]{display:none}
+.radio .rr{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.radio input[type=text],.radio input[type=number]{background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:7px 9px; min-width:0}
+.radio input[type=number]{width:72px}
+.rlog{margin-top:8px; max-height:110px; overflow:auto; font-family:var(--font-mono); font-size:12px; color:var(--muted); display:flex; flex-direction:column; gap:2px}
+.rlog .out{color:var(--fg)} .rlog .bad{color:var(--bad)}
+
+.card{border:1px solid var(--line); border-radius:10px; background:var(--surface); padding:16px 18px}
+.card h2{margin:0 0 4px; font-family:var(--font-display); font-size:20px; line-height:1.25; font-weight:600}
+.eyebrow{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.card p{margin:8px 0 0}
+.goal{color:var(--muted)}
+.checks{list-style:none; padding:0; margin:12px 0 0; display:flex; flex-direction:column; gap:6px}
+.checks li{display:flex; gap:10px; align-items:flex-start; font-size:14.5px}
+.checks li::before{content:""; flex:none; width:16px; height:16px; margin-top:3px; border:1.5px solid var(--line); border-radius:4px; background:var(--bg)}
+.checks li.ok::before{background:var(--good); border-color:var(--good); background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>")}
+.checks li.ok{color:var(--muted)}
+.checks li.challenge span::after{content:" desafio"; font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--amber); margin-left:6px}
+.tip{margin-top:14px; padding:10px 12px; border-radius:8px; background:var(--amber-bg); border:1px solid color-mix(in srgb, var(--amber) 35%, transparent); font-size:14px}
+.tip strong{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--amber); display:block; margin-bottom:2px}
+.banner{margin-top:12px; padding:9px 12px; border-radius:8px; background:var(--good); color:#fff; font-weight:700; display:none}
+.banner.show{display:block}
+.lnav{display:flex; justify-content:space-between; gap:8px; margin-top:14px}
+
+.editor{border:1px solid var(--code-line); border-radius:10px; overflow:hidden; background:var(--code-bg)}
+.bar-tools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 10px; background:var(--surface); border-bottom:1px solid var(--line)}
+.bar-tools .sp{flex:1}
+.bar-tools label{font-size:13px; color:var(--muted); display:flex; align-items:center; gap:6px}
+.bar-tools select{background:var(--bg); border:1px solid var(--line); border-radius:6px; padding:4px 6px; font-size:13px}
+.status{font-family:var(--font-mono); font-size:11.5px; padding:3px 8px; border-radius:99px; background:var(--surface2); color:var(--muted)}
+.status.run{background:var(--accent); color:var(--accent-fg)}
+textarea#code{display:block; width:100%; height:330px; resize:vertical; border:0; padding:12px 14px; background:var(--code-bg); color:var(--code-fg); font-family:var(--font-mono); font-size:13px; line-height:1.55; tab-size:4; white-space:pre; overflow:auto}
+textarea#code:focus-visible{outline-offset:-2px}
+.serial{border:1px solid var(--code-line); border-radius:10px; overflow:hidden; background:var(--code-bg)}
+.serial header{display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--surface); border-bottom:1px solid var(--line); font-family:var(--font-mono); font-size:12px; color:var(--muted)}
+.serial header button{background:none; border:0; cursor:pointer; color:var(--muted); font-size:12px; text-decoration:underline}
+pre#serial{margin:0; height:130px; overflow:auto; padding:10px 12px; color:var(--code-fg); font-family:var(--font-mono); font-size:12.5px; line-height:1.5; white-space:pre-wrap; word-break:break-word}
+pre#serial .err{color:#ff8f80} pre#serial .sys{color:#8a93b8}
+.note{font-size:13px; color:var(--muted); border-top:1px dashed var(--line); padding-top:12px; margin:0}
+.note b{color:var(--fg)}
+
+.app[data-mode="intro"] .panel,.app[data-mode="intro"] #codeArea{display:none}
+.app:not([data-mode="intro"]) #anatomy{display:none}
+#anatomy h3{margin:0 0 6px; font-family:var(--font-display); font-size:16px; font-weight:600}
+#anatomy details{margin-top:14px; border-top:1px solid var(--line); padding-top:12px}
+#anatomy summary{cursor:pointer; font-family:var(--font-display); font-weight:600; font-size:15.5px}
+.parts{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px; margin-top:10px}
+.parts button{display:flex; align-items:center; gap:8px; text-align:left; border:1px solid var(--line); background:var(--bg); border-radius:8px; padding:8px 10px; cursor:pointer; font-size:13.5px; line-height:1.25}
+.parts button .m{flex:none; width:16px; height:16px; border-radius:4px; border:1.5px solid var(--line)}
+.parts button.seen .m{background:var(--good); border-color:var(--good)}
+.parts button[aria-pressed="true"]{border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent); background:var(--surface2)}
+.detail{margin-top:12px; padding:12px 14px; border-radius:8px; background:var(--bg); border:1px solid var(--line)}
+.detail h4{margin:0; font-family:var(--font-display); font-size:16.5px}
+.detail .role{font-family:var(--font-mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); margin:2px 0 6px}
+.detail p{margin:6px 0 0; font-size:14.5px}
+.detail .why{color:var(--muted)}
+.tw{overflow-x:auto}
+.spec{width:100%; border-collapse:collapse; font-size:13.5px; margin-top:10px}
+.spec th,.spec td{padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+.spec th{font-family:var(--font-mono); font-size:11.5px; font-weight:500; color:var(--muted)}
+.spec td:first-child{font-weight:700}
+.spec td:nth-child(2){color:var(--accent); font-weight:700}
+.q{margin-top:12px}
+.q p{margin:0 0 6px; font-weight:700; font-size:14.5px}
+.q .opts{display:grid; gap:6px}
+.q .opts button{text-align:left; border:1px solid var(--line); background:var(--bg); border-radius:8px; padding:7px 10px; cursor:pointer; font-size:14px}
+.q .opts button:hover:not([disabled]){background:var(--surface2)}
+.q .opts button.right{border-color:var(--good); box-shadow:inset 0 0 0 1px var(--good)}
+.q .opts button.wrong{border-color:var(--bad); box-shadow:inset 0 0 0 1px var(--bad)}
+.q .exp{margin-top:6px; font-size:13.5px; color:var(--muted)}
+@media (max-width:640px){ .hint{display:none} .stage{aspect-ratio:1/1; max-height:none} }
+@media (prefers-reduced-motion:reduce){ .bar i{transition:none} }
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<div class="app" data-mode="intro">
+  <header class="top">
+    <div class="brand">
+      <svg width="42" height="42" viewBox="0 0 42 42" fill="none" aria-hidden="true">
+        <rect x="3" y="7" width="36" height="28" rx="6" stroke="currentColor" stroke-width="2.4"/>
+        <g fill="currentColor"><circle cx="16" cy="15" r="1.7"/><circle cx="21" cy="15" r="1.7"/><circle cx="26" cy="15" r="1.7"/><circle cx="16" cy="21" r="1.7"/><circle cx="21" cy="21" r="1.7"/><circle cx="26" cy="21" r="1.7"/><circle cx="16" cy="27" r="1.7"/><circle cx="21" cy="27" r="1.7"/><circle cx="26" cy="27" r="1.7"/></g>
+      </svg>
+      <div>
+        <h1>micro:bit Lab 3D</h1>
+        <p>Placa 3D, matriz de LEDs, sensores e código em JavaScript no estilo MakeCode, direto no navegador.</p>
+      </div>
+    </div>
+    <div class="progress" aria-live="polite"><span id="progText">0 de 8 lições</span><div class="bar"><i id="progBar"></i></div></div>
+  </header>
+
+  <nav class="lessons" id="lessonNav" aria-label="Lições"></nav>
+
+  <main class="grid">
+    <section class="left" aria-label="Bancada 3D">
+      <div class="stage" id="stage">
+        <div class="hint">arraste: girar · roda: zoom · clique e segure os botões A e B, o logotipo dourado e os anéis 0, 1 e 2</div>
+        <div class="glfail" id="glFail" hidden>Seu navegador não conseguiu iniciar o WebGL. Ative a aceleração de hardware para ver a placa 3D. O código e o console continuam funcionando.</div>
+      </div>
+
+      <div class="panel" aria-label="Painel de simulação">
+        <div class="row">
+          <div class="disp" id="disp" role="img" aria-label="Matriz de LEDs 5 por 5"></div>
+          <div>
+            <h3>Entradas</h3>
+            <div class="btns">
+              <button class="btn hold" id="btnA" type="button">A</button>
+              <button class="btn hold" id="btnB" type="button">B</button>
+              <button class="btn hold" id="btnAB" type="button">A+B</button>
+              <button class="btn hold" id="btnLogo" type="button">Logo</button>
+              <button class="btn" id="btnShake" type="button">Sacudir</button>
+            </div>
+            <div class="btns" style="margin-top:8px">
+              <button class="btn hold" id="btnP0" type="button">Tocar P0</button>
+              <button class="btn hold" id="btnP1" type="button">Tocar P1</button>
+              <button class="btn hold" id="btnP2" type="button">Tocar P2</button>
+            </div>
+            <div class="tone" id="tone" style="margin-top:10px">Alto-falante: <b>silêncio</b></div>
+          </div>
+        </div>
+        <div>
+          <h3>Sensores</h3>
+          <div class="sliders">
+            <label class="sl" for="sRoll">Inclinar para os lados <output id="oRoll">0°</output><input type="range" id="sRoll" min="-90" max="90" value="0"></label>
+            <label class="sl" for="sPitch">Inclinar para frente e para trás <output id="oPitch">0°</output><input type="range" id="sPitch" min="-90" max="90" value="0"></label>
+            <label class="sl" for="sTemp">Temperatura <output id="oTemp">24 °C</output><input type="range" id="sTemp" min="0" max="50" value="24"></label>
+            <label class="sl" for="sLight">Luz <output id="oLight">128</output><input type="range" id="sLight" min="0" max="255" value="128"></label>
+            <label class="sl" for="sHead">Bússola <output id="oHead">0°</output><input type="range" id="sHead" min="0" max="359" value="0"></label>
+            <label class="sl" for="sSound">Som do microfone <output id="oSound">20</output><input type="range" id="sSound" min="0" max="255" value="20"></label>
+          </div>
+        </div>
+        <div class="radio" id="radioBox" hidden>
+          <h3>Rádio · segundo micro:bit simulado</h3>
+          <div class="rr">
+            <label for="rGroup">Grupo do amigo</label><input type="number" id="rGroup" min="0" max="255" value="1">
+            <input type="text" id="rMsg" value="ola" aria-label="Mensagem do amigo" autocomplete="off" style="flex:1 1 120px">
+            <button class="btn" id="rSendTxt" type="button">Enviar texto</button>
+            <button class="btn" id="rSendNum" type="button">Enviar número</button>
+          </div>
+          <div class="rlog" id="rLog" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="right">
+      <article class="card" id="lessonCard"></article>
+      <section class="card" id="anatomy" aria-label="Anatomia da placa"></section>
+      <div id="codeArea">
+        <div class="editor">
+          <div class="bar-tools">
+            <button class="btn primary" id="btnRun" type="button">▶ Executar</button>
+            <button class="btn" id="btnStop" type="button" disabled>■ Parar</button>
+            <button class="btn" id="btnReset" type="button">Restaurar código</button>
+            <span class="sp"></span>
+            <label for="speed">Velocidade <select id="speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
+            <span class="status" id="status">parado</span>
+          </div>
+          <textarea id="code" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Editor de código"></textarea>
+        </div>
+        <div class="serial" style="margin-top:12px">
+          <header><span>Console · serial</span><button id="btnClear" type="button">limpar</button></header>
+          <pre id="serial" aria-live="off"></pre>
+        </div>
+        <p class="note" style="margin-top:12px"><b>Sintaxe do MakeCode (JavaScript):</b> o código usa a mesma sintaxe do modo JavaScript do MakeCode (makecode.microbit.org), mas este simulador é um subconjunto. Teste no MakeCode antes de usar em aula. Ele cobre <code>basic</code>, <code>input</code>, <code>led</code>, <code>music</code>, <code>radio</code>, <code>serial</code>, <code>game</code> e parte de <code>pins</code>. Funções fora dessa lista mostram um aviso.</p>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/* ===== Simulador micro:bit (JavaScript no estilo MakeCode, rodando em fibras assíncronas) ===== */
+const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+const STOP = { stop: true };
+
+const bmp = s => s.split('/').join('').split('').map(c => (c === '#' || c === '1') ? 255 : 0);
+const FONT_SRC = {
+  '0':'01110/10001/10001/10001/01110','1':'00100/01100/00100/00100/01110','2':'11110/00001/01110/10000/11111','3':'11110/00001/00110/00001/11110',
+  '4':'00110/01010/10010/11111/00010','5':'11111/10000/11110/00001/11110','6':'01110/10000/11110/10001/01110','7':'11111/00010/00100/01000/10000',
+  '8':'01110/10001/01110/10001/01110','9':'01110/10001/01111/00001/01110',
+  A:'01110/10001/11111/10001/10001',B:'11110/10001/11110/10001/11110',C:'01111/10000/10000/10000/01111',D:'11110/10001/10001/10001/11110',
+  E:'11111/10000/11110/10000/11111',F:'11111/10000/11110/10000/10000',G:'01111/10000/10011/10001/01111',H:'10001/10001/11111/10001/10001',
+  I:'11111/00100/00100/00100/11111',J:'11111/00010/00010/10010/01100',K:'10010/10100/11000/10100/10010',L:'10000/10000/10000/10000/11111',
+  M:'10001/11011/10101/10001/10001',N:'10001/11001/10101/10011/10001',O:'01110/10001/10001/10001/01110',P:'11110/10001/11110/10000/10000',
+  Q:'01100/10010/10010/10110/01111',R:'11110/10001/11110/10010/10001',S:'01111/10000/01110/00001/11110',T:'11111/00100/00100/00100/00100',
+  U:'10001/10001/10001/10001/01110',V:'10001/10001/10001/01010/00100',W:'10001/10001/10101/11011/10001',X:'10001/01010/00100/01010/10001',
+  Y:'10001/01010/00100/00100/00100',Z:'11111/00010/00100/01000/11111',
+  ' ':'00000/00000/00000/00000/00000','!':'00100/00100/00100/00000/00100','?':'01110/10001/00110/00000/00100','.':'00000/00000/00000/00000/00100',
+  ',':'00000/00000/00000/00100/01000','-':'00000/00000/01110/00000/00000','+':'00000/00100/01110/00100/00000',':':'00000/00100/00000/00100/00000',
+  '=':'00000/01110/00000/01110/00000','*':'00000/10101/01110/10101/00000','/':'00001/00010/00100/01000/10000','(':'00110/01000/01000/01000/00110',
+  ')':'01100/00010/00010/00010/01100','%':'11001/11010/00100/01011/10011','<':'00010/00100/01000/00100/00010','>':'01000/00100/00010/00100/01000',
+  '_':'00000/00000/00000/00000/11111',"'":'00100/00100/00000/00000/00000',
+};
+const GLYPH = {}; for (const k in FONT_SRC) GLYPH[k] = bmp(FONT_SRC[k]);
+const ICON_SRC = {
+  Heart:'.#.#./#####/#####/.###./..#..', SmallHeart:'...../.#.#./.###./..#../.....', Happy:'...../.#.#./...../#...#/.###.',
+  Sad:'...../.#.#./...../.###./#...#', Yes:'...../....#/...#./#.#../.#...', No:'#...#/.#.#./..#../.#.#./#...#',
+  Surprised:'.#.#./...../..#../.#.#./..#..', Angry:'#...#/.#.#./...../#####/#.#.#', Asleep:'...../##.##/...../.###./.....',
+  Confused:'...../.#.#./...../.#.#./#.#.#', Skull:'.###./#.#.#/#####/.###./.#.#.', Ghost:'.###./#.#.#/#####/#####/#.#.#',
+  House:'..#../.###./#####/.###./.#.#.', Square:'#####/#...#/#...#/#...#/#####', SmallSquare:'...../.###./.#.#./.###./.....',
+  Diamond:'..#../.#.#./#...#/.#.#./..#..', SmallDiamond:'...../..#../.#.#./..#../.....', Target:'..#../.###./##.##/.###./..#..',
+  Triangle:'...../..#../.#.#./#####/.....', Chessboard:'.#.#./#.#.#/.#.#./#.#.#/.#.#.',
+};
+const ICONS = {}; for (const k in ICON_SRC) ICONS[k] = bmp(ICON_SRC[k]);
+const IconNames = {}; for (const k in ICON_SRC) IconNames[k] = k;
+const normText = t => String(t).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+function stripComments(s){
+  return s.replace(/("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`)|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, (m, str) => str ? str : (m.startsWith('/*') ? m.replace(/[^\n]/g, '') : ''));
+}
+function transpile(src){
+  let s = stripComments(src);
+  s = s.replace(/\)\s*:\s*(?:number|string|boolean|void|any)\s*\{/g, ') {');
+  s = s.replace(/(\w+)\s*:\s*(?:number|string|boolean|any)(?:\[\])?(?=\s*[,)=;])/g, '$1');
+  const names = new Set();
+  s = s.replace(/\bfunction\s+(\w+)\s*\(/g, (m, n) => { names.add(n); return 'async function ' + n + '('; });
+  s = s.replace(/\bfunction\s*\(/g, 'async function (');
+  s = s.replace(/(\([^()]*\)|\b[A-Za-z_]\w*)\s*=>/g, 'async $1 =>');
+  if (names.size) s = s.replace(new RegExp('(?<!function\\s+)(?<![\\w.$])(' + [...names].join('|') + ')\\s*\\(', 'g'), 'await $1(');
+  s = s.replace(/\b(basic\.(?:pause|showString|showNumber|showIcon|showLeds)|music\.(?:playTone|rest)|game\.gameOver)\s*\(/g, 'await $1(');
+  return s;
+}
+
+class Sprite {
+  constructor(S, x, y){ this.S = S; this.x = clamp(Math.round(x), 0, 4); this.y = clamp(Math.round(y), 0, 4); this.dir = 90; this.b = 255; this.deleted = false; S.sprites.push(this); }
+  move(n){
+    const r = this.dir * Math.PI / 180;
+    this.x = clamp(this.x + Math.round(Math.sin(r) * n), 0, 4); this.y = clamp(this.y - Math.round(Math.cos(r) * n), 0, 4); this.S.stats.spriteMoved = true;
+  }
+  turn(d, deg){ this.dir = ((this.dir + (d === 'right' ? 1 : -1) * deg) % 360 + 360) % 360; }
+  get(p){ return p === 'x' ? this.x : p === 'y' ? this.y : p === 'direction' ? this.dir : p === 'brightness' ? this.b : 0; }
+  set(p, v){
+    if (p === 'x') this.x = clamp(Math.round(v), 0, 4); else if (p === 'y') this.y = clamp(Math.round(v), 0, 4);
+    else if (p === 'direction') this.dir = v; else if (p === 'brightness') this.b = clamp(v, 0, 255);
+    if (p === 'x') this.S.stats.spriteMoved = true;
+  }
+  change(p, v){ this.set(p, this.get(p) + v); }
+  isTouching(o){ return !this.deleted && !o.deleted && this.x === o.x && this.y === o.y; }
+  isTouchingEdge(){ return this.x === 0 || this.x === 4 || this.y === 0 || this.y === 4; }
+  ifOnEdgeBounce(){
+    const sx = Math.sin(this.dir * Math.PI / 180);
+    if ((this.x === 0 && sx < 0) || (this.x === 4 && sx > 0)) this.dir = (360 - this.dir) % 360;
+    const cy = Math.cos(this.dir * Math.PI / 180);
+    if ((this.y === 0 && cy > 0) || (this.y === 4 && cy < 0)) this.dir = (540 - this.dir) % 360;
+  }
+  delete(){ this.deleted = true; }
+}
+
+const Sim = {
+  leds: new Array(25).fill(0), sprites: [], handlers: null, foreverFns: [], timers: new Set(),
+  running: false, token: 0, speed: 1, t0: 0, score: 0, radioGroup: 0, tempo: 120, stats: {},
+  btn: { A: false, B: false }, logo: false, pinTouch: { P0: false, P1: false, P2: false }, pinsOut: {},
+  sens: { roll: 0, pitch: 0, temp: 24, light: 128, heading: 0, sound: 20 }, orient: 'screen-up', shakeUntil: 0,
+  hooks: { serial(){}, state(){}, tone(){}, radio(){} },
+
+  resetStats(){
+    this.stats = { strings: new Set(), icons: new Set(), ledsUsed: false, handler: {}, plotX: new Set(), plotY: new Set(), unplot: false,
+      numbers: new Set(), gestures: new Set(), tempRead: false, lightSeen: new Set(), serialLines: 0, radioGroupSet: false, radioSent: 0,
+      radioRecv: 0, radioMismatch: false, spriteMoved: false, maxScore: 0, gameOver: false, tones: new Set() };
+  },
+  resetAll(){
+    this.leds.fill(0); this.sprites = []; this.score = 0; this.radioGroup = 0; this.foreverFns = []; this.pinsOut = {}; this.tempo = 120;
+    this.handlers = { button: { A: [], B: [], AB: [] }, gesture: {}, logo: {}, pin: {}, radio: { string: [], number: [], value: [] } };
+  },
+  now(){ return (performance.now() - this.t0) * this.speed; },
+  frame(){
+    const out = this.leds.slice();
+    for (const sp of this.sprites) if (!sp.deleted) { const i = sp.y * 5 + sp.x; out[i] = Math.max(out[i], sp.b); }
+    return out;
+  },
+  setBitmap(b){ for (let i = 0; i < 25; i++) this.leds[i] = b[i]; },
+  pause(ms){
+    const my = this.token;
+    return new Promise((res, rej) => {
+      const e = { rej }; e.t = setTimeout(() => { this.timers.delete(e); my === this.token ? res() : rej(STOP); }, Math.max(0, ms) / this.speed);
+      this.timers.add(e);
+    });
+  },
+  async scroll(text, interval = 150){
+    const t = normText(text); const chars = [...t];
+    if (!chars.length) return;
+    const g = c => GLYPH[c] || GLYPH['?'];
+    if (chars.length === 1){ this.setBitmap(g(chars[0])); await this.pause(Math.max(interval * 4, 500)); return; }
+    const strip = []; const blank = () => [0, 0, 0, 0, 0];
+    for (let i = 0; i < 5; i++) strip.push(blank());
+    for (const c of chars){ const gl = g(c); for (let x = 0; x < 5; x++) strip.push([0, 1, 2, 3, 4].map(y => gl[y * 5 + x])); strip.push(blank()); }
+    for (let i = 0; i < 4; i++) strip.push(blank());
+    for (let off = 0; off <= strip.length - 5; off++){
+      for (let x = 0; x < 5; x++) for (let y = 0; y < 5; y++) this.leds[y * 5 + x] = strip[off + x][y];
+      await this.pause(interval);
+    }
+  },
+
+  // ---- eventos ----
+  fork(fn, my){
+    (async () => { try { await fn(); } catch (e) { if (e !== STOP && this.token === my) { this.report(e); this.halt(); } } })();
+  },
+  dispatch(h, ...args){
+    const tk = this.token;
+    h._q = (h._q || Promise.resolve()).then(async () => { if (this.token === tk) await h(...args); })
+      .catch(e => { if (e !== STOP && this.token === tk) { this.report(e); this.halt(); } });
+  },
+  fire(list, ...args){ (list || []).forEach(h => this.dispatch(h, ...args)); },
+  setButton(name, down){
+    if (!!this.btn[name] === down || !this.handlers) return;
+    this.btn[name] = down;
+    if (!down || !this.running) return;
+    const other = name === 'A' ? 'B' : 'A';
+    if (this.btn[other]) { this.stats.handler.AB = true; this.fire(this.handlers.button.AB); }
+    else { this.stats.handler[name] = true; this.fire(this.handlers.button[name]); }
+  },
+  setLogo(down){
+    if (this.logo === down) return; this.logo = down; if (!this.running) return;
+    const H = this.handlers.logo; if (down) { this.fire(H.pressed); this.fire(H.touched); } else this.fire(H.released);
+  },
+  setPin(name, down){
+    if (this.pinTouch[name] === down) return; this.pinTouch[name] = down;
+    if (down && this.running) this.fire((this.handlers.pin[name] || []));
+  },
+  gesture(g){ this.stats.gestures.add(g); if (this.running) this.fire(this.handlers.gesture[g]); },
+  shake(){ this.shakeUntil = performance.now() + 700; this.gesture('shake'); },
+  setTilt(roll, pitch){
+    this.sens.roll = roll; this.sens.pitch = pitch;
+    const o = roll > 30 ? 'tilt-right' : roll < -30 ? 'tilt-left' : pitch > 30 ? 'logo-down' : pitch < -30 ? 'logo-up' : 'screen-up';
+    if (o !== this.orient) { this.orient = o; this.gesture(o); }
+  },
+  receive(kind, payload, friendGroup){
+    if (friendGroup !== this.radioGroup){
+      this.stats.radioMismatch = true;
+      return { ok: false, msg: `Ninguém ouviu: o seu micro:bit está no grupo ${this.radioGroup} e o amigo no grupo ${friendGroup}.` };
+    }
+    if (!this.running) return { ok: false, msg: 'O programa não está rodando.' };
+    this.stats.radioRecv++;
+    const H = this.handlers.radio;
+    if (kind === 'number') this.fire(H.number, Number(payload)); else this.fire(H.string, String(payload));
+    return { ok: true, msg: 'Mensagem entregue.' };
+  },
+
+  api(){
+    const S = this, st = () => S.stats;
+    const out = (t, c) => S.hooks.serial(t, c);
+    const M = Object.create(Math); M.randomRange = (a, b) => Math.floor(a + Math.random() * (b - a + 1));
+    const E = (...ks) => Object.fromEntries(ks.map(k => [k, k]));
+    const NOTES = { C: 262, CSharp: 277, D: 294, Eb: 311, E: 330, F: 349, FSharp: 370, G: 392, GSharp: 415, A: 440, Bb: 466, B: 494, C5: 523, D5: 587, E5: 659, F5: 698, G5: 784, A5: 880, B5: 988 };
+    const accel = d => {
+      const r = S.sens.roll * Math.PI / 180, p = S.sens.pitch * Math.PI / 180, shaking = performance.now() < S.shakeUntil;
+      const n = () => Math.round((Math.random() - .5) * 16 + (shaking ? (Math.random() - .5) * 4000 : 0));
+      const x = Math.round(1024 * Math.sin(r)) + n(), y = Math.round(1024 * Math.sin(p)) + n(), z = -Math.round(1024 * Math.cos(r) * Math.cos(p)) + n();
+      return d === 'x' ? x : d === 'y' ? y : d === 'z' ? z : Math.round(Math.sqrt(x * x + y * y + z * z));
+    };
+    return {
+      Math: M, randint: M.randomRange,
+      Button: { A: 'A', B: 'B', AB: 'AB' }, IconNames, Note: NOTES,
+      Gesture: { Shake: 'shake', TiltLeft: 'tilt-left', TiltRight: 'tilt-right', LogoUp: 'logo-up', LogoDown: 'logo-down', ScreenUp: 'screen-up', ScreenDown: 'screen-down', FreeFall: 'freefall' },
+      Dimension: { X: 'x', Y: 'y', Z: 'z', Strength: 'strength' }, Rotation: { Pitch: 'pitch', Roll: 'roll' },
+      TouchButtonEvent: { Pressed: 'pressed', Released: 'released', Touched: 'touched', LongPressed: 'long' }, TouchPin: E('P0', 'P1', 'P2'),
+      DigitalPin: E('P0','P1','P2','P3','P4','P5','P6','P7','P8','P9','P10','P11','P12','P13','P14','P15','P16'), AnalogPin: E('P0', 'P1', 'P2'),
+      BeatFraction: { Whole: 1, Half: 0.5, Quarter: 0.25, Eighth: 0.125, Sixteenth: 0.0625, Double: 2, Breve: 4 },
+      LedSpriteProperty: { X: 'x', Y: 'y', Direction: 'direction', Brightness: 'brightness' }, Direction: { Left: 'left', Right: 'right' },
+      console: { log(v){ out(String(v) + '\n'); st().serialLines++; } },
+      basic: {
+        async showString(t, interval){ st().strings.add(String(t)); await S.scroll(t, interval); },
+        async showNumber(n, interval){ st().numbers.add(n); await S.scroll(String(n), interval); },
+        async showIcon(name, interval = 600){
+          const b = ICONS[name]; if (!b) throw new Error('Ícone desconhecido: ' + name);
+          S.setBitmap(b); st().icons.add(name); await S.pause(interval);
+        },
+        async showLeds(pat, interval = 400){
+          const rows = String(pat).split('\n').map(r => r.replace(/\s+/g, '')).filter(Boolean);
+          const b = new Array(25).fill(0);
+          rows.slice(0, 5).forEach((r, y) => [...r].slice(0, 5).forEach((c, x) => { if (c === '#' || c === '1') b[y * 5 + x] = 255; }));
+          S.setBitmap(b); st().ledsUsed = true; await S.pause(interval);
+        },
+        clearScreen(){ S.leds.fill(0); },
+        pause(ms){ return S.pause(ms); },
+        forever(fn){ S.foreverFns.push(fn); },
+      },
+      input: {
+        onButtonPressed(b, fn){ S.handlers.button[b].push(fn); },
+        buttonIsPressed(b){ return b === 'AB' ? S.btn.A && S.btn.B : !!S.btn[b]; },
+        onGesture(g, fn){ (S.handlers.gesture[g] = S.handlers.gesture[g] || []).push(fn); },
+        onLogoEvent(e, fn){ (S.handlers.logo[e] = S.handlers.logo[e] || []).push(fn); },
+        logoIsPressed(){ return S.logo; },
+        onPinPressed(p, fn){ (S.handlers.pin[p] = S.handlers.pin[p] || []).push(fn); },
+        pinIsPressed(p){ return !!S.pinTouch[p]; },
+        acceleration: accel,
+        rotation(r){ return Math.round(r === 'roll' ? S.sens.roll : S.sens.pitch); },
+        temperature(){ st().tempRead = true; return Math.round(S.sens.temp); },
+        lightLevel(){ st().lightSeen.add(Math.round(S.sens.light / 51)); return Math.round(S.sens.light); },
+        compassHeading(){ return Math.round(S.sens.heading); },
+        soundLevel(){ return Math.round(S.sens.sound); },
+        runningTime(){ return Math.floor(S.now()); },
+      },
+      led: {
+        plot(x, y){ x = Math.round(x); y = Math.round(y); if (x < 0 || x > 4 || y < 0 || y > 4) return; S.leds[y * 5 + x] = 255; st().plotX.add(x); st().plotY.add(y); },
+        unplot(x, y){ x = Math.round(x); y = Math.round(y); if (x < 0 || x > 4 || y < 0 || y > 4) return; S.leds[y * 5 + x] = 0; st().unplot = true; },
+        plotBrightness(x, y, b){ if (x >= 0 && x <= 4 && y >= 0 && y <= 4) S.leds[Math.round(y) * 5 + Math.round(x)] = clamp(b, 0, 255); },
+        point(x, y){ return S.leds[Math.round(y) * 5 + Math.round(x)] > 0; },
+        toggle(x, y){ const i = Math.round(y) * 5 + Math.round(x); if (i >= 0 && i < 25) S.leds[i] = S.leds[i] ? 0 : 255; },
+      },
+      music: {
+        async playTone(f, ms){ st().tones.add(Math.round(f)); S.hooks.tone(f, ms); await S.pause(ms); },
+        ringTone(f){ st().tones.add(Math.round(f)); S.hooks.tone(f, 0); },
+        async rest(ms){ await S.pause(ms); },
+        beat(f = 1){ return f * 60000 / S.tempo; }, setTempo(b){ S.tempo = b; }, tempo(){ return S.tempo; },
+        stopAllSounds(){ S.hooks.tone(0, 0); },
+      },
+      radio: {
+        setGroup(n){ S.radioGroup = n; st().radioGroupSet = true; },
+        sendString(t){ st().radioSent++; S.hooks.radio({ dir: 'out', group: S.radioGroup, text: String(t) }); },
+        sendNumber(n){ st().radioSent++; S.hooks.radio({ dir: 'out', group: S.radioGroup, text: String(n) }); },
+        onReceivedString(fn){ S.handlers.radio.string.push(fn); }, onReceivedNumber(fn){ S.handlers.radio.number.push(fn); },
+      },
+      serial: {
+        writeLine(t){ out(String(t) + '\n'); st().serialLines++; }, writeString(t){ out(String(t)); },
+        writeValue(n, v){ out(n + ':' + v + '\n'); st().serialLines++; },
+      },
+      pins: {
+        digitalWritePin(p, v){ S.pinsOut[p] = v ? 1 : 0; }, digitalReadPin(p){ return S.pinTouch[p] ? 1 : 0; },
+        analogWritePin(p, v){ S.pinsOut[p] = clamp(Math.round(v), 0, 1023); }, analogReadPin(){ return 0; },
+      },
+      control: { reset(){ S.hooks.serial('↺ control.reset()\n', 'sys'); }, inBackground(fn){ S.fork(fn, S.token); }, runningTime(){ return Math.floor(S.now()); } },
+      game: {
+        createSprite(x, y){ return new Sprite(S, x, y); },
+        addScore(n){ S.score += n; st().maxScore = Math.max(st().maxScore, S.score); },
+        score(){ return S.score; }, setScore(n){ S.score = n; st().maxScore = Math.max(st().maxScore, n); },
+        async gameOver(){
+          st().gameOver = true; S.sprites = []; const my = S.token;
+          await S.scroll('GAME OVER', 120); await S.scroll(String(S.score), 150);
+          if (S.token === my) S.halt();
+        },
+      },
+    };
+  },
+
+  compile(code){
+    const js = transpile(code), api = this.api(), keys = Object.keys(api);
+    const fn = new AsyncFunction(...keys, js);
+    return () => fn(...keys.map(k => api[k]));
+  },
+  friendlyError(e){
+    const m = String(e && e.message || e); let r;
+    if ((r = m.match(/^(\w+) is not defined/))) return `'${r[1]}' não foi declarado. Confira o nome da variável ou da função.`;
+    if ((r = m.match(/(.+) is not a function/))) return `A função ${r[1]} não existe ou ainda não é suportada neste simulador.`;
+    if ((r = m.match(/Cannot read properties of undefined \(reading '(\w+)'\)/))) return `Não foi possível usar '${r[1]}': o objeto não existe.`;
+    if (/Unexpected (token|end of input|identifier)/.test(m)) return 'Erro de sintaxe: confira parênteses, chaves { } e aspas. (' + m + ')';
+    if (/already been declared/.test(m)) return 'Uma variável foi declarada duas vezes (' + m + ').';
+    return m;
+  },
+  report(e){ this.hooks.serial('Erro: ' + this.friendlyError(e) + '\n', 'err'); },
+
+  async run(code){
+    this.stop(true); this.resetAll(); this.t0 = performance.now();
+    let boot; try { boot = this.compile(code); } catch (e) { this.hooks.serial('Erro de compilação: ' + this.friendlyError(e) + '\n', 'err'); this.hooks.state(); return; }
+    const my = ++this.token; this.running = true; this.hooks.state();
+    this.hooks.serial('▶ Programa iniciado\n', 'sys');
+    try { await boot(); } catch (e) { if (e !== STOP && this.token === my) { this.report(e); this.halt(); } return; }
+    if (this.token !== my) return;
+    for (const f of this.foreverFns) this.fork(async () => { while (this.token === my) { await f(); await this.pause(20); } }, my);
+    const H = this.handlers, any = this.foreverFns.length || H.button.A.length || H.button.B.length || H.button.AB.length ||
+      Object.values(H.gesture).some(a => a.length) || Object.values(H.logo).some(a => a.length) || Object.values(H.pin).some(a => a.length) ||
+      H.radio.string.length || H.radio.number.length;
+    if (!any) { this.running = false; this.hooks.state(); }
+  },
+  halt(){
+    this.token++; const was = this.running; this.running = false;
+    for (const e of this.timers) { clearTimeout(e.t); e.rej(STOP); } this.timers.clear();
+    this.hooks.tone(0, 0); if (was) this.hooks.state();
+  },
+  stop(silent){
+    const was = this.running; this.halt(); this.leds.fill(0); this.sprites = []; this.pinsOut = {};
+    if (was && !silent) this.hooks.serial('■ Programa parado\n', 'sys');
+    this.hooks.state();
+  },
+};
+Sim.resetStats(); Sim.resetAll();
+/* ===== Módulo 0: anatomia do micro:bit ===== */
+const INTRO = {
+  parts: [
+    { id: 'matriz', side: 'front', name: 'Matriz de LEDs 5×5', role: 'A tela do micro:bit',
+      text: 'São 25 LEDs vermelhos em 5 linhas e 5 colunas. Cada LED tem um endereço (x, y), com x de 0 a 4 da esquerda para a direita e y de 0 a 4 de cima para baixo. O (0, 0) é o canto superior esquerdo. Os LEDs também funcionam como sensor de luz: a placa mede a luz que chega neles.',
+      why: 'Quase todo programa mostra algo aqui. Em led.plot(2, 2) o LED aceso é o do centro.' },
+    { id: 'botoes', side: 'front', name: 'Botões A e B', role: 'Entradas do usuário',
+      text: 'São dois botões físicos nos lados da matriz. Você pode tratar cada um separadamente ou os dois ao mesmo tempo (A+B). Cada botão dispara um evento, e o seu código decide o que fazer.',
+      why: 'Com input.onButtonPressed(Button.A, ...) você cria um comportamento para o botão A.' },
+    { id: 'logo', side: 'front', name: 'Logotipo sensível ao toque', role: 'Um terceiro botão (versão 2)',
+      text: 'Na versão 2 o logotipo dourado, na parte de cima, é um sensor de toque capacitivo. Basta encostar o dedo. Funciona como um botão extra, mas sem peça móvel.',
+      why: 'Use input.onLogoEvent(TouchButtonEvent.Pressed, ...) para reagir ao toque.' },
+    { id: 'borda', side: 'front', name: 'Conector de borda', role: 'Pinos 0, 1, 2, 3V e GND',
+      text: 'Os cinco anéis grandes aceitam garras jacaré: os pinos 0, 1 e 2 são entradas e saídas, 3V fornece alimentação e GND é o terra. Entre os anéis ficam mais pinos pequenos que só um conector de borda alcança. Os pinos 0, 1 e 2 também detectam toque quando você segura o GND com a outra mão.',
+      why: 'Aqui você liga LEDs, buzzers, motores e sensores externos. A lógica é de 3,3 V.' },
+    { id: 'usbbat', side: 'front', name: 'USB e conector de bateria', role: 'Energia e gravação',
+      text: 'O micro-USB, na borda superior, alimenta a placa e grava o programa copiando o arquivo .hex para a unidade que aparece no computador. O conector branco ao lado recebe um suporte com 2 pilhas AAA (3 V) para usar a placa sem cabo.',
+      why: 'No MakeCode, o botão Baixar gera o arquivo .hex que você arrasta para a placa.' },
+    { id: 'cpu', side: 'back', name: 'Processador nRF52833', role: 'O cérebro (no verso)',
+      text: 'Um chip Nordic com núcleo Arm Cortex‑M4F de 64 MHz, 512 KB de flash e 128 KB de RAM. Ele também tem o rádio de 2,4 GHz, que fala Bluetooth de baixa energia e o protocolo de rádio próprio do micro:bit.',
+      why: 'É o rádio que permite que dois micro:bits conversem com radio.sendString e radio.onReceivedString.' },
+    { id: 'sensores', side: 'back', name: 'Acelerômetro e bússola', role: 'Sensores de movimento (no verso)',
+      text: 'O acelerômetro mede a aceleração nos eixos X, Y e Z. Em repouso, deitado com a tela para cima, o Z marca cerca de −1024. Com isso a placa detecta agitar, inclinar e queda livre. A bússola (magnetômetro) mede o campo magnético e informa a direção em graus. A temperatura vem do próprio processador.',
+      why: 'input.onGesture(Gesture.Shake, ...) é a base de um dado eletrônico.' },
+    { id: 'speaker', side: 'back', name: 'Alto-falante e microfone', role: 'Som (versão 2, no verso)',
+      text: 'Na versão 2 há um alto-falante embutido, então você não precisa de fones para ouvir músicas e tons. O microfone fica na frente, junto de um pequeno LED que acende quando ele está em uso.',
+      why: 'music.playTone(Note.C, 500) toca uma nota por meio segundo.' },
+  ],
+  specs: [
+    ['Processador', 'Cortex‑M4F, 64 MHz', 'Xtensa LX6, 2 núcleos, até 240 MHz'],
+    ['RAM', '128 KB', '520 KB'],
+    ['Memória flash', '512 KB', '4 MB (no módulo)'],
+    ['Tensão dos pinos', '3,3 V', '3,3 V'],
+    ['Wi‑Fi', 'não tem', 'sim, 2,4 GHz'],
+    ['Bluetooth e rádio', 'Bluetooth LE e rádio entre micro:bits', 'Bluetooth clássico e LE'],
+    ['Já vem na placa', 'matriz de LEDs, 2 botões, toque, acelerômetro, bússola, temperatura, microfone e alto-falante', 'só um LED e botões de EN e BOOT'],
+    ['Como programar', 'blocos ou JavaScript no MakeCode; MicroPython', 'Arduino (C++), MicroPython e outros'],
+  ],
+  quiz: [
+    { q: 'Qual é a coordenada do LED do canto superior esquerdo da matriz?', o: ['(4, 4)', '(0, 0)', '(0, 4)', '(1, 1)'], a: 1, e: 'O x cresce para a direita e o y cresce para baixo, começando em 0. O canto superior esquerdo é (0, 0).' },
+    { q: 'Quando o micro:bit está deitado com a tela para cima, quanto o acelerômetro marca no eixo Z?', o: ['0', '+1024', 'cerca de −1024', '+9,8'], a: 2, e: 'A gravidade puxa a placa para baixo e o Z marca em torno de −1024 milésimos de g.' },
+    { q: 'Qual componente permite que dois micro:bits conversem sem fio, sem Wi‑Fi?', o: ['O rádio de 2,4 GHz do processador', 'O alto-falante', 'O conector de borda', 'A matriz de LEDs'], a: 0, e: 'O nRF52833 tem um rádio de 2,4 GHz. Os dois micro:bits precisam estar no mesmo grupo de rádio.' },
+    { q: 'Para que serve o conector de borda?', o: ['Apenas para a bateria', 'Ligar componentes externos aos pinos 0, 1, 2, 3V e GND', 'Mostrar mensagens', 'Medir a temperatura'], a: 1, e: 'Os anéis grandes aceitam garras jacaré, e os pinos pequenos entre eles só funcionam com um conector de borda.' },
+  ],
+};
+
+/* ===== Lições ===== */
+const LESSONS = [
+{
+  id: 'intro', intro: true, title: 'Introdução: conheça o micro:bit',
+  goal: 'Conheça cada parte da placa antes de programar. Clique nos componentes na lista ou direto na placa 3D, compare com o ESP32 e responda ao teste rápido.',
+  tip: 'O micro:bit é um computador de bolso criado para o ensino. A diferença para uma placa como o ESP32 é que ele já vem com tela, botões e sensores, então você começa a programar sem montar nenhum circuito.',
+  checks: [
+    { id: 'explore', label: 'Explorou os 8 componentes da placa', test: () => false },
+    { id: 'quiz', label: 'Respondeu às 4 perguntas do teste rápido', test: () => false },
+  ],
+  code: ''
+},
+{
+  id: 'ola', title: 'Olá, mundo: texto e ícones',
+  goal: 'Mostre uma mensagem rolando na tela e depois dois ícones, um de cada vez.',
+  tip: 'basic.showString rola o texto da direita para a esquerda e só passa para a próxima linha quando termina. A fonte do micro:bit tem apenas 5×5 pontos, então acentos são ignorados e letras minúsculas viram maiúsculas.',
+  checks: [
+    { id: 'str', label: 'Mostrou um texto com basic.showString', test: s => s.strings.size >= 1 },
+    { id: 'icons', label: 'Mostrou pelo menos 2 ícones diferentes', test: s => s.icons.size >= 2 },
+    { id: 'leds', label: 'Desenhe o seu ícone com basic.showLeds', challenge: true, test: s => s.ledsUsed },
+  ],
+  code: `// Lição 1: texto e ícones
+basic.showString("OLA!")
+basic.showIcon(IconNames.Heart)
+basic.pause(1000)
+basic.showIcon(IconNames.SmallHeart)
+basic.pause(1000)
+basic.clearScreen()
+`
+},
+{
+  id: 'botoes', title: 'Botões A e B',
+  goal: 'Programe o botão A para mostrar um rosto feliz e o B para um rosto triste. Use os botões na tela ou clique nos botões da placa 3D.',
+  tip: 'input.onButtonPressed registra um evento: o código dentro da função só roda quando alguém aperta o botão. Enquanto isso o micro:bit fica livre para fazer outras coisas.',
+  checks: [
+    { id: 'a', label: 'O botão A executou o seu código', test: s => !!s.handler.A },
+    { id: 'b', label: 'O botão B executou o seu código', test: s => !!s.handler.B },
+    { id: 'ab', label: 'Aperte A e B ao mesmo tempo (botão A+B)', challenge: true, test: s => !!s.handler.AB },
+  ],
+  code: `// Lição 2: botões
+input.onButtonPressed(Button.A, function () {
+    basic.showIcon(IconNames.Happy)
+})
+input.onButtonPressed(Button.B, function () {
+    basic.showIcon(IconNames.Sad)
+})
+input.onButtonPressed(Button.AB, function () {
+    basic.showString("A+B")
+})
+`
+},
+{
+  id: 'leds', title: 'Coordenadas e animação',
+  goal: 'Faça um ponto percorrer as 5 colunas da linha do meio, sem deixar rastro.',
+  tip: 'basic.forever repete o bloco para sempre. led.plot(x, y) acende e led.unplot(x, y) apaga o LED naquela coordenada. Lembre que o y cresce para baixo.',
+  checks: [
+    { id: 'cols', label: 'O ponto passou pelas 5 colunas', test: s => s.plotX.size >= 5 },
+    { id: 'unp', label: 'Apagou o ponto com led.unplot', test: s => s.unplot },
+    { id: 'row', label: 'Faça o ponto andar em outra linha também', challenge: true, test: s => s.plotY.size >= 2 },
+  ],
+  code: `// Lição 3: um ponto que anda
+let x = 0
+basic.forever(function () {
+    led.plot(x, 2)
+    basic.pause(200)
+    led.unplot(x, 2)
+    x = x + 1
+    if (x > 4) {
+        x = 0
+    }
+})
+`
+},
+{
+  id: 'dado', title: 'Acelerômetro: dado eletrônico',
+  goal: 'Sacuda o micro:bit para sortear um número de 1 a 6. Use o botão Sacudir ao lado da bancada.',
+  tip: 'Math.randomRange(1, 6) sorteia um número inteiro entre 1 e 6, incluindo os dois extremos. O gesto Shake é detectado quando a aceleração muda bruscamente. Incline a placa com os controles para testar também TiltLeft e TiltRight.',
+  checks: [
+    { id: 'shake', label: 'Sacudiu e o código rodou (Gesture.Shake)', test: s => s.gestures.has('shake') && s.numbers.size >= 1 },
+    { id: 'rolls', label: 'Sorteou pelo menos 3 números diferentes', test: s => s.numbers.size >= 3 },
+    { id: 'tilt', label: 'Use outro gesto, como Gesture.TiltLeft', challenge: true, test: s => s.gestures.has('tilt-left') || s.gestures.has('tilt-right') },
+  ],
+  code: `// Lição 4: dado eletrônico
+input.onGesture(Gesture.Shake, function () {
+    let dado = Math.randomRange(1, 6)
+    basic.showNumber(dado)
+})
+basic.showIcon(IconNames.Diamond)
+`
+},
+{
+  id: 'sensores', title: 'Temperatura e nível de luz',
+  goal: 'Meça a temperatura e a luz e mostre o nível de luz como barras acesas na tela. Mexa nos controles de temperatura e luz.',
+  tip: 'A luz é medida pelos próprios LEDs da matriz, com valores de 0 (escuro) a 255 (muito claro). A temperatura é a do processador, por isso costuma ser um pouco maior que a do ambiente. serial.writeValue envia pares nome:valor para o computador, ótimo para gráficos.',
+  checks: [
+    { id: 'temp', label: 'Leu a temperatura com input.temperature()', test: s => s.tempRead },
+    { id: 'luz', label: 'Variou a luz e o programa leu pelo menos 3 níveis', test: s => s.lightSeen.size >= 3 },
+    { id: 'ser', label: 'Enviou valores pela serial (veja o console)', test: s => s.serialLines >= 2 },
+  ],
+  code: `// Lição 5: temperatura e luz
+basic.forever(function () {
+    let luz = input.lightLevel()
+    let linhas = Math.round(luz / 51)
+    serial.writeValue("luz", luz)
+    serial.writeValue("temp", input.temperature())
+
+    basic.clearScreen()
+    for (let y = 4; y > 4 - linhas; y--) {
+        for (let x = 0; x < 5; x++) {
+            led.plot(x, y)
+        }
+    }
+    basic.pause(300)
+})
+
+input.onButtonPressed(Button.A, function () {
+    basic.showNumber(input.temperature())
+})
+`
+},
+{
+  id: 'radio', title: 'Rádio entre micro:bits',
+  goal: 'Envie uma mensagem com o botão A e receba mensagens de um segundo micro:bit simulado (painel Rádio, abaixo da bancada).',
+  tip: 'Dois micro:bits só se ouvem se estiverem no mesmo grupo (de 0 a 255), como canais de walkie‑talkie. Troque o número do grupo no código e veja a mensagem do amigo não chegar. Em sala, grupos diferentes evitam que as mensagens dos colegas se misturem.',
+  checks: [
+    { id: 'grp', label: 'Escolheu o grupo com radio.setGroup(1)', test: s => s.radioGroupSet },
+    { id: 'send', label: 'Enviou uma mensagem (botão A)', test: s => s.radioSent >= 1 },
+    { id: 'recv', label: 'Recebeu e mostrou uma mensagem do amigo', test: s => s.radioRecv >= 1 },
+    { id: 'miss', label: 'Descubra o que acontece quando os grupos são diferentes', challenge: true, test: s => s.radioMismatch },
+  ],
+  code: `// Lição 6: rádio (grupo igual ao do amigo)
+radio.setGroup(1)
+
+input.onButtonPressed(Button.A, function () {
+    radio.sendString("oi")
+    basic.showIcon(IconNames.Yes)
+})
+
+radio.onReceivedString(function (receivedString) {
+    basic.showString(receivedString)
+})
+`
+},
+{
+  id: 'jogo', title: 'Projeto: pegue a estrela',
+  goal: 'Jogue com os botões A e B para mover o jogador na linha de baixo e pegar a estrela que cai. Se você errar, o jogo termina.',
+  tip: 'Sprites são pontos que se movem pela tela. Cada sprite guarda sua posição, e isTouching diz se dois sprites estão no mesmo LED. Variáveis, eventos, condicionais e repetição juntos formam um jogo completo em menos de 30 linhas.',
+  checks: [
+    { id: 'move', label: 'Moveu o jogador com os botões', test: s => s.spriteMoved },
+    { id: 'catch', label: 'Pegou 1 estrela (pontuação 1)', test: s => s.maxScore >= 1 },
+    { id: 'five', label: 'Chegue a 5 pontos', challenge: true, test: s => s.maxScore >= 5 },
+    { id: 'over', label: 'Deixe a estrela passar e veja o GAME OVER', challenge: true, test: s => s.gameOver },
+  ],
+  code: `// Lição 7: pegue a estrela
+let jogador = game.createSprite(2, 4)
+let estrela = game.createSprite(randint(0, 4), 0)
+
+input.onButtonPressed(Button.A, function () {
+    jogador.change(LedSpriteProperty.X, -1)
+})
+input.onButtonPressed(Button.B, function () {
+    jogador.change(LedSpriteProperty.X, 1)
+})
+
+basic.forever(function () {
+    basic.pause(600)
+    estrela.change(LedSpriteProperty.Y, 1)
+    if (estrela.get(LedSpriteProperty.Y) == 4) {
+        if (estrela.isTouching(jogador)) {
+            game.addScore(1)
+        } else {
+            game.gameOver()
+        }
+        estrela.set(LedSpriteProperty.Y, 0)
+        estrela.set(LedSpriteProperty.X, randint(0, 4))
+    }
+})
+`
+}
+];
+</script>
+<script>
+/* ===== Cena 3D: micro:bit v2 ===== */
+const Scene3D = (() => {
+  const stage = document.getElementById('stage');
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ antialias: true }); }
+  catch (e) { document.getElementById('glFail').hidden = false; return { ok: false }; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.insertBefore(renderer.domElement, stage.firstChild);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 4 / 3, 1, 1000);
+  const HOME = { t: new THREE.Vector3(0, 24, 4), c: new THREE.Vector3(0, 74, 66) };
+  camera.position.copy(HOME.c);
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.target.copy(HOME.t); controls.enableDamping = true; controls.dampingFactor = 0.1;
+  controls.minDistance = 30; controls.maxDistance = 220; controls.maxPolarAngle = Math.PI * 0.62;
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8890a8, 0.8));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.8); sun.position.set(30, 120, 60); sun.castShadow = true; sun.shadow.mapSize.set(1024, 1024);
+  Object.assign(sun.shadow.camera, { left: -70, right: 70, top: 70, bottom: -70, near: 10, far: 300 }); sun.shadow.bias = -0.0004; scene.add(sun);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(600, 400), new THREE.MeshStandardMaterial({ color: 0xc8ccd8, roughness: 1 }));
+  floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+
+  const std = (color, o = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.55, metalness: 0.05 }, o));
+  const tilt = new THREE.Group(); tilt.position.set(0, 26, 0); scene.add(tilt);
+  const flip = new THREE.Group(); tilt.add(flip);
+  const PARTS = {}, CTL = [];
+  const tag = (id, m) => { (PARTS[id] = PARTS[id] || []).push(m); m.userData.partId = id; return m; };
+  const box = (w, h, d, mat, x, y, z, shadow = true) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = shadow; m.receiveShadow = true; flip.add(m); return m; };
+  const cyl = (r, h, mat, x, y, z, seg = 28) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; flip.add(m); return m; };
+
+  /* ---- Placa ---- */
+  (() => {
+    const W = 52, H = 42, r = 3.5, sh = new THREE.Shape();
+    sh.moveTo(-W / 2 + r, -H / 2); sh.lineTo(W / 2 - r, -H / 2); sh.quadraticCurveTo(W / 2, -H / 2, W / 2, -H / 2 + r);
+    sh.lineTo(W / 2, H / 2 - r); sh.quadraticCurveTo(W / 2, H / 2, W / 2 - r, H / 2); sh.lineTo(-W / 2 + r, H / 2);
+    sh.quadraticCurveTo(-W / 2, H / 2, -W / 2, H / 2 - r); sh.lineTo(-W / 2, -H / 2 + r); sh.quadraticCurveTo(-W / 2, -H / 2, -W / 2 + r, -H / 2);
+    const g = new THREE.ExtrudeGeometry(sh, { depth: 1.6, bevelEnabled: false, curveSegments: 8 }); g.rotateX(-Math.PI / 2); g.translate(0, -0.8, 0);
+    const pcb = new THREE.Mesh(g, std(0x14161d, { roughness: 0.45 })); pcb.castShadow = true; pcb.receiveShadow = true; flip.add(pcb);
+    const mk = (flipY) => {
+      const c = document.createElement('canvas'); c.width = W * 10; c.height = H * 10; const x = c.getContext('2d');
+      x.fillStyle = '#e9ebf2'; x.textAlign = 'center'; x.textBaseline = 'middle';
+      const T = (t, px, pz, size = 22) => { x.font = '600 ' + size + 'px "Lexend", sans-serif'; x.fillText(t, (px + W / 2) * 10, (pz + H / 2) * 10); };
+      if (!flipY) { T('A', -19, 6, 26); T('B', 19, 6, 26); ['0', '1', '2', '3V', 'GND'].forEach((t, i) => T(t, [-19, -9.5, 0, 9.5, 19][i], 12.6, 14)); T('LAB 3D', 14, -8.2, 11); T('LOGO', 0, -12.4, 10); }
+      else { x.translate(0, 0); T('nRF52833', -4, 6.3, 12); T('LAB 3D · verso', 0, -17, 12); }
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(W, H), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true }));
+      m.rotation.x = flipY ? Math.PI / 2 : -Math.PI / 2; m.position.y = flipY ? -0.83 : 0.83; flip.add(m);
+    };
+    mk(false); mk(true);
+  })();
+
+  /* ---- Matriz de LEDs ---- */
+  const leds = [];
+  for (let j = 0; j < 5; j++) for (let i = 0; i < 5; i++) {
+    const mat = new THREE.MeshStandardMaterial({ color: 0x4a1616, emissive: 0xff2a1a, emissiveIntensity: 0, roughness: 0.35 });
+    leds.push(mat); tag('matriz', box(3.6, 0.9, 1.9, mat, (i - 2) * 6.2, 1.25, (j - 2) * 6.2 + 0, false));
+  }
+  const glow = new THREE.PointLight(0xff3322, 0, 60, 2); glow.position.set(0, 14, 0); flip.add(glow);
+
+  /* ---- Botões A e B (interativos) ---- */
+  const btnCaps = {};
+  [['A', -19], ['B', 19]].forEach(([n, x]) => {
+    tag('botoes', box(7, 2.6, 7, std(0x20232d), x, 1.3 + 0.1, 0));
+    const capMat = std(0xdfe3ee, { roughness: 0.35 }); const cap = cyl(2.6, 1.8, capMat, x, 3.1, 0);
+    cap.userData.ctl = n; CTL.push(cap); tag('botoes', cap); btnCaps[n] = cap;
+  });
+
+  /* ---- Logotipo sensível ao toque ---- */
+  const logoMat = std(0xe6c25a, { metalness: 0.3, roughness: 0.4, emissive: 0xffc94d, emissiveIntensity: 0 });
+  const logo = box(11, 0.5, 3, logoMat, 0, 1.05, -16, false); logo.userData.ctl = 'logo'; CTL.push(logo); tag('logo', logo);
+  [-3.5, 0, 3.5].forEach(x => tag('logo', box(0.9, 0.4, 3, std(0x14161d), x, 1.3, -16, false)));
+
+  /* ---- Microfone, USB, bateria ---- */
+  cyl(1.1, 0.4, std(0x050505), 9, 1.0, -16, 16); box(1.6, 0.6, 1.2, std(0xffa526, { emissive: 0xff8a00, emissiveIntensity: 0.4 }), 13, 1.0, -16, false);
+  tag('usbbat', box(8, 3, 6, std(0xb9bdc8, { metalness: 0.4, roughness: 0.4 }), 0, 2.3, -20));
+  tag('usbbat', box(6.4, 4.2, 5, std(0xf1f1f1, { roughness: 0.6 }), -17, 2.9, -18.2));
+
+  /* ---- Conector de borda: anéis 0, 1, 2, 3V e GND ---- */
+  const padX = [-19, -9.5, 0, 9.5, 19], padCtl = ['P0', 'P1', 'P2', null, null], padMats = [];
+  padX.forEach((x, i) => {
+    const mat = std(0xe6c25a, { metalness: 0.3, roughness: 0.4, emissive: 0xffc94d, emissiveIntensity: 0 }); padMats.push(mat);
+    const ring = cyl(3.3, 0.35, mat, x, 0.95, 18.2); tag('borda', ring);
+    cyl(1.4, 0.4, std(0x14161d), x, 1.0, 18.2, 20);
+    if (padCtl[i]) { ring.userData.ctl = padCtl[i]; CTL.push(ring); }
+  });
+  for (let k = 0; k < 4; k++) { const x = (padX[k] + padX[k + 1]) / 2; tag('borda', box(2.2, 0.35, 5.2, std(0xe6c25a, { metalness: 0.3, roughness: 0.4 }), x, 0.95, 18.4, false)); }
+
+  /* ---- Verso: processador, sensores, alto-falante ---- */
+  tag('cpu', box(8, 1.2, 8, std(0x0d0d10, { roughness: 0.3 }), -4, -1.4, 0));
+  tag('sensores', box(3.4, 1, 3.4, std(0x1a1a20), 12, -1.3, -9)); tag('sensores', box(2.6, 0.9, 2.6, std(0x23232b), 14, -1.3, -3));
+  const spk = cyl(6.2, 1.6, std(0xc4c9d6, { metalness: 0.35, roughness: 0.4 }), -14, -1.6, 7, 36); tag('speaker', spk);
+  tag('speaker', cyl(3.2, 1.7, std(0x1b1b22), -14, -1.62, 7, 24));
+
+  /* ---- Rótulos e fios de apoio ---- */
+  const wavePins = [0, 1, 2].map(() => 0);
+
+  /* ---- Tema e tamanho ---- */
+  const applyTheme = () => {
+    const cs = getComputedStyle(document.documentElement), s = cs.getPropertyValue('--stage').trim() || '#d9dde8', f = cs.getPropertyValue('--floor').trim() || '#c8ccd8';
+    scene.background = new THREE.Color(s); scene.fog = new THREE.Fog(new THREE.Color(s), 200, 480); floor.material.color = new THREE.Color(f);
+  };
+  applyTheme();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(applyTheme, 30));
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  const resize = () => { const w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); };
+  new ResizeObserver(resize).observe(stage); resize();
+
+  /* ---- Interação ---- */
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  const pick = (ev, objs) => { const r = renderer.domElement.getBoundingClientRect(); ndc.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera); return ray.intersectObjects(objs, false)[0]; };
+  let introMode = false, onPart = () => {}, onUI = () => {}, held = null, down = null, focus = null, helper = null, flipTarget = 0;
+  const press = (c, v) => { if (c === 'A' || c === 'B') Sim.setButton(c, v); else if (c === 'logo') Sim.setLogo(v); else Sim.setPin(c, v); onUI(); };
+  renderer.domElement.addEventListener('pointerdown', ev => {
+    down = { x: ev.clientX, y: ev.clientY };
+    if (introMode) return;
+    const h = pick(ev, CTL); if (h) { held = h.object.userData.ctl; press(held, true); controls.enabled = false; renderer.domElement.setPointerCapture(ev.pointerId); }
+  });
+  const end = ev => { if (held) { press(held, false); held = null; controls.enabled = true; } };
+  renderer.domElement.addEventListener('pointerup', ev => {
+    end(ev);
+    if (introMode && down && Math.hypot(ev.clientX - down.x, ev.clientY - down.y) < 5) { const h = pick(ev, Object.values(PARTS).flat()); if (h) onPart(h.object.userData.partId); }
+  });
+  renderer.domElement.addEventListener('pointercancel', end);
+  renderer.domElement.addEventListener('pointermove', ev => { if (!held) renderer.domElement.style.cursor = pick(ev, introMode ? Object.values(PARTS).flat() : CTL) ? 'pointer' : 'grab'; });
+
+  const localCenter = id => { const b = new THREE.Box3(); PARTS[id].forEach(m => { m.geometry.computeBoundingBox(); b.union(m.geometry.boundingBox.clone().translate(m.position)); }); return b; };
+  const highlight = (id, side) => {
+    if (helper) { flip.remove(helper); helper.geometry.dispose(); helper = null; }
+    if (!id || !PARTS[id]) return;
+    const b = localCenter(id).expandByScalar(1.2);
+    helper = new THREE.Box3Helper(b, 0xf5b83d); helper.material.depthTest = false; helper.renderOrder = 20; flip.add(helper);
+    flipTarget = side === 'back' ? Math.PI : 0;
+    const c = b.getCenter(new THREE.Vector3()); if (side === 'back') { c.y = -c.y; c.z = -c.z; }
+    c.add(tilt.position); const size = b.getSize(new THREE.Vector3()).length();
+    const dirv = new THREE.Vector3(0, 0.78, 0.62).normalize().multiplyScalar(Math.max(42, size * 2.6)); if (side === 'back') dirv.y *= 1;
+    focus = { t: c, c: c.clone().add(dirv) };
+  };
+  const resetView = () => { focus = { t: HOME.t.clone(), c: HOME.c.clone() }; flipTarget = 0; };
+
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const frame = () => {
+    requestAnimationFrame(frame);
+    if (focus) { controls.target.lerp(focus.t, 0.09); camera.position.lerp(focus.c, 0.09); if (controls.target.distanceTo(focus.t) < 0.3 && camera.position.distanceTo(focus.c) < 0.6) focus = null; }
+    if (helper) helper.material.color.setHex(Math.floor(performance.now() / 350) % 2 ? 0xf5b83d : 0xffd77a);
+    controls.update();
+    tilt.rotation.z = lerp(tilt.rotation.z, -Sim.sens.roll * Math.PI / 180, 0.25);
+    tilt.rotation.x = lerp(tilt.rotation.x, -Sim.sens.pitch * Math.PI / 180, 0.25);
+    flip.rotation.x = lerp(flip.rotation.x, flipTarget, 0.12);
+    const f = Sim.frame(); let sum = 0;
+    for (let i = 0; i < 25; i++) { const b = f[i] / 255 * (Sim.running || f[i] ? 1 : 0); leds[i].emissiveIntensity = b * 2.4; leds[i].color.setRGB(0.29 + b * 0.7, 0.09 + b * 0.1, 0.09 + b * 0.08); sum += b; }
+    glow.intensity = Math.min(1, sum / 8) * 2.2;
+    ['A', 'B'].forEach(n => { btnCaps[n].position.y = lerp(btnCaps[n].position.y, Sim.btn[n] ? 2.4 : 3.1, 0.5); });
+    logoMat.emissiveIntensity = lerp(logoMat.emissiveIntensity, Sim.logo ? 0.9 : 0, 0.3);
+    ['P0', 'P1', 'P2'].forEach((p, i) => { padMats[i].emissiveIntensity = lerp(padMats[i].emissiveIntensity, Sim.pinTouch[p] ? 0.9 : 0, 0.3); });
+    renderer.render(scene, camera);
+  };
+  requestAnimationFrame(frame);
+
+  return {
+    ok: true, setUIHook: fn => { onUI = fn; }, highlight, resetView,
+    flip: back => { flipTarget = back ? Math.PI : 0; },
+    setIntro: (on, cb) => { introMode = on; onPart = cb || (() => {}); if (!on) { highlight(null); flipTarget = 0; } else focus = { t: HOME.t.clone(), c: HOME.c.clone() }; },
+  };
+})();
+/* ===== Interface ===== */
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch(e){ return d; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} if (/\.done$/.test(k) && window.progressoMudou) window.progressoMudou(); },
+  };
+  let cur = Math.min(store.get('mblab.cur', 0), LESSONS.length - 1);
+  const done = store.get('mblab.done', {});
+  const codes = store.get('mblab.codes', {});
+  const el = { code: $('code'), serial: $('serial'), status: $('status'), run: $('btnRun'), stop: $('btnStop'), card: $('lessonCard'), nav: $('lessonNav') };
+
+  /* ---- Navegação e cartão da lição ---- */
+  const lessonDone = L => L.checks.filter(c => !c.challenge).every(c => (done[L.id] || {})[c.id]);
+  const renderNav = () => {
+    el.nav.innerHTML = '';
+    LESSONS.forEach((L, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = lessonDone(L) ? 'done' : '';
+      if (i === cur) b.setAttribute('aria-current', 'true');
+      b.innerHTML = '<span class="n">' + (lessonDone(L) ? '✓' : i) + '</span><span></span>';
+      b.lastChild.textContent = L.title.split(':')[0]; b.title = L.title; b.addEventListener('click', () => go(i)); el.nav.appendChild(b);
+    });
+    const n = LESSONS.filter(lessonDone).length;
+    $('progText').textContent = n + ' de ' + LESSONS.length + ' lições'; $('progBar').style.width = (n / LESSONS.length * 100) + '%';
+  };
+  const renderCard = () => {
+    const L = LESSONS[cur], d = done[L.id] || {}; el.card.innerHTML = '';
+    const add = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; el.card.appendChild(e); return e; };
+    add('div', 'eyebrow', L.intro ? 'Módulo 0 · Base do curso' : 'Lição ' + cur + ' de ' + (LESSONS.length - 1));
+    add('h2', '', L.title); add('p', 'goal', L.goal);
+    const ul = add('ul', 'checks');
+    L.checks.forEach(c => {
+      const li = document.createElement('li'); li.dataset.id = c.id; if (c.challenge) li.className = 'challenge'; if (d[c.id]) li.classList.add('ok');
+      const sp = document.createElement('span'); sp.textContent = c.label; li.appendChild(sp); ul.appendChild(li);
+    });
+    const ban = add('div', 'banner' + (lessonDone(L) ? ' show' : ''), L.intro ? 'Introdução concluída! Vá para a lição 1.' : cur < LESSONS.length - 1 ? 'Lição concluída! Siga para a próxima.' : 'Última lição concluída. Agora crie o seu próprio projeto.');
+    ban.id = 'banner';
+    const tip = document.createElement('div'); tip.className = 'tip';
+    const st = document.createElement('strong'); st.textContent = 'Dica'; tip.appendChild(st); tip.appendChild(document.createTextNode(L.tip)); el.card.appendChild(tip);
+    const nav = add('div', 'lnav');
+    const mk = (t, dis, fn) => { const b = document.createElement('button'); b.className = 'btn'; b.type = 'button'; b.textContent = t; b.disabled = dis; b.onclick = fn; return b; };
+    nav.append(mk('← Anterior', cur === 0, () => go(cur - 1)), mk('Próxima →', cur === LESSONS.length - 1, () => go(cur + 1)));
+  };
+  const go = i => {
+    if (i < 0 || i >= LESSONS.length) return;
+    codes[LESSONS[cur].id] = el.code.value; store.set('mblab.codes', codes);
+    Sim.stop(true); cur = i; store.set('mblab.cur', cur); Sim.resetStats(); resetSensors(); applyMode();
+    el.code.value = codes[LESSONS[cur].id] ?? LESSONS[cur].code; clearSerial(); $('rLog').replaceChildren();
+    renderNav(); renderCard(); setState();
+    el.nav.children[cur] && el.nav.children[cur].scrollIntoView({ block: 'nearest', inline: 'center' });
+  };
+  const evaluate = () => {
+    const L = LESSONS[cur]; if (L.intro) return;
+    let changed = false; const d = done[L.id] || (done[L.id] = {});
+    L.checks.forEach(c => { if (!d[c.id] && c.test(Sim.stats)) { d[c.id] = true; changed = true; } });
+    if (changed) {
+      store.set('mblab.done', done);
+      L.checks.forEach(c => { const li = el.card.querySelector('li[data-id="' + c.id + '"]'); if (li && d[c.id]) li.classList.add('ok'); });
+      const b = $('banner'); if (b && lessonDone(L)) b.classList.add('show'); renderNav();
+    }
+  };
+  setInterval(evaluate, 250);
+
+  /* ---- Matriz 2D ---- */
+  const disp = $('disp'), cells = [];
+  for (let i = 0; i < 25; i++) { const c = document.createElement('i'); disp.appendChild(c); cells.push(c); }
+  let lastFrame = '';
+  setInterval(() => {
+    const f = Sim.frame(), key = f.join(','); if (key === lastFrame) return; lastFrame = key;
+    f.forEach((v, i) => { const a = v / 255; cells[i].style.background = a ? `rgb(${Math.round(60 + 195 * a)},${Math.round(20 + 50 * a)},${Math.round(25 + 40 * a)})` : ''; cells[i].style.boxShadow = a > 0.5 ? '0 0 8px rgba(255,60,60,.8)' : ''; });
+  }, 40);
+
+  /* ---- Entradas e sensores ---- */
+  const holds = { btnA: ['A'], btnB: ['B'], btnAB: ['A', 'B'], btnLogo: ['logo'], btnP0: ['P0'], btnP1: ['P1'], btnP2: ['P2'] };
+  const apply = (k, v) => holds[k].forEach(c => { if (c === 'A' || c === 'B') Sim.setButton(c, v); else if (c === 'logo') Sim.setLogo(v); else Sim.setPin(c, v); });
+  const syncHeld = () => {
+    $('btnA').classList.toggle('held', Sim.btn.A); $('btnB').classList.toggle('held', Sim.btn.B); $('btnAB').classList.toggle('held', Sim.btn.A && Sim.btn.B);
+    $('btnLogo').classList.toggle('held', Sim.logo); ['P0', 'P1', 'P2'].forEach(p => $('btn' + p).classList.toggle('held', Sim.pinTouch[p]));
+  };
+  Object.keys(holds).forEach(k => {
+    const b = $(k);
+    b.addEventListener('pointerdown', ev => { ev.preventDefault(); b.setPointerCapture(ev.pointerId); apply(k, true); syncHeld(); });
+    const up = () => { apply(k, false); syncHeld(); }; b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
+    b.addEventListener('keydown', ev => { if (ev.key === ' ' || ev.key === 'Enter') { ev.preventDefault(); apply(k, true); syncHeld(); } });
+    b.addEventListener('keyup', ev => { if (ev.key === ' ' || ev.key === 'Enter') up(); });
+  });
+  setInterval(syncHeld, 100);
+  $('btnShake').addEventListener('click', () => Sim.shake());
+  const SL = [['sRoll', 'oRoll', v => v + '°'], ['sPitch', 'oPitch', v => v + '°'], ['sTemp', 'oTemp', v => v + ' °C'], ['sLight', 'oLight', v => v], ['sHead', 'oHead', v => v + '°'], ['sSound', 'oSound', v => v]];
+  const readSliders = () => {
+    const g = id => +$(id).value; SL.forEach(([s, o, f]) => { $(o).textContent = f(g(s)); });
+    Sim.sens.temp = g('sTemp'); Sim.sens.light = g('sLight'); Sim.sens.heading = g('sHead'); Sim.sens.sound = g('sSound'); Sim.setTilt(g('sRoll'), g('sPitch'));
+  };
+  SL.forEach(([s]) => $(s).addEventListener('input', readSliders));
+  const resetSensors = () => { const d = { sRoll: 0, sPitch: 0, sTemp: 24, sLight: 128, sHead: 0, sSound: 20 }; Object.entries(d).forEach(([k, v]) => { $(k).value = v; }); Sim.orient = 'screen-up'; readSliders(); };
+  if (Scene3D.ok) Scene3D.setUIHook(syncHeld);
+
+  /* ---- Alto-falante (WebAudio) ---- */
+  let ac = null, osc = null, toneTimer = null;
+  const stopOsc = () => { clearTimeout(toneTimer); if (osc) { try { osc.stop(); } catch(e){} osc = null; } };
+  Sim.hooks.tone = (f, ms) => {
+    stopOsc(); const lab = $('tone').querySelector('b');
+    if (!f) { lab.textContent = 'silêncio'; return; }
+    lab.textContent = Math.round(f) + ' Hz';
+    try {
+      ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
+      osc = ac.createOscillator(); const g = ac.createGain(); g.gain.value = 0.06; osc.type = 'square'; osc.frequency.value = f; osc.connect(g); g.connect(ac.destination); osc.start();
+    } catch(e){}
+    if (ms > 0) toneTimer = setTimeout(() => { stopOsc(); lab.textContent = 'silêncio'; }, ms / Sim.speed);
+  };
+
+  /* ---- Console ---- */
+  const clearSerial = () => { el.serial.textContent = ''; };
+  Sim.hooks.serial = (text, cls) => {
+    const stick = el.serial.scrollTop + el.serial.clientHeight >= el.serial.scrollHeight - 24;
+    if (cls) { const s = document.createElement('span'); s.className = cls; s.textContent = text; el.serial.appendChild(s); } else el.serial.appendChild(document.createTextNode(text));
+    while (el.serial.childNodes.length > 600) el.serial.removeChild(el.serial.firstChild);
+    if (stick) el.serial.scrollTop = el.serial.scrollHeight;
+  };
+  $('btnClear').addEventListener('click', clearSerial);
+
+  /* ---- Rádio ---- */
+  const rlog = (t, c) => { const d = document.createElement('div'); if (c) d.className = c; d.textContent = t; $('rLog').prepend(d); while ($('rLog').childNodes.length > 40) $('rLog').lastChild.remove(); };
+  Sim.hooks.radio = e => rlog('→ seu micro:bit (grupo ' + e.group + '): ' + e.text, 'out');
+  const friend = kind => {
+    const msg = $('rMsg').value; const g = +$('rGroup').value;
+    const r = Sim.receive(kind, kind === 'number' ? (+msg || 0) : msg, g);
+    rlog(r.ok ? '← amigo (grupo ' + g + '): ' + msg : '✕ ' + r.msg, r.ok ? '' : 'bad');
+  };
+  $('rSendTxt').addEventListener('click', () => friend('string')); $('rSendNum').addEventListener('click', () => friend('number'));
+
+  /* ---- Execução ---- */
+  const setState = () => {
+    el.run.disabled = Sim.running; el.stop.disabled = !Sim.running;
+    el.status.textContent = Sim.running ? 'executando' : 'parado'; el.status.classList.toggle('run', Sim.running);
+  };
+  Sim.hooks.state = setState;
+  el.run.addEventListener('click', () => {
+    codes[LESSONS[cur].id] = el.code.value; store.set('mblab.codes', codes);
+    Sim.speed = +$('speed').value; try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); } catch(e){}
+    Sim.run(el.code.value);
+  });
+  el.stop.addEventListener('click', () => Sim.stop());
+  $('speed').addEventListener('change', e => { Sim.speed = +e.target.value; });
+  $('btnReset').addEventListener('click', () => { Sim.stop(true); el.code.value = LESSONS[cur].code; delete codes[LESSONS[cur].id]; store.set('mblab.codes', codes); });
+  el.code.addEventListener('keydown', e => {
+    if (e.key === 'Tab') { e.preventDefault(); el.code.setRangeText('    ', el.code.selectionStart, el.code.selectionEnd, 'end'); }
+    else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); el.run.click(); }
+  });
+  el.code.addEventListener('input', () => { codes[LESSONS[cur].id] = el.code.value; store.set('mblab.codes', codes); });
+
+  /* ---- Módulo 0: anatomia ---- */
+  const seen = new Set(store.get('mblab.seen', [])), quizAns = store.get('mblab.quiz', {}), A = $('anatomy');
+  const mark = id => {
+    const d = done.intro || (done.intro = {}); if (d[id]) return;
+    d[id] = true; store.set('mblab.done', done); renderNav();
+    if (LESSONS[cur].intro) { const li = el.card.querySelector('li[data-id="' + id + '"]'); if (li) li.classList.add('ok'); const b = $('banner'); if (b && lessonDone(LESSONS[0])) b.classList.add('show'); }
+  };
+  const selectPart = id => {
+    const part = INTRO.parts.find(p => p.id === id); if (!part) return;
+    seen.add(id); store.set('mblab.seen', [...seen]); if (Scene3D.ok) Scene3D.highlight(id, part.side);
+    A.querySelectorAll('.parts button').forEach(b => { b.setAttribute('aria-pressed', b.dataset.id === id ? 'true' : 'false'); if (seen.has(b.dataset.id)) b.classList.add('seen'); });
+    const D = A.querySelector('.detail'); D.replaceChildren();
+    const mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; e.textContent = x; D.appendChild(e); };
+    mk('h4', '', part.name); mk('div', 'role', part.role); mk('p', '', part.text); mk('p', 'why', 'Na prática: ' + part.why);
+    if (seen.size >= INTRO.parts.length) mark('explore');
+  };
+  const renderAnatomy = () => {
+    A.replaceChildren();
+    const h = document.createElement('h3'); h.textContent = 'Componentes da placa'; A.appendChild(h);
+    const hint = document.createElement('div'); hint.className = 'goal'; hint.style.fontSize = '14px';
+    hint.textContent = 'Escolha na lista ou clique direto na placa 3D. Peças do verso fazem a placa virar sozinha.'; A.appendChild(hint);
+    const grid = document.createElement('div'); grid.className = 'parts';
+    INTRO.parts.forEach(p => {
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.id = p.id; b.setAttribute('aria-pressed', 'false'); if (seen.has(p.id)) b.classList.add('seen');
+      const m = document.createElement('span'); m.className = 'm'; const t = document.createElement('span'); t.textContent = p.name.replace(/ \(.*\)/, '');
+      b.append(m, t); b.onclick = () => selectPart(p.id); grid.appendChild(b);
+    });
+    A.appendChild(grid);
+    const det = document.createElement('div'); det.className = 'detail'; det.innerHTML = '<p class="goal" style="margin:0">Nenhum componente selecionado ainda.</p>'; A.appendChild(det);
+    const d1 = document.createElement('details'); d1.open = true; d1.innerHTML = '<summary>micro:bit × ESP32</summary>';
+    const tw = document.createElement('div'); tw.className = 'tw'; const tb = document.createElement('table'); tb.className = 'spec';
+    const hr = tb.insertRow(); ['', 'micro:bit v2', 'ESP32 DevKit'].forEach(x => { const th = document.createElement('th'); th.textContent = x; hr.appendChild(th); });
+    INTRO.specs.forEach(r => { const tr = tb.insertRow(); r.forEach(x => { tr.insertCell().textContent = x; }); });
+    tw.appendChild(tb); d1.appendChild(tw); A.appendChild(d1);
+    const d2 = document.createElement('details'); d2.open = true; d2.innerHTML = '<summary>Teste rápido</summary>';
+    INTRO.quiz.forEach((q, qi) => {
+      const box = document.createElement('div'); box.className = 'q'; const pq = document.createElement('p'); pq.textContent = (qi + 1) + '. ' + q.q; box.appendChild(pq);
+      const opts = document.createElement('div'); opts.className = 'opts'; box.appendChild(opts); const exp = document.createElement('div'); exp.className = 'exp'; box.appendChild(exp);
+      const reveal = pick => { [...opts.children].forEach((b, i) => { b.disabled = true; if (i === q.a) b.classList.add('right'); else if (i === pick) b.classList.add('wrong'); }); exp.textContent = (pick === q.a ? 'Certo. ' : 'Não foi dessa vez. ') + q.e; };
+      q.o.forEach((o, oi) => {
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = o;
+        b.onclick = () => { quizAns[qi] = oi; store.set('mblab.quiz', quizAns); reveal(oi); if (Object.keys(quizAns).length >= INTRO.quiz.length) mark('quiz'); }; opts.appendChild(b);
+      });
+      if (quizAns[qi] !== undefined) reveal(quizAns[qi]); d2.appendChild(box);
+    });
+    A.appendChild(d2);
+  };
+  const applyMode = () => {
+    const L = LESSONS[cur], intro = !!L.intro;
+    document.querySelector('.app').dataset.mode = intro ? 'intro' : 'lab';
+    $('radioBox').hidden = L.id !== 'radio';
+    const hint = document.querySelector('.hint'); if (!hint.dataset.lab) hint.dataset.lab = hint.textContent;
+    hint.textContent = intro ? 'arraste: girar · roda: zoom · clique em uma peça da placa para saber o que ela faz' : hint.dataset.lab;
+    if (Scene3D.ok) { Scene3D.setIntro(intro, selectPart); if (!intro) Scene3D.resetView(); }
+    if (intro) renderAnatomy();
+  };
+
+  /* ---- Início ---- */
+  resetSensors(); applyMode(); el.code.value = codes[LESSONS[cur].id] ?? LESSONS[cur].code; renderNav(); renderCard(); setState();
+})();
+</script>
+<script>
+window.PROGRESSO_ID = "microbit-lab-v1";
+window.PROGRESSO_DADOS = function () {
+  var d = {}; try { d = JSON.parse(localStorage.getItem("mblab.done") || "{}") || {}; } catch (e) {}
+  var feitas = 0, ok = 0, det = {};
+  LESSONS.forEach(function (L) {
+    var x = d[L.id] || {}, n = Object.keys(x).filter(function (k) { return x[k]; }).length;
+    ok += n; det[L.id] = n;
+    var obrig = (L.checks || []).filter(function (c) { return !c.challenge; });
+    if (obrig.length && obrig.every(function (c) { return x[c.id]; })) feitas++;
+  });
+  return { feitas: feitas, total: LESSONS.length, pontos: ok * 10, detalhe: det };
+};
+</script>
+<script src="../config.js"></script>
+<script src="../progresso-turma.js"></script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

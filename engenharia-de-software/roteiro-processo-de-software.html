@@ -1,0 +1,2592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roteiro de Atividade RápidoJá</title>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<title>Roteiro de Atividade RápidoJá</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&family=Open+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ============================================================
+   Tokens — derivados do design system Sanok (demo 9)
+   ============================================================ */
+:root{
+  --paper:#ffffff;
+  --paper-2:#f7f7f8;
+  --ink:#101010;
+  --ink-soft:#3d3d42;
+  --muted:#6d6d74;
+  --line:#e4e4e8;
+  --line-soft:#efeff2;
+  --panel:#101010;
+  --panel-2:#191919;
+  --panel-line:rgba(255,255,255,.10);
+  --panel-text:#f2f2f2;
+  --panel-muted:#a9a9b0;
+  --grad:linear-gradient(to right,#163D28 0%,#1F5135 50%,#2E8B57 100%);
+  --c1:#163D28; --c2:#1F5135; --c3:#2E8B57;
+  --ok:#2E8B57; --warn:#e0a33a; --bad:#e2685f;
+  --font-display:'Poppins',system-ui,sans-serif;
+  --font-body:'Open Sans','Poppins',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sidebar-w:302px;
+  --radius:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0c0c0d; --paper-2:#141416; --ink:#f2f2f4; --ink-soft:#c9c9cf;
+    --muted:#8b8b93; --line:#26262b; --line-soft:#1c1c20;
+    --panel:#141416; --panel-2:#1c1c20; --panel-line:rgba(255,255,255,.09);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0c0c0d; --paper-2:#141416; --ink:#f2f2f4; --ink-soft:#c9c9cf;
+  --muted:#8b8b93; --line:#26262b; --line-soft:#1c1c20;
+  --panel:#141416; --panel-2:#1c1c20; --panel-line:rgba(255,255,255,.09);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--font-body);font-weight:300;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+
+/* ============================================================
+   Layout base
+   ============================================================ */
+.shell{display:flex;min-height:100vh}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);
+  background:var(--paper);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;z-index:60;
+}
+.sidebar-head{padding:30px 26px 20px;border-bottom:1px solid var(--line-soft)}
+.brand-eyebrow{
+  font-family:var(--font-display);font-size:10px;font-weight:600;
+  letter-spacing:3.2px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;
+}
+.brand-title{
+  font-family:var(--font-display);font-size:23px;font-weight:300;
+  line-height:1.2;letter-spacing:-.4px;margin:0;
+}
+.brand-title b{font-weight:500;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.brand-author{
+  font-family:var(--font-body);font-size:12.5px;line-height:1.5;
+  color:var(--ink-soft);margin:12px 0 0;
+}
+.brand-author span{
+  display:block;font-family:var(--font-display);font-size:9.5px;font-weight:600;
+  letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;
+}
+.brand-author b{font-weight:500;color:var(--ink)}
+
+.progress-wrap{padding:18px 26px 16px;border-bottom:1px solid var(--line-soft);display:flex;flex-direction:column;gap:8px}
+.progress-meta{display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted)}
+.progress-meta strong{color:var(--ink);font-size:12px;font-variant-numeric:tabular-nums}
+.progress-track{height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.progress-bar{height:100%;width:0;background:var(--grad);transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+.nav{flex:1;overflow-y:auto;padding:18px 14px 30px}
+.nav-group{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--muted);padding:14px 12px 8px;margin:0;
+}
+.nav-item{
+  display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+  padding:10px 12px;border:none;border-radius:var(--radius);background:transparent;
+  color:var(--ink-soft);cursor:pointer;transition:background .2s ease,color .2s ease;
+  font-family:var(--font-display);font-size:13.5px;font-weight:400;line-height:1.35;
+}
+.nav-item:hover{background:var(--paper-2);color:var(--ink)}
+.nav-item.active{background:var(--ink);color:var(--paper)}
+.nav-item.active .nav-num{color:var(--paper);opacity:.65}
+.nav-num{
+  flex:0 0 26px;font-family:var(--font-mono);font-size:11px;color:var(--muted);
+  padding-top:2px;font-variant-numeric:tabular-nums;
+}
+.nav-label{flex:1}
+.nav-check{
+  flex:0 0 14px;height:14px;width:14px;margin-top:3px;border-radius:50%;
+  border:1.5px solid var(--line);position:relative;transition:all .3s ease;
+}
+.nav-item.active .nav-check{border-color:rgba(255,255,255,.35)}
+.nav-item.done .nav-check{background:var(--c3);border-color:var(--c3)}
+.nav-item.done .nav-check::after{
+  content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
+  border:solid #06281f;border-width:0 1.6px 1.6px 0;transform:rotate(45deg);
+}
+.sidebar-foot{padding:14px 26px 20px;border-top:1px solid var(--line-soft);display:flex;gap:10px;align-items:center;justify-content:space-between}
+.foot-note{font-size:11px;color:var(--muted);letter-spacing:.4px;margin:0}
+.reset-btn{
+  background:none;border:1px solid var(--line);color:var(--muted);border-radius:20px;
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;cursor:pointer;
+  font-family:var(--font-display);font-weight:600;transition:all .25s ease;
+}
+.reset-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+/* ---------- Topbar (mobile) ---------- */
+.topbar{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:70;
+  background:var(--paper);border-bottom:1px solid var(--line);
+  padding:12px 16px;align-items:center;gap:14px;
+}
+.burger{
+  background:none;border:1px solid var(--line);border-radius:var(--radius);
+  width:38px;height:38px;display:flex;flex-direction:column;gap:4px;
+  align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+}
+.burger span{display:block;width:16px;height:1.5px;background:currentColor}
+.topbar-title{font-family:var(--font-display);font-size:14px;font-weight:500;margin:0}
+
+/* ---------- Main ---------- */
+.main{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:0 0 90px}
+.topic{display:none;animation:fade .45s ease both}
+.topic.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.topic-head{
+  padding:74px 8vw 46px;border-bottom:1px solid var(--line-soft);
+  max-width:1180px;
+}
+.eyebrow{
+  font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:3.4px;
+  text-transform:uppercase;color:var(--muted);margin:0 0 16px;display:flex;align-items:center;gap:12px;
+}
+.eyebrow::after{content:"";height:1px;width:46px;background:var(--grad)}
+.topic-title{
+  font-family:var(--font-display);font-size:clamp(30px,4.4vw,50px);font-weight:200;
+  line-height:1.08;letter-spacing:-1.2px;margin:0 0 22px;text-wrap:balance;max-width:16ch;
+}
+.topic-lead{
+  font-size:17px;line-height:1.75;color:var(--ink-soft);margin:0;max-width:62ch;font-weight:300;
+}
+.topic-body{padding:46px 8vw 0;max-width:1180px}
+
+/* ---------- Blocos de conteúdo ---------- */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px;margin:0 0 44px}
+.concept{
+  border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;background:var(--paper);
+  transition:border-color .3s ease,transform .3s ease;
+}
+.concept:hover{border-color:var(--ink);transform:translateY(-2px)}
+.concept h3{
+  font-family:var(--font-display);font-size:12px;font-weight:600;letter-spacing:2.2px;
+  text-transform:uppercase;margin:0 0 12px;color:var(--ink);
+}
+.concept p{margin:0;font-size:14.5px;line-height:1.75;color:var(--ink-soft)}
+.concept .kicker{
+  display:inline-block;font-family:var(--font-mono);font-size:11px;color:var(--muted);
+  margin-bottom:10px;letter-spacing:.5px;
+}
+
+.callout{
+  border-left:2px solid transparent;border-image:var(--grad) 1;
+  padding:6px 0 6px 22px;margin:0 0 44px;max-width:64ch;
+}
+.callout p{margin:0;font-family:var(--font-display);font-size:17px;font-weight:300;line-height:1.6;color:var(--ink)}
+
+/* ---------- Laboratório interativo ---------- */
+.lab{
+  background:var(--panel);color:var(--panel-text);border:1px solid var(--panel-line);
+  border-radius:8px;padding:34px 32px 36px;margin:0 0 46px;position:relative;overflow:hidden;
+}
+.lab::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.lab-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.lab-tag{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0;
+}
+.lab h3{font-family:var(--font-display);font-size:23px;font-weight:300;margin:0 0 6px;color:#fff;letter-spacing:-.3px}
+.lab-hint{font-size:13.5px;color:var(--panel-muted);margin:0 0 26px;max-width:70ch}
+.lab-stage{background:var(--panel-2);border:1px solid var(--panel-line);border-radius:var(--radius);padding:24px}
+.lab-readout{
+  margin-top:20px;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;
+  color:var(--panel-muted);border-top:1px solid var(--panel-line);padding-top:16px;
+}
+.lab-readout b{color:#fff;font-weight:500}
+.lab-readout .ok{color:var(--ok)}
+.lab-readout .warn{color:var(--warn)}
+.lab-readout .bad{color:var(--bad)}
+
+/* controles genéricos dentro do lab */
+.ctrl-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:20px}
+.btn{
+  font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:1.8px;
+  text-transform:uppercase;padding:10px 22px;border-radius:24px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;transition:all .25s ease;
+}
+.btn:hover{background:#fff;color:var(--panel)}
+.btn.solid{background:#fff;color:#111;border-color:#fff}
+.btn.solid:hover{background:var(--c3);border-color:var(--c3);color:#06281f}
+.btn.on{background:var(--grad);border-color:transparent;color:#fff}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-sm{padding:7px 16px;font-size:10px;letter-spacing:1.4px}
+
+.slider-block{display:flex;flex-direction:column;gap:9px;min-width:230px;flex:1}
+.slider-label{
+  display:flex;justify-content:space-between;font-family:var(--font-display);
+  font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--panel-muted);
+}
+.slider-label b{color:#fff;font-variant-numeric:tabular-nums}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:3px;
+  background:rgba(255,255,255,.2);outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;
+  background:#fff;border:3px solid var(--c2);cursor:pointer;transition:transform .2s ease;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18)}
+input[type=range]::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--c2);cursor:pointer;
+}
+.text-input{
+  background:rgba(255,255,255,.05);border:1px solid var(--panel-line);border-radius:4px;
+  color:#fff;font-family:var(--font-mono);font-size:12.5px;padding:9px 12px;width:100%;
+}
+.text-input:focus{border-color:var(--c2);outline:none}
+
+/* chips arrastáveis */
+.chip{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 15px;border-radius:24px;
+  border:1px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.04);color:#fff;
+  font-family:var(--font-display);font-size:12.5px;font-weight:400;cursor:grab;
+  transition:all .22s ease;user-select:none;
+}
+.chip:hover{border-color:#fff;transform:translateY(-2px)}
+.chip.placed{border-style:solid;border-color:var(--c3);background:rgba(44,201,157,.12)}
+.chip.wrong{border-color:var(--bad);background:rgba(226,104,95,.14)}
+.chip.dragging{opacity:.45}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:var(--c2)}
+.zone{
+  border:1px dashed rgba(255,255,255,.22);border-radius:var(--radius);padding:18px;
+  min-height:104px;display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start;
+  transition:border-color .25s ease,background .25s ease;
+}
+.zone.over{border-color:var(--c3);background:rgba(44,201,157,.06)}
+.zone-title{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:2.4px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0 0 12px;
+}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:820px){.two-col{grid-template-columns:1fr}}
+
+/* ---------- Quiz ---------- */
+.quiz{border:1px solid var(--line);border-radius:8px;padding:30px 30px 26px;margin:0 0 46px}
+.quiz-tag{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--muted);margin:0 0 20px;
+}
+.q{margin:0 0 26px;padding:0 0 24px;border-bottom:1px solid var(--line-soft)}
+.q:last-of-type{border-bottom:none;padding-bottom:6px;margin-bottom:10px}
+.q-text{font-family:var(--font-display);font-size:16px;font-weight:400;margin:0 0 16px;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:13px 16px;font-family:var(--font-body);font-size:14.5px;font-weight:300;color:var(--ink);
+  cursor:pointer;transition:all .2s ease;line-height:1.5;
+}
+.opt:hover{border-color:var(--ink)}
+.opt.correct{border-color:var(--ok);background:rgba(44,201,157,.10)}
+.opt.incorrect{border-color:var(--bad);background:rgba(226,104,95,.09)}
+.opt.locked{cursor:default}
+.feedback{
+  margin:14px 0 0;font-size:14px;line-height:1.7;color:var(--ink-soft);
+  padding-left:16px;border-left:2px solid var(--line);display:none;
+}
+.feedback.show{display:block}
+.feedback.good{border-color:var(--ok)}
+.feedback.bad{border-color:var(--bad)}
+
+/* ---------- Navegação inferior ---------- */
+.topic-nav{
+  display:flex;justify-content:space-between;gap:16px;padding:0 8vw 60px;max-width:1180px;flex-wrap:wrap;
+}
+.nav-btn{
+  display:flex;flex-direction:column;gap:4px;background:none;border:1px solid var(--line);
+  border-radius:var(--radius);padding:16px 24px;cursor:pointer;color:var(--ink);text-align:left;
+  transition:all .25s ease;min-width:200px;
+}
+.nav-btn:hover{border-color:var(--ink);transform:translateY(-2px)}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.nav-btn span{font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted)}
+.nav-btn b{font-family:var(--font-display);font-size:14.5px;font-weight:400}
+.nav-btn.next{text-align:right;align-items:flex-end;margin-left:auto}
+
+/* ---------- Glossário ---------- */
+.search-input{
+  width:100%;max-width:420px;background:var(--paper);border:1px solid var(--line);
+  border-radius:24px;padding:13px 20px;font-family:var(--font-body);font-size:14.5px;
+  color:var(--ink);margin-bottom:34px;
+}
+.search-input:focus{border-color:var(--ink);outline:none}
+.gloss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:18px;margin-bottom:50px}
+.gloss-card{border:1px solid var(--line);border-radius:var(--radius);padding:20px 20px 18px;transition:all .25s ease}
+.gloss-card:hover{border-color:var(--ink);transform:translateY(-2px)}
+.gloss-card h3{font-family:var(--font-display);font-size:15px;font-weight:500;margin:0 0 4px}
+.gloss-card .from{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);display:block;margin-bottom:10px}
+.gloss-card p{margin:0;font-size:13.5px;line-height:1.7;color:var(--ink-soft)}
+.empty-msg{color:var(--muted);font-size:14px;margin:0 0 40px}
+
+/* ---------- Responsivo ---------- */
+@media(max-width:1000px){
+  .topbar{display:flex}
+  .sidebar{transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);width:290px;box-shadow:0 0 40px rgba(0,0,0,.18);top:63px;bottom:0}
+  .sidebar-head{padding:22px 24px 16px}
+  .sidebar.open{transform:none}
+  .main{margin-left:0;padding-top:63px}
+  .topic-head{padding:40px 24px 32px}
+  .topic-body{padding:34px 24px 0}
+  .topic-nav{padding:0 24px 50px}
+  .lab{padding:26px 20px 28px}
+  .lab-stage{padding:18px}
+  .quiz{padding:24px 20px}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:55;display:none}
+  .scrim.show{display:block}
+}
+
+/* ---------- Impressão / folha de respostas ---------- */
+.print-sheet{display:none}
+@media print{
+  .topbar,.sidebar,.scrim,.topic-nav,.lab,.quiz,.back-top{display:none !important}
+  .shell{display:block !important;min-height:0 !important}
+  .main{margin:0 !important;padding:0 !important;min-height:0 !important}
+  .topic{display:none !important}
+  .print-sheet{display:block !important;padding:0 8mm}
+  body{background:#fff;color:#000;font-size:11pt}
+  .print-sheet h1{font-family:'Poppins',sans-serif;font-weight:400;font-size:19pt;margin:0 0 4pt}
+  .print-sheet h2{font-family:'Poppins',sans-serif;font-weight:500;font-size:13pt;margin:16pt 0 6pt;border-bottom:1px solid #999;padding-bottom:3pt}
+  .print-sheet .meta{color:#444;font-size:10pt;margin:0 0 14pt}
+  .print-sheet .ans{white-space:pre-wrap;border:1px solid #bbb;border-radius:3px;padding:6pt 8pt;margin:0 0 9pt;font-size:10.5pt;min-height:18pt}
+  .print-sheet .lbl{font-weight:600;font-size:10pt;margin:0 0 3pt}
+  .print-sheet table{width:100%;border-collapse:collapse;font-size:9.5pt;margin-bottom:10pt}
+  .print-sheet th,.print-sheet td{border:1px solid #999;padding:5pt 6pt;text-align:left;vertical-align:top}
+  .print-sheet th{background:#eee}
+}
+</style>
+
+<style>
+/* ============================================================
+   Componentes específicos dos laboratórios (dentro do painel escuro)
+   ============================================================ */
+.mono{font-family:var(--font-mono)}
+.panel-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--panel-line);
+  border-radius:var(--radius);padding:16px 18px;
+}
+.panel-card h4{
+  font-family:var(--font-display);font-size:13px;font-weight:500;margin:0 0 8px;color:#fff;
+}
+.panel-card p{margin:0;font-size:13.5px;line-height:1.7;color:var(--panel-muted)}
+.tag-pill{
+  display:inline-block;font-family:var(--font-display);font-size:9.5px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:20px;
+  border:1px solid var(--panel-line);color:var(--panel-muted);
+}
+.tag-pill.ok{color:var(--ok);border-color:rgba(44,201,157,.45)}
+.tag-pill.bad{color:var(--bad);border-color:rgba(226,104,95,.45)}
+.tag-pill.warn{color:var(--warn);border-color:rgba(224,163,58,.45)}
+
+/* barras / métricas */
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.bar-name{flex:0 0 128px;font-family:var(--font-display);font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--panel-muted)}
+.bar-track{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;width:0;border-radius:6px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.bar-val{flex:0 0 78px;text-align:right;font-family:var(--font-mono);font-size:12px;color:#fff;font-variant-numeric:tabular-nums}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.metric{background:rgba(255,255,255,.04);border:1px solid var(--panel-line);border-radius:var(--radius);padding:14px 16px}
+.metric span{display:block;font-family:var(--font-display);font-size:9.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--panel-muted);margin-bottom:6px}
+.metric b{font-family:var(--font-display);font-size:24px;font-weight:300;color:#fff;letter-spacing:-.5px}
+.metric small{display:block;font-size:11.5px;color:var(--panel-muted);margin-top:4px}
+
+/* timeline de sprints/fases */
+.timeline{display:flex;gap:5px;align-items:flex-end;height:80px;margin-bottom:8px}
+.tl-block{flex:1;border-radius:3px 3px 0 0;background:rgba(255,255,255,.14);transition:height .5s ease,background .4s ease;position:relative}
+.tl-axis{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10.5px;color:var(--panel-muted)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:11.5px;color:var(--panel-muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+
+/* preview de interface (1.4) */
+.ui-preview{background:#fff;border-radius:6px;padding:18px;color:#101010;transition:all .35s ease}
+.ui-preview .ui-title{font-family:var(--font-display);font-weight:500;margin:0 0 14px;color:#101010}
+.ui-field{border:1px solid #dcdce2;border-radius:4px;padding:9px 12px;margin-bottom:9px;color:#5a5a63;background:#fafafb}
+.ui-field b{color:#101010;font-weight:500}
+.ui-help{color:#7a7a84;font-style:italic;margin:2px 0 12px}
+.ui-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ui-btn{border-radius:4px;padding:8px 14px;background:#101010;color:#fff;font-family:var(--font-display);font-weight:500;border:none}
+.ui-btn.ghost{background:#fff;color:#101010;border:1px solid #dcdce2}
+.ui-shortcut{font-family:var(--font-mono);font-size:11px;color:#7a7a84;border:1px solid #dcdce2;border-radius:3px;padding:2px 6px}
+
+/* linhas clicáveis (matching, requisitos, docs, backlog) */
+.pick{
+  display:flex;gap:12px;align-items:center;justify-content:space-between;
+  border:1px solid var(--panel-line);border-radius:var(--radius);padding:12px 15px;
+  background:rgba(255,255,255,.03);cursor:pointer;transition:all .22s ease;text-align:left;
+  color:#fff;font-family:var(--font-body);font-size:13.5px;font-weight:300;width:100%;line-height:1.55;
+}
+.pick:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.06)}
+.pick.sel{border-color:var(--c2);background:rgba(41,137,216,.14)}
+.pick.ok{border-color:var(--ok);background:rgba(44,201,157,.12)}
+.pick.bad{border-color:var(--bad);background:rgba(226,104,95,.12)}
+.pick .lead{flex:1}
+.pick .side{flex:0 0 auto;display:flex;gap:8px;align-items:center}
+.mini-btn{
+  border:1px solid var(--panel-line);background:transparent;color:var(--panel-muted);
+  border-radius:20px;padding:5px 12px;font-family:var(--font-display);font-size:10px;
+  font-weight:600;letter-spacing:1.4px;text-transform:uppercase;cursor:pointer;transition:all .2s ease;
+}
+.mini-btn:hover{border-color:#fff;color:#fff}
+.mini-btn.on{background:#fff;color:#111;border-color:#fff}
+.mini-btn.ok{background:var(--ok);border-color:var(--ok);color:#06281f}
+.mini-btn.bad{background:var(--bad);border-color:var(--bad);color:#3b100c}
+
+/* código */
+.code{
+  background:#0a0a0b;border:1px solid var(--panel-line);border-radius:var(--radius);
+  padding:16px 18px;font-family:var(--font-mono);font-size:12.5px;line-height:1.85;
+  color:#d7d7de;overflow-x:auto;white-space:pre;
+}
+.code .kw{color:#c792ea}
+.code .fn{color:#82aaff}
+.code .st{color:#c3e88d}
+.code .cm{color:#6c6c78}
+.code .hl{background:rgba(224,163,58,.16);display:inline-block;width:100%}
+
+/* objetos (1.10) */
+.obj-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--panel-line);border-radius:var(--radius);
+  padding:14px 16px;animation:pop .35s ease both;
+}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.obj-card h5{font-family:var(--font-mono);font-size:12px;margin:0 0 10px;color:#fff;font-weight:500}
+.obj-attr{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11.5px;color:var(--panel-muted);padding:2px 0}
+.obj-attr b{color:#fff;font-weight:400}
+.speed-track{height:5px;background:rgba(255,255,255,.1);border-radius:4px;margin:10px 0 12px;overflow:hidden}
+.speed-fill{height:100%;width:0;background:var(--grad);transition:width .45s ease}
+
+/* UML */
+.uml-wrap{overflow-x:auto;padding-bottom:6px}
+svg.uml{display:block;min-width:520px;max-width:100%;height:auto;font-family:var(--font-display)}
+svg.uml text{fill:#e9e9ef;font-size:12px}
+svg.uml text.sm{font-size:10.5px;fill:#a9a9b0}
+svg.uml text.mono{font-family:var(--font-mono);font-size:10.5px;fill:#a9a9b0}
+svg.uml .box{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.28)}
+svg.uml .box.on{fill:rgba(41,137,216,.18);stroke:#1F5135}
+svg.uml .uc{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.3);cursor:pointer;transition:all .25s ease}
+svg.uml .uc:hover{fill:rgba(255,255,255,.12)}
+svg.uml .uc.linked{fill:rgba(44,201,157,.16);stroke:#2E8B57}
+svg.uml .actor{stroke:#e9e9ef;stroke-width:1.6;fill:none;cursor:pointer}
+svg.uml .actor.sel{stroke:#2E8B57}
+svg.uml .link{stroke:#2E8B57;stroke-width:1.4}
+svg.uml .rel{stroke:rgba(255,255,255,.35);stroke-width:1.2}
+svg.uml .lifeline{stroke:rgba(255,255,255,.25);stroke-dasharray:4 4}
+svg.uml .msg{stroke:#1F5135;stroke-width:1.6;opacity:0;transition:opacity .35s ease}
+svg.uml .msg.on{opacity:1}
+svg.uml .msg-lbl{opacity:0;transition:opacity .35s ease}
+svg.uml .msg-lbl.on{opacity:1}
+svg.uml .msg.ret{stroke:#2E8B57;stroke-dasharray:5 4}
+</style>
+
+
+<style>
+/* ============================================================
+   Painel de abertura de módulo — camadas (SVG) + linha do tempo
+   ============================================================ */
+.pan{
+  background:var(--panel);color:var(--panel-text);border:1px solid var(--panel-line);
+  border-radius:8px;padding:34px 32px 30px;margin:0 0 46px;position:relative;overflow:hidden;
+}
+.pan::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.pan-tag{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0 0 10px;
+}
+.pan h3{font-family:var(--font-display);font-size:23px;font-weight:300;margin:0 0 8px;color:#fff;letter-spacing:-.3px}
+.pan-intro{font-size:14px;line-height:1.75;color:var(--panel-muted);margin:0 0 26px;max-width:72ch}
+.pan-sec{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:2.6px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0 0 4px;
+}
+.pan-sub{font-size:13px;line-height:1.7;color:var(--panel-muted);margin:0 0 18px;max-width:70ch}
+.pan-rule{height:1px;background:var(--panel-line);margin:34px 0 28px;border:0}
+
+/* ---- bloco camadas ---- */
+.pan-layers{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:24px;align-items:start}
+@media (max-width:900px){ .pan-layers{grid-template-columns:1fr} }
+.pan-svg{width:100%;height:auto;display:block;overflow:visible}
+.pan-svg text{font-family:var(--font-display);fill:#fff}
+.pan-svg .cam-t{font-size:13.5px;font-weight:500}
+.pan-svg .cam-s{font-size:11px;fill:rgba(255,255,255,.72);font-weight:300}
+.pan-svg .cam-n{font-family:var(--font-mono);font-size:10.5px;fill:var(--panel-muted)}
+.pan-svg .rail{font-family:var(--font-mono);font-size:10px;fill:var(--panel-muted);letter-spacing:.09em}
+.pan-svg g.cam{cursor:pointer}
+.pan-svg g.cam rect{transition:opacity .22s ease, stroke-opacity .22s ease}
+.pan-svg g.cam:hover rect.base{opacity:.92}
+.pan-svg g.cam:focus{outline:none}
+.pan-svg g.cam:focus-visible rect.base{stroke:#fff;stroke-width:2;stroke-opacity:1}
+
+/* ---- cartão de detalhe ---- */
+.pan-det{
+  background:rgba(255,255,255,.04);border:1px solid var(--panel-line);
+  border-radius:var(--radius);padding:20px 22px;min-height:230px;
+}
+.pan-det .kick{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--panel-muted);margin:0 0 8px;display:flex;align-items:center;gap:9px;
+}
+.pan-det .kick i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:0 0 auto}
+.pan-det h4{font-family:var(--font-display);font-size:18px;font-weight:400;color:#fff;margin:0 0 12px;letter-spacing:-.2px}
+.pan-det p{margin:0 0 14px;font-size:14px;line-height:1.75;color:var(--panel-muted)}
+.pan-det p:last-child{margin-bottom:0}
+.pan-det b{color:#fff;font-weight:500}
+.pan-det .ex{
+  font-family:var(--font-mono);font-size:12px;line-height:1.75;color:#d7d7de;
+  background:#0a0a0b;border:1px solid var(--panel-line);border-radius:var(--radius);
+  padding:11px 14px;overflow-x:auto;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;
+}
+.pan-det .ex-lbl{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--panel-muted);margin:14px 0 6px;
+}
+
+/* ---- linha do tempo ---- */
+.pan-tl-wrap{overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.pan-tl{display:block;height:auto}
+.pan-tl text{font-family:var(--font-display)}
+.pan-tl .ano{font-family:var(--font-mono);font-size:12px;fill:#fff;font-weight:500}
+.pan-tl .ano.off{fill:var(--panel-muted);font-weight:400}
+.pan-tl .rot{font-size:11.5px;fill:var(--panel-muted);font-weight:300}
+.pan-tl .rot.on{fill:#fff;font-weight:400}
+.pan-tl g.marco{cursor:pointer}
+.pan-tl g.marco:focus{outline:none}
+.pan-tl g.marco:focus-visible circle.hit{stroke:#fff;stroke-width:2}
+.pan-tl .eixo{stroke:rgba(255,255,255,.18);stroke-width:1.5}
+.pan-tl .feito{stroke:url(#panGrad);stroke-width:2.5;transition:stroke-dashoffset .5s ease}
+
+.pan-ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.pan-read{
+  margin-top:20px;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;
+  color:var(--panel-muted);border-top:1px solid var(--panel-line);padding-top:16px;
+}
+.pan-read b{color:#fff;font-weight:500}
+.pan-read .ok{color:var(--ok)}
+.pan-conta{font-family:var(--font-mono);font-size:11.5px;color:var(--panel-muted)}
+</style>
+
+<div class="topbar">
+  <button class="burger" id="burger" aria-label="Abrir menu de tópicos"><span></span><span></span><span></span></button>
+  <p class="topbar-title" id="topbarTitle">Roteiro de Atividade</p>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <p class="brand-eyebrow">IFMS — Engenharia de Software</p>
+      <h1 class="brand-title">Roteiro de <b>Atividade</b></h1>
+      <p class="brand-author"><span>Elaborado por</span><b>Professor Eber Santana</b></p>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span>Progresso</span><strong id="progressLabel">0 / 0</strong></div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Tópicos da aula"></nav>
+    <div class="sidebar-foot">
+      <p class="foot-note">Entrega via Moodle</p>
+      <button class="reset-btn" id="resetBtn">Zerar</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+  <!-- painel ps1 -->
+  <section class="topic" data-id="ps1">
+    <div class="topic-head">
+      <p class="eyebrow">Material de apoio · Panorama</p>
+      <h2 class="topic-title">O caminho da RápidoJá, do problema ao sistema em produção</h2>
+      <p class="topic-lead">Os seis materiais de apoio percorrem, em ordem, o caminho que o caso vai atravessar: problema, especificação, escolha do modelo, projeto, validação e evolução — com a indicação de qual atividade avaliativa depende de cada etapa. Com a linha do tempo dos modelos de processo, insumo direto da Atividade 2.</p>
+    </div>
+    <div class="topic-body"><div data-painel="rot-p1"></div></div>
+  </section>
+
+  <!-- painel ps2 -->
+  <section class="topic" data-id="ps2">
+    <div class="topic-head">
+      <p class="eyebrow">Atividades · Panorama</p>
+      <h2 class="topic-title">As quatro entregas e o que cada uma avalia</h2>
+      <p class="topic-lead">Identificar, comparar, relacionar e representar: cada atividade exercita um nível diferente de domínio do mesmo conteúdo. Com o que cada entrega cobra, onde ela costuma tropeçar, e um roteiro sugerido de execução, passo a passo, até gerar o PDF.</p>
+    </div>
+    <div class="topic-body"><div data-painel="rot-p2"></div></div>
+  </section>
+
+
+
+  <!-- p1 -->
+  <section class="topic active" data-id="p1">
+    <div class="topic-head">
+      <p class="eyebrow">Material de apoio · 1</p>
+      <h2 class="topic-title">Processo de Software</h2>
+      <p class="topic-lead">"Conjunto de atividades relacionadas que levam à produção de um sistema de software" (Sommerville, 2018, p. 29). Quatro atividades organizam esse conjunto: especificação, desenvolvimento, validação e evolução — e cada uma se desdobra em subatividades concretas.</p>
+    </div>
+    <div class="topic-body">
+      <div class="callout"><p>Leia este material e as leituras recomendadas antes de realizar as quatro atividades. As respostas devem ser reunidas em um único PDF e submetidas pelo Moodle.</p></div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Abra cada etapa do processo</h3>
+        <p class="lab-hint">Clique em uma etapa para ver suas subatividades. Este é o insumo direto da <b>Atividade 4</b>, em que você vai construir o fluxograma.</p>
+        <div class="lab-stage">
+          <div id="p1-flow"></div>
+          <div id="p1-detail" style="margin-top:20px"></div>
+        </div>
+        <div class="lab-readout" id="p1-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="p1"></div>
+    </div>
+  </section>
+
+  <!-- p2 -->
+  <section class="topic" data-id="p2">
+    <div class="topic-head">
+      <p class="eyebrow">Material de apoio · 2</p>
+      <h2 class="topic-title">Modelos de Processo</h2>
+      <p class="topic-lead">Cascata, Desenvolvimento Incremental e Engenharia de Software orientada a reuso. Nenhum é universal: a equipe avalia qual se adequa ao projeto, podendo adotar versões híbridas.</p>
+    </div>
+    <div class="topic-body">
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Comparador de modelos</h3>
+        <p class="lab-hint">Escolha uma linha de comparação e revele o conteúdo de cada modelo. Use este comparador como base para preencher o quadro da <b>Atividade 2</b> — mas escreva com suas palavras.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row" id="p2-rows"></div>
+          <div id="p2-cards"></div>
+        </div>
+        <div class="lab-readout" id="p2-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="p2"></div>
+    </div>
+  </section>
+
+  <!-- p3 -->
+  <section class="topic" data-id="p3">
+    <div class="topic-head">
+      <p class="eyebrow">Material de apoio · 3</p>
+      <h2 class="topic-title">Especificação e Requisitos</h2>
+      <p class="topic-lead">A Engenharia de Requisitos compreende e define quais serviços são necessários e quais restrições existem. Requisitos funcionais descrevem <b>funções</b> do sistema; não-funcionais descrevem <b>como</b> essas funções serão realizadas.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">RF</span><h3>Funcionais</h3><p>Tudo aquilo que o usuário compreende que o sistema faça: inserir dados em formulário, buscar pratos no cardápio, consultar status do pedido, realizar compras.</p></div>
+        <div class="concept"><span class="kicker">RNF</span><h3>Não-funcionais</h3><p>O "background" do sistema: sistema operacional, hardware, processamento, memória, conexão, banco de dados, dispositivos suportados.</p></div>
+        <div class="concept"><span class="kicker">Cuidado</span><h3>Erro caro</h3><p>Erro nesta etapa gera problemas posteriores no projeto e na implementação do sistema.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Triagem no caso RápidoJá</h3>
+        <p class="lab-hint">Requisitos levantados com a empresa do enunciado. Classifique cada um — é o mesmo raciocínio exigido na <b>Atividade 1</b>.</p>
+        <div class="lab-stage">
+          <div id="p3-cards" style="display:flex;flex-direction:column;gap:11px"></div>
+          <div class="ctrl-row" style="margin:18px 0 0"><button class="btn btn-sm" id="p3-reset">Recomeçar</button></div>
+        </div>
+        <div class="lab-readout" id="p3-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="p3"></div>
+    </div>
+  </section>
+
+  <!-- p4 -->
+  <section class="topic" data-id="p4">
+    <div class="topic-head">
+      <p class="eyebrow">Material de apoio · 4</p>
+      <h2 class="topic-title">Projeto e Implementação</h2>
+      <p class="topic-lead">Elaboração de um sistema executável para entregar ao cliente. Envolve projeto (design) e programação — intercalados em processos ágeis. O projeto ganha detalhes à medida que avança: arquitetura, banco de dados, interface e componentes.</p>
+    </div>
+    <div class="topic-body">
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Decisões de projeto do RápidoJá</h3>
+        <p class="lab-hint">Cada decisão pertence a uma das quatro atividades de projeto. Classifique-as.</p>
+        <div class="lab-stage">
+          <div id="p4-cards" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+        <div class="lab-readout" id="p4-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="p4"></div>
+    </div>
+  </section>
+
+  <!-- p5 -->
+  <section class="topic" data-id="p5">
+    <div class="topic-head">
+      <p class="eyebrow">Material de apoio · 5</p>
+      <h2 class="topic-title">Validação do Software</h2>
+      <p class="topic-lead">A V&amp;V mostra que o sistema está conforme sua especificação e que satisfaz as expectativas do cliente. <b>Verificação</b>: o sistema está funcionando da maneira correta? <b>Validação</b>: é o software correto? A principal técnica é o teste, em três níveis.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Nível 1</span><h3>Componente</h3><p>Testado por quem o desenvolveu.</p></div>
+        <div class="concept"><span class="kicker">Nível 2</span><h3>Sistema</h3><p>Componentes integrados: interações imprevistas e erros de interface.</p></div>
+        <div class="concept"><span class="kicker">Nível 3</span><h3>Cliente</h3><p>Testado pelo cliente com dados reais, não de simulação.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Em que nível esse defeito aparece?</h3>
+        <p class="lab-hint">Defeitos plausíveis no RápidoJá. Indique o nível de teste em que cada um seria detectado.</p>
+        <div class="lab-stage">
+          <div id="p5-cards" style="display:flex;flex-direction:column;gap:12px"></div>
+        </div>
+        <div class="lab-readout" id="p5-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="p5"></div>
+    </div>
+  </section>
+
+  <!-- p6 -->
+  <section class="topic" data-id="p6">
+    <div class="topic-head">
+      <p class="eyebrow">Material de apoio · 6</p>
+      <h2 class="topic-title">Evolução do Software</h2>
+      <p class="topic-lead">Todo software ativo necessitará de mudanças: reparo de bugs, adaptação a mudanças de processos de negócio e adesão de novas funcionalidades. A evolução revisita todas as etapas do processo — especificação, desenvolvimento e validação.</p>
+    </div>
+    <div class="topic-body">
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Um ano de RápidoJá em produção</h3>
+        <p class="lab-hint">Cinco solicitações chegaram depois do lançamento. Classifique o tipo de manutenção de cada uma.</p>
+        <div class="lab-stage">
+          <div id="p6-cards" style="display:flex;flex-direction:column;gap:12px"></div>
+          <div id="p6-summary" style="margin-top:20px"></div>
+        </div>
+        <div class="lab-readout" id="p6-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="p6"></div>
+    </div>
+  </section>
+
+
+  <!-- a1 -->
+  <section class="topic" data-id="a1">
+    <div class="topic-head">
+      <p class="eyebrow">Atividade 1</p>
+      <h2 class="topic-title">Requisitos e Modelo para a RápidoJá</h2>
+      <p class="topic-lead">A RápidoJá é um serviço de entrega local que atende restaurantes, lanchonetes e padarias em uma cidade de médio porte. Quer um sistema web e mobile para pedidos de comida com acompanhamento da entrega em tempo real, usado também por entregadores e restaurantes parceiros.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Perfil 1</span><h3>Cliente final</h3><p>Visualiza cardápios, faz pedidos, paga online, acompanha o status da entrega e avalia o pedido após recebê-lo.</p></div>
+        <div class="concept"><span class="kicker">Perfil 2</span><h3>Restaurantes parceiros</h3><p>Cadastram e editam cardápios, recebem e confirmam pedidos, informam o tempo estimado de preparo e acompanham a entrega.</p></div>
+        <div class="concept"><span class="kicker">Perfil 3</span><h3>Entregadores</h3><p>Visualizam pedidos disponíveis, aceitam entregas, registram a conclusão e acompanham seu histórico.</p></div>
+      </div>
+      <div class="callout"><p>A empresa quer um sistema simples, confiável, com boa performance e acessível tanto em computadores quanto em celulares.</p></div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Entregável 1.a e 1.b</p></div>
+        <h3>Liste cinco requisitos funcionais e cinco não-funcionais</h3>
+        <p class="lab-hint">Escreva os seus, um por linha. O verificador aponta sinais típicos de cada tipo — ele orienta, mas quem decide é você.</p>
+        <div class="lab-stage">
+          <div class="two-col">
+            <div>
+              <p class="zone-title">Requisitos funcionais</p>
+              <div id="a1-rf" style="display:flex;flex-direction:column;gap:9px"></div>
+            </div>
+            <div>
+              <p class="zone-title">Requisitos não-funcionais</p>
+              <div id="a1-rnf" style="display:flex;flex-direction:column;gap:9px"></div>
+            </div>
+          </div>
+          <div class="ctrl-row" style="margin:20px 0 0">
+            <button class="btn btn-sm solid" id="a1-check">Verificar meus requisitos</button>
+            <button class="btn btn-sm" id="a1-model">Ver exemplo comentado</button>
+          </div>
+          <div id="a1-modelbox" style="margin-top:18px"></div>
+        </div>
+        <div class="lab-readout" id="a1-out"></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Entregável 1.c</p></div>
+        <h3>Escolha o modelo de processo e justifique</h3>
+        <p class="lab-hint">Selecione o modelo que você considera mais adequado para a RápidoJá e escreva a justificativa. Depois compare com o comentário do gabarito.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row" id="a2-models"></div>
+          <div id="a2-just"></div>
+          <div class="ctrl-row" style="margin:18px 0 0"><button class="btn btn-sm" id="a2-model">Ver comentário do gabarito</button></div>
+          <div id="a2-modelbox" style="margin-top:16px"></div>
+        </div>
+        <div class="lab-readout" id="a2-out"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- a2 -->
+  <section class="topic" data-id="a2">
+    <div class="topic-head">
+      <p class="eyebrow">Atividade 2</p>
+      <h2 class="topic-title">Quadro Comparativo dos Modelos</h2>
+      <p class="topic-lead">Preencha o quadro comparando Cascata, Incremental e Orientado a reuso em cinco dimensões. Escreva com suas palavras — o gabarito comentado fica disponível célula a célula depois que você responder.</p>
+    </div>
+    <div class="topic-body">
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Entregável 2</p></div>
+        <h3>Preencha as quinze células</h3>
+        <p class="lab-hint">Tudo é salvo neste navegador. Use o comparador do material de apoio 2 como consulta.</p>
+        <div class="lab-stage">
+          <div id="a3-grid" style="overflow-x:auto"></div>
+          <div class="ctrl-row" style="margin:20px 0 0">
+            <button class="btn btn-sm" id="a3-model">Mostrar / ocultar gabarito</button>
+            <button class="btn btn-sm" id="a3-clear">Limpar quadro</button>
+          </div>
+        </div>
+        <div class="lab-readout" id="a3-out"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- a3 -->
+  <section class="topic" data-id="a3">
+    <div class="topic-head">
+      <p class="eyebrow">Atividade 3</p>
+      <h2 class="topic-title">Mapa Conceitual</h2>
+      <p class="topic-lead">Assista ao vídeo indicado no roteiro e construa um mapa conceitual no Lucidchart cobrindo: as etapas do processo de software, os modelos de processo, os tipos de requisitos e as fases de teste e validação.</p>
+    </div>
+    <div class="topic-body">
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Entregável 3</p></div>
+        <h3>Checklist de cobertura do mapa</h3>
+        <p class="lab-hint">Marque os conceitos já representados no seu mapa. O medidor mostra a cobertura exigida pelo enunciado — um mapa incompleto perde ponto por omissão, não por erro.</p>
+        <div class="lab-stage">
+          <div id="a4-check" style="display:flex;flex-direction:column;gap:9px"></div>
+          <div id="a4-meter" style="margin-top:20px"></div>
+          <div style="margin-top:20px">
+            <p class="zone-title">Link do mapa no Lucidchart</p>
+            <input class="text-input" id="a4-link" placeholder="cole aqui o link compartilhável" aria-label="Link do mapa conceitual">
+          </div>
+          <div style="margin-top:14px">
+            <p class="zone-title">Ideia central e relações principais</p>
+            <textarea class="text-input" id="a4-desc" rows="4" style="resize:vertical;font-family:var(--font-body);font-size:14px" aria-label="Descrição do mapa" placeholder="Explique em poucas linhas como você conectou os quatro blocos de conceitos."></textarea>
+          </div>
+        </div>
+        <div class="lab-readout" id="a4-out"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- a4 -->
+  <section class="topic" data-id="a4">
+    <div class="topic-head">
+      <p class="eyebrow">Atividade 4</p>
+      <h2 class="topic-title">Fluxograma das Subatividades</h2>
+      <p class="topic-lead">Construa o fluxograma com as principais subatividades de cada etapa do processo: Especificação → Desenvolvimento → Validação → Evolução. Monte aqui a estrutura, confira e depois desenhe no seu editor.</p>
+    </div>
+    <div class="topic-body">
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Entregável 4</p></div>
+        <h3>Monte o fluxograma</h3>
+        <p class="lab-hint">Arraste (ou clique) cada subatividade para a etapa a que ela pertence. Ao final, o fluxograma montado aparece pronto para servir de rascunho do seu desenho.</p>
+        <div class="lab-stage">
+          <p class="zone-title">Subatividades embaralhadas</p>
+          <div class="zone" id="a5-pool" style="margin-bottom:18px"></div>
+          <div id="a5-stages" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px"></div>
+          <div class="ctrl-row" style="margin:18px 0 0">
+            <button class="btn btn-sm solid" id="a5-check">Conferir</button>
+            <button class="btn btn-sm" id="a5-reset">Recomeçar</button>
+          </div>
+          <div id="a5-diagram" style="margin-top:22px"></div>
+          <div style="margin-top:20px">
+            <p class="zone-title">Observações do grupo sobre o fluxo</p>
+            <textarea class="text-input" id="a5-obs" rows="3" style="resize:vertical;font-family:var(--font-body);font-size:14px" aria-label="Observações sobre o fluxograma" placeholder="Ex.: como a evolução realimenta a especificação no caso da RápidoJá."></textarea>
+          </div>
+        </div>
+        <div class="lab-readout" id="a5-out"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- entrega -->
+  <section class="topic" data-id="entrega">
+    <div class="topic-head">
+      <p class="eyebrow">Fechamento</p>
+      <h2 class="topic-title">Gerar a Entrega</h2>
+      <p class="topic-lead">As quatro atividades devem ser reunidas em um único arquivo PDF e submetidas pelo Moodle. Confira a cobertura abaixo e gere a folha de respostas com tudo o que você preencheu nesta apostila.</p>
+    </div>
+    <div class="topic-body">
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Checklist de entrega</p></div>
+        <h3>O que já está preenchido</h3>
+        <p class="lab-hint">A folha de respostas sai formatada para impressão: no diálogo do navegador, escolha "Salvar como PDF".</p>
+        <div class="lab-stage">
+          <div id="fin-check" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div style="margin-top:20px">
+            <p class="zone-title">Identificação</p>
+            <input class="text-input" id="fin-nome" placeholder="Nome completo / integrantes do grupo" aria-label="Nome" style="margin-bottom:10px">
+            <input class="text-input" id="fin-turma" placeholder="Turma e período" aria-label="Turma">
+          </div>
+          <div class="ctrl-row" style="margin:22px 0 0">
+            <button class="btn btn-sm solid" id="fin-print">Gerar folha de respostas (PDF)</button>
+          </div>
+        </div>
+        <div class="lab-readout" id="fin-out"></div>
+      </div>
+    </div>
+  </section>
+
+
+  </main>
+</div>
+
+
+<div class="print-sheet" id="printSheet"></div>
+
+<script>
+window.APOSTILA = {
+  storeKey: "roteiro-atividade-processo-v1",
+  topics: [
+    {id:"ps1", num:"◆", label:"Panorama — O caminho da RápidoJá", unit:"Material de apoio"},
+    {id:"p1", num:"1", label:"Processo de Software", unit:"Material de apoio"},
+    {id:"p2", num:"2", label:"Modelos de Processo", unit:"Material de apoio"},
+    {id:"p3", num:"3", label:"Especificação e Requisitos", unit:"Material de apoio"},
+    {id:"p4", num:"4", label:"Projeto e Implementação", unit:"Material de apoio"},
+    {id:"p5", num:"5", label:"Validação do Software", unit:"Material de apoio"},
+    {id:"p6", num:"6", label:"Evolução do Software", unit:"Material de apoio"},
+    {id:"ps2", num:"◆", label:"Panorama — As quatro entregas", unit:"Atividades avaliativas"},
+    {id:"a1", num:"A1", label:"Requisitos e modelo (RápidoJá)", unit:"Atividades avaliativas"},
+    {id:"a2", num:"A2", label:"Quadro comparativo", unit:"Atividades avaliativas"},
+    {id:"a3", num:"A3", label:"Mapa conceitual", unit:"Atividades avaliativas"},
+    {id:"a4", num:"A4", label:"Fluxograma do processo", unit:"Atividades avaliativas"},
+    {id:"entrega", num:"↓", label:"Gerar a entrega", unit:"Atividades avaliativas"}
+  ],
+  quiz: {
+    p1:{tag:"Fixação — processo de software", items:[
+      {q:"Segundo Sommerville, processo de software é:",
+       o:["A metodologia ágil adotada pela empresa","Um conjunto de atividades relacionadas que levam à produção de um sistema de software","O cronograma do projeto","O conjunto de ferramentas usadas pela equipe"],
+       a:1,
+       good:"Correto — é a definição literal do material (2018, p. 29).",
+       bad:"Metodologia, cronograma e ferramentas são escolhas dentro do processo; o processo é o conjunto de atividades que levam à produção do sistema."},
+      {q:"Qual sequência representa as quatro atividades do processo?",
+       o:["Especificação, desenvolvimento, validação e evolução","Análise, código, teste e entrega","Requisitos, contrato, homologação e suporte","Planejar, executar, medir e corrigir"],
+       a:0,
+       good:"Isso. É a sequência usada como espinha dorsal deste roteiro.",
+       bad:"A sequência do material é: especificação, desenvolvimento, validação e evolução."}
+    ]},
+    p2:{tag:"Fixação — modelos de processo", items:[
+      {q:"O modelo que intercala especificação, desenvolvimento e validação, entregando o sistema como uma série de versões, é o:",
+       o:["Cascata","Incremental","Orientado a reuso","Nenhum deles"],
+       a:1,
+       good:"Correto. Séries de versões é a marca do desenvolvimento incremental.",
+       bad:"“Série de versões” e atividades intercaladas descrevem o modelo incremental."},
+      {q:"Sobre a escolha do modelo, é correto afirmar:",
+       o:["Existe um modelo universalmente melhor","A equipe avalia qual se adequa ao projeto, podendo adotar versões híbridas","O modelo é definido pela linguagem de programação","O cliente sempre escolhe o modelo"],
+       a:1,
+       good:"Isso. Inclusive combinações de modelos são legítimas.",
+       bad:"O material é explícito: não há modelo universal, e híbridos são possíveis."}
+    ]},
+    p3:{tag:"Fixação — requisitos", items:[
+      {q:"“Acompanhar o status da entrega em tempo real” é um requisito:",
+       o:["Funcional, pois descreve uma função que o usuário compreende que o sistema faça","Não-funcional, porque envolve tempo","Regra de negócio","Restrição de hardware"],
+       a:0,
+       good:"Correto. É uma função visível para o cliente final.",
+       bad:"Descreve o que o sistema faz para o usuário — logo, funcional. A restrição de desempenho seria um RNF associado."},
+      {q:"“Ser acessível tanto em computadores quanto em celulares” é um requisito:",
+       o:["Funcional","Não-funcional, pois trata dos dispositivos em que o software pode ser usado","Não é requisito","Requisito de negócio apenas"],
+       a:1,
+       good:"Isso. Tipos de dispositivos suportados aparecem na lista de exemplos de RNF do material.",
+       bad:"Não é uma nova função: é uma restrição sobre onde o sistema deve funcionar — requisito não-funcional."}
+    ]},
+    p4:{tag:"Fixação — projeto", items:[
+      {q:"Definir como o app do entregador, o app do cliente e o serviço de pedidos se comunicam e se distribuem é atividade de:",
+       o:["Projeto de banco de dados","Projeto de arquitetura","Projeto de interface","Seleção de componentes"],
+       a:1,
+       good:"Correto: estrutura global, componentes principais e sua distribuição.",
+       bad:"Trata-se da estrutura global do sistema e da distribuição dos componentes: projeto de arquitetura."},
+      {q:"Em um processo ágil, projeto e implementação:",
+       o:["São fases separadas e sequenciais","São intercalados","Não existem","São feitos por equipes diferentes obrigatoriamente"],
+       a:1,
+       good:"Isso — o material destaca essa característica do ágil.",
+       bad:"No ágil, projeto e implementação se intercalam; a separação estrita é característica do cascata."}
+    ]},
+    p5:{tag:"Fixação — validação", items:[
+      {q:"O teste realizado pelo cliente, com dados reais em vez de dados de simulação, é o:",
+       o:["Teste de componente","Teste de sistema","Teste do cliente","Teste de regressão"],
+       a:2,
+       good:"Correto — é o terceiro nível descrito no material.",
+       bad:"Dados reais e a perspectiva de quem contratou caracterizam o teste do cliente."},
+      {q:"Verificação e validação respondem, respectivamente, às perguntas:",
+       o:["“É o software correto?” e “o sistema funciona da maneira correta?”","“O sistema está funcionando da maneira correta?” e “é o software correto?”","Ambas à mesma pergunta","Nenhuma das anteriores"],
+       a:1,
+       good:"Isso. Verificação olha para a especificação; validação, para a expectativa do cliente.",
+       bad:"Inverteu: verificação pergunta se o sistema funciona da maneira correta; validação, se é o software correto."}
+    ]},
+    p6:{tag:"Fixação — evolução", items:[
+      {q:"A evolução do software:",
+       o:["Ocorre apenas em sistemas mal feitos","Revisita todas as etapas do processo, pois toda mudança precisa ser especificada, desenvolvida e validada","Substitui a fase de testes","Acontece só na primeira versão"],
+       a:1,
+       good:"Correto. Manutenção é um miniprocesso completo.",
+       bad:"Todo software ativo necessitará de mudanças, e cada mudança percorre novamente especificação, desenvolvimento e validação."},
+      {q:"Adaptar o RápidoJá a uma nova regra de emissão de nota fiscal eletrônica é manutenção:",
+       o:["Corretiva","Adaptativa","Evolutiva","Preventiva"],
+       a:1,
+       good:"Isso: mudança no contexto externo (legal), não erro nem nova funcionalidade pedida pelo negócio.",
+       bad:"Não houve defeito (corretiva) nem pedido de nova funcionalidade do negócio (evolutiva): é adaptação a uma exigência externa."}
+    ]}
+  },
+  gloss: []
+};
+</script>
+
+<script>
+(function(){
+"use strict";
+var CFG    = window.APOSTILA || {};
+var TOPICS = CFG.topics || [];
+var QUIZ   = CFG.quiz || {};
+var GLOSS  = CFG.gloss || [];
+var STORE_KEY = CFG.storeKey || "apostila-generica";
+
+var done = {};
+try{ var raw = localStorage.getItem(STORE_KEY); if(raw) done = JSON.parse(raw) || {}; }catch(e){ done = {}; }
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(done)); }catch(e){} }
+
+var nav = document.getElementById("nav");
+var sections = {};
+Array.prototype.forEach.call(document.querySelectorAll(".topic"), function(sec){
+  sections[sec.getAttribute("data-id")] = sec;
+});
+
+/* ---------- sidebar ---------- */
+var lastUnit = null;
+TOPICS.forEach(function(t){
+  if(t.unit && t.unit !== lastUnit){
+    var h = document.createElement("p");
+    h.className = "nav-group";
+    h.textContent = t.unit;
+    nav.appendChild(h);
+    lastUnit = t.unit;
+  }
+  var b = document.createElement("button");
+  b.className = "nav-item";
+  b.type = "button";
+  b.setAttribute("data-goto", t.id);
+  b.innerHTML = '<span class="nav-num">' + (t.num !== undefined ? t.num : t.id) + "</span>" +
+                '<span class="nav-label">' + t.label + "</span>" +
+                '<span class="nav-check" aria-hidden="true"></span>';
+  b.addEventListener("click", function(){ show(t.id); });
+  nav.appendChild(b);
+});
+
+var sidebar = document.getElementById("sidebar");
+var scrim   = document.getElementById("scrim");
+var burger  = document.getElementById("burger");
+function closeMenu(){ sidebar.classList.remove("open"); scrim.classList.remove("show"); }
+burger.addEventListener("click", function(){
+  sidebar.classList.toggle("open");
+  scrim.classList.toggle("show", sidebar.classList.contains("open"));
+});
+scrim.addEventListener("click", closeMenu);
+
+function show(id){
+  if(!sections[id]) return;
+  Object.keys(sections).forEach(function(k){ sections[k].classList.toggle("active", k === id); });
+  Array.prototype.forEach.call(nav.querySelectorAll(".nav-item"), function(b){
+    b.classList.toggle("active", b.getAttribute("data-goto") === id);
+  });
+  var t = TOPICS.filter(function(x){ return x.id === id; })[0];
+  document.getElementById("topbarTitle").textContent = t ? t.label : "";
+  window.scrollTo({top:0, behavior:"auto"});
+  closeMenu();
+}
+
+function countable(){ return TOPICS.filter(function(t){ return !t.skipProgress; }); }
+
+function refreshProgress(){
+  var list = countable(), n = 0;
+  list.forEach(function(t){
+    var b = nav.querySelector('[data-goto="' + t.id + '"]');
+    var isDone = !!done[t.id];
+    if(isDone) n++;
+    if(b) b.classList.toggle("done", isDone);
+  });
+  document.getElementById("progressLabel").textContent = n + " / " + list.length;
+  document.getElementById("progressBar").style.width = (list.length ? (n / list.length * 100) : 0) + "%";
+}
+
+var answered = {};
+document.getElementById("resetBtn").addEventListener("click", function(){
+  done = {}; save(); refreshProgress(); answered = {};
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(o){
+    o.classList.remove("correct","incorrect","locked");
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".feedback"), function(f){ f.className = "feedback"; });
+});
+
+/* ---------- navegação inferior ---------- */
+TOPICS.forEach(function(t, i){
+  var sec = sections[t.id];
+  if(!sec) return;
+  var prev = TOPICS[i-1], next = TOPICS[i+1];
+  var wrap = document.createElement("div");
+  wrap.className = "topic-nav";
+  if(prev){
+    var pb = document.createElement("button");
+    pb.className = "nav-btn"; pb.type = "button";
+    pb.innerHTML = "<span>Anterior</span><b>" + prev.label + "</b>";
+    pb.addEventListener("click", function(){ show(prev.id); });
+    wrap.appendChild(pb);
+  }
+  if(next){
+    var nb = document.createElement("button");
+    nb.className = "nav-btn next"; nb.type = "button";
+    nb.innerHTML = "<span>Próximo</span><b>" + next.label + "</b>";
+    nb.addEventListener("click", function(){ show(next.id); });
+    wrap.appendChild(nb);
+  }
+  sec.appendChild(wrap);
+});
+
+/* ---------- quiz ---------- */
+Object.keys(QUIZ).forEach(function(tid){
+  var host = document.querySelector('[data-quiz="' + tid + '"]');
+  if(!host) return;
+  var head = document.createElement("p");
+  head.className = "quiz-tag";
+  head.textContent = QUIZ[tid].tag || "Fixação";
+  host.appendChild(head);
+  var items = QUIZ[tid].items || QUIZ[tid];
+
+  items.forEach(function(item, qi){
+    var q = document.createElement("div");
+    q.className = "q";
+    var txt = document.createElement("p");
+    txt.className = "q-text";
+    txt.innerHTML = (qi + 1) + ". " + item.q;
+    q.appendChild(txt);
+    if(item.ctx){
+      var ctx = document.createElement("p");
+      ctx.style.cssText = "font-size:14px;line-height:1.7;color:var(--ink-soft);margin:-6px 0 16px;max-width:70ch";
+      ctx.innerHTML = item.ctx;
+      q.appendChild(ctx);
+    }
+    var opts = document.createElement("div");
+    opts.className = "opts";
+    item.o.forEach(function(o, oi){
+      var btn = document.createElement("button");
+      btn.className = "opt"; btn.type = "button"; btn.innerHTML = o;
+      btn.addEventListener("click", function(){
+        var key = tid + "-" + qi;
+        if(answered[key]) return;
+        answered[key] = true;
+        var correct = (oi === item.a);
+        btn.classList.add(correct ? "correct" : "incorrect");
+        Array.prototype.forEach.call(opts.children, function(c, ci){
+          c.classList.add("locked");
+          if(ci === item.a) c.classList.add("correct");
+        });
+        fb.innerHTML = correct ? item.good : item.bad;
+        fb.className = "feedback show " + (correct ? "good" : "bad");
+        var all = items.every(function(_, i){ return answered[tid + "-" + i]; });
+        if(all){ done[tid] = true; save(); refreshProgress(); }
+      });
+      opts.appendChild(btn);
+    });
+    q.appendChild(opts);
+    var fb = document.createElement("p");
+    fb.className = "feedback";
+    q.appendChild(fb);
+    host.appendChild(q);
+  });
+});
+
+/* ---------- glossário ---------- */
+var grid = document.getElementById("glossGrid");
+if(grid){
+  var empty = document.getElementById("glossEmpty");
+  var renderGloss = function(filter){
+    var f = (filter || "").toLowerCase().trim();
+    grid.innerHTML = "";
+    var n = 0;
+    GLOSS.forEach(function(g){
+      if(f && (g[0] + " " + g[1] + " " + g[2]).toLowerCase().indexOf(f) === -1) return;
+      n++;
+      var c = document.createElement("div");
+      c.className = "gloss-card";
+      var h = document.createElement("h3"); h.textContent = g[0];
+      var s = document.createElement("span"); s.className = "from"; s.textContent = g[1];
+      var p = document.createElement("p"); p.textContent = g[2];
+      c.appendChild(h); c.appendChild(s); c.appendChild(p);
+      grid.appendChild(c);
+    });
+    if(empty) empty.style.display = n ? "none" : "block";
+  };
+  var search = document.getElementById("glossSearch");
+  if(search) search.addEventListener("input", function(e){ renderGloss(e.target.value); });
+  renderGloss("");
+}
+
+refreshProgress();
+if(TOPICS.length) show(TOPICS[0].id);
+window.__apostila = {
+  show: show,
+  markDone: function(id){ if(!done[id]){ done[id] = true; save(); refreshProgress(); } }
+};
+})();
+</script>
+
+<script>
+/* armazenamento compartilhado das respostas das atividades */
+window.__ROT = (function(){
+  var KEY = "roteiro-respostas-v1";
+  var data = {};
+  try{ var raw = localStorage.getItem(KEY); if(raw) data = JSON.parse(raw) || {}; }catch(e){}
+  return {
+    data: data,
+    get: function(k, def){ return data[k] === undefined ? def : data[k]; },
+    set: function(k, v){ data[k] = v; try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(e){} },
+    clear: function(){ data = {}; try{ localStorage.removeItem(KEY); }catch(e){} }
+  };
+})();
+
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+function done(id){ if(window.__apostila) window.__apostila.markDone(id); }
+
+/* ============================================================
+   p1 — Etapas e subatividades
+   ============================================================ */
+(function(){
+  var flow = $("p1-flow");
+  if(!flow) return;
+  var detail = $("p1-detail"), out = $("p1-out");
+  var STAGES = [
+    {t:"Especificação", d:"Clientes e engenheiros definem o software a ser produzido e as restrições de sua operação.",
+     subs:["Estudo de viabilidade","Elicitação e análise de requisitos","Especificação de requisitos","Validação de requisitos"]},
+    {t:"Desenvolvimento", d:"O software é projetado e programado.",
+     subs:["Projeto de arquitetura","Projeto de banco de dados","Projeto de interface","Seleção e projeto de componentes","Programação e depuração"]},
+    {t:"Validação", d:"O software é verificado para garantir que é o que o cliente quer.",
+     subs:["Teste de componente","Teste de sistema","Teste do cliente"]},
+    {t:"Evolução", d:"O software é modificado para refletir a mudança de requisitos do cliente e do mercado.",
+     subs:["Análise da solicitação de mudança","Replanejamento do sistema","Implementação da mudança","Nova validação e liberação"]}
+  ];
+  var open = 0;
+
+  function render(){
+    flow.innerHTML = "";
+    var g = el("div");
+    g.style.cssText = "display:grid;grid-template-columns:repeat(4,1fr);gap:10px";
+    STAGES.forEach(function(s, i){
+      var b = el("button","pick" + (open === i ? " sel" : ""));
+      b.type = "button";
+      b.style.cssText = "justify-content:center;text-align:center;min-height:74px";
+      b.innerHTML = '<span class="lead" style="text-align:center"><b>' + (i + 1) + ". " + s.t + "</b><br>" +
+        '<span class="mono" style="font-size:11px;color:var(--panel-muted)">' + s.subs.length + " subatividades</span></span>";
+      b.addEventListener("click", function(){ open = i; render(); });
+      g.appendChild(b);
+    });
+    flow.appendChild(g);
+
+    var s = STAGES[open];
+    detail.innerHTML = "";
+    var card = el("div","panel-card");
+    card.innerHTML = "<h4>" + s.t + "</h4><p>" + s.d + "</p>" +
+      '<div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px">' +
+      s.subs.map(function(x){ return '<span class="tag-pill">' + x + "</span>"; }).join("") + "</div>";
+    detail.appendChild(card);
+    out.innerHTML = "<b>" + s.t + " → " + s.subs.length + " subatividades.</b><br>" +
+      "Anote-as: a <b>Atividade 4</b> pede exatamente esse desdobramento em forma de fluxograma. Repare que a evolução volta ao início — o processo é um ciclo, não uma linha reta.";
+    done("p1");
+  }
+  render();
+})();
+
+/* ============================================================
+   p2 — Comparador de modelos
+   ============================================================ */
+(function(){
+  var rows = $("p2-rows");
+  if(!rows) return;
+  var cards = $("p2-cards"), out = $("p2-out");
+  var DIM = [
+    {k:"def", t:"Definição"},
+    {k:"van", t:"Vantagens"},
+    {k:"des", t:"Desvantagens"},
+    {k:"exe", t:"Exemplo de uso"},
+    {k:"met", t:"Métodos que seguem"}
+  ];
+  var MODELS = [
+    {t:"Cascata",
+     def:"Considera as atividades fundamentais como fases distintas e sequenciais: especificação, desenvolvimento, validação e evolução.",
+     van:"Documentação completa a cada fase, planejamento e custo previsíveis, fácil de auditar e de contratar.",
+     des:"Rígido diante de mudanças; o cliente só vê software funcionando no fim; erro de requisito é descoberto tarde.",
+     exe:"Sistemas críticos e contratos públicos com escopo fechado, como controle de tráfego aéreo.",
+     met:"Modelos dirigidos a plano; V-Model como variação orientada a testes."},
+    {t:"Incremental",
+     def:"Intercala especificação, desenvolvimento e validação; o sistema é desenvolvido como uma série de versões.",
+     van:"Feedback cedo, custo de mudança menor, entrega de valor antes do fim do projeto.",
+     des:"Estrutura pode se degradar sem refatoração; documentação tende a ficar em segundo plano; visibilidade do todo é menor.",
+     exe:"Produtos digitais em evolução: aplicativos de delivery, e-commerce, plataformas internas.",
+     met:"Scrum, XP, Kanban e demais métodos ágeis."},
+    {t:"Orientado a reuso",
+     def:"O processo concentra-se na seleção, adaptação e integração de componentes existentes em vez de desenvolver do zero.",
+     van:"Reduz custo, prazo e risco; aproveita componentes já testados em produção.",
+     des:"Perda de controle sobre a evolução dos componentes; compromissos nos requisitos para caber no que existe.",
+     exe:"Portais que integram autenticação, pagamento e emissão de documentos por serviços de mercado.",
+     met:"Desenvolvimento baseado em componentes; integração de serviços e APIs."}
+  ];
+  var cur = "def", revealed = {};
+
+  function render(){
+    rows.innerHTML = "";
+    DIM.forEach(function(d){
+      var b = el("button","btn btn-sm" + (cur === d.k ? " on" : ""), d.t);
+      b.type = "button";
+      b.addEventListener("click", function(){ cur = d.k; render(); });
+      rows.appendChild(b);
+    });
+    cards.innerHTML = "";
+    var g = el("div","metric-grid");
+    MODELS.forEach(function(m, i){
+      var key = cur + "-" + i;
+      var c = el("div","panel-card");
+      c.style.cursor = "pointer";
+      c.innerHTML = "<h4>" + m.t + "</h4><p>" +
+        (revealed[key] ? m[cur] : '<span class="tag-pill">clique para revelar</span>') + "</p>";
+      c.addEventListener("click", function(){ revealed[key] = !revealed[key]; render(); });
+      g.appendChild(c);
+    });
+    cards.appendChild(g);
+    var n = Object.keys(revealed).filter(function(k){ return revealed[k]; }).length;
+    out.innerHTML = "<b>Dimensão em foco: " + DIM.filter(function(d){ return d.k === cur; })[0].t + " · células reveladas: " + n + " / 15.</b><br>" +
+      "Tente formular sua própria resposta antes de revelar — o quadro da Atividade 2 é avaliado pela sua formulação, não pela cópia.";
+    if(n >= 6) done("p2");
+  }
+  render();
+})();
+
+/* ============================================================
+   p3 — RF / RNF no caso RápidoJá
+   ============================================================ */
+(function(){
+  var host = $("p3-cards");
+  if(!host) return;
+  var out = $("p3-out");
+  var REQS = [
+    {t:"O cliente deve visualizar o cardápio dos restaurantes parceiros", a:"RF"},
+    {t:"O sistema deve estar disponível em navegador e em aplicativo móvel", a:"RNF"},
+    {t:"O entregador deve aceitar uma entrega disponível na lista", a:"RF"},
+    {t:"O acompanhamento da entrega deve atualizar a posição a cada 15 segundos", a:"RNF"},
+    {t:"O restaurante deve informar o tempo estimado de preparo do pedido", a:"RF"},
+    {t:"Os dados de pagamento devem trafegar criptografados", a:"RNF"},
+    {t:"O cliente deve avaliar o pedido após o recebimento", a:"RF"},
+    {t:"O sistema deve suportar 2.000 pedidos simultâneos no horário de pico", a:"RNF"}
+  ];
+  var ans = {};
+
+  function render(){
+    host.innerHTML = "";
+    REQS.forEach(function(r, i){
+      var a = ans[i];
+      var row = el("div","pick" + (a ? (a === r.a ? " ok" : " bad") : ""));
+      row.style.cursor = "default";
+      row.innerHTML = '<span class="lead">' + r.t + "</span>" +
+        '<span class="side">' +
+        '<button class="mini-btn' + (a === "RF" ? (r.a === "RF" ? " ok" : " bad") : "") + '" data-i="' + i + '" data-v="RF" type="button">RF</button>' +
+        '<button class="mini-btn' + (a === "RNF" ? (r.a === "RNF" ? " ok" : " bad") : "") + '" data-i="' + i + '" data-v="RNF" type="button">RNF</button>' +
+        "</span>";
+      host.appendChild(row);
+    });
+    Array.prototype.forEach.call(host.querySelectorAll(".mini-btn"), function(b){
+      b.addEventListener("click", function(){
+        var i = +b.getAttribute("data-i");
+        if(ans[i]) return;
+        ans[i] = b.getAttribute("data-v");
+        render();
+      });
+    });
+    var n = Object.keys(ans).length;
+    var hits = Object.keys(ans).filter(function(i){ return ans[i] === REQS[i].a; }).length;
+    out.innerHTML = n < REQS.length
+      ? "Classificados: <b>" + n + " / " + REQS.length + "</b> · acertos: " + hits
+      : "<b>" + hits + " / " + REQS.length + " corretos.</b><br>Perceba o par: “acompanhar a entrega” é funcional; “atualizar a cada 15 segundos” é a qualidade com que essa função acontece. Nas suas respostas da Atividade 1, evite escrever o mesmo requisito duas vezes trocando só o critério.";
+    if(n === REQS.length && hits >= 7) done("p3");
+  }
+  $("p3-reset").addEventListener("click", function(){ ans = {}; render(); });
+  render();
+})();
+
+/* ============================================================
+   p4 — Decisões de projeto
+   ============================================================ */
+(function(){
+  var host = $("p4-cards");
+  if(!host) return;
+  var out = $("p4-out");
+  var TYPES = [{k:"arq", t:"arquitetura"}, {k:"bd", t:"banco de dados"}, {k:"itf", t:"interface"}, {k:"cmp", t:"componentes"}];
+  var CASES = [
+    {t:"Separar o sistema em app do cliente, app do entregador, portal do restaurante e serviço central de pedidos", a:"arq",
+     why:"estrutura global e distribuição dos componentes principais"},
+    {t:"Modelar as tabelas de pedido, item, restaurante e entregador com chaves e índices", a:"bd",
+     why:"estruturas de dados e sua representação no banco"},
+    {t:"Definir que o serviço de rastreamento publica latitude, longitude e timestamp em um contrato fixo consumido pelos apps", a:"itf",
+     why:"a interface entre componentes deve ser inequívoca"},
+    {t:"Avaliar se o gateway de pagamento do mercado atende ou se será preciso desenvolver um módulo próprio", a:"cmp",
+     why:"busca por componentes reusáveis antes de projetar novos"}
+  ];
+  var ans = {};
+
+  function render(){
+    host.innerHTML = "";
+    CASES.forEach(function(c, i){
+      var a = ans[i];
+      var row = el("div","pick" + (a ? (a === c.a ? " ok" : " bad") : ""));
+      row.style.cursor = "default";
+      row.innerHTML = '<span class="lead">' + c.t +
+        (a ? '<br><span class="mono" style="font-size:11.5px;color:var(--panel-muted)">projeto de ' +
+          TYPES.filter(function(t){ return t.k === c.a; })[0].t + " — " + c.why + "</span>" : "") + "</span>" +
+        '<span class="side">' + TYPES.map(function(t){
+          return '<button class="mini-btn' + (a === t.k ? (t.k === c.a ? " ok" : " bad") : "") + '" data-i="' + i + '" data-v="' + t.k + '" type="button">' + t.t + "</button>";
+        }).join("") + "</span>";
+      host.appendChild(row);
+    });
+    Array.prototype.forEach.call(host.querySelectorAll(".mini-btn"), function(b){
+      b.addEventListener("click", function(){
+        var i = +b.getAttribute("data-i");
+        if(ans[i]) return;
+        ans[i] = b.getAttribute("data-v");
+        render();
+      });
+    });
+    var n = Object.keys(ans).length;
+    var hits = Object.keys(ans).filter(function(i){ return ans[i] === CASES[i].a; }).length;
+    out.innerHTML = n < CASES.length
+      ? "Decisões classificadas: <b>" + n + " / " + CASES.length + "</b>"
+      : "<b>" + hits + " / " + CASES.length + " corretas.</b><br>As quatro atividades de projeto acontecem em paralelo e se influenciam: mudar a arquitetura muda as interfaces, que mudam o que se espera de cada componente.";
+    if(n === CASES.length && hits >= 3) done("p4");
+  }
+  render();
+})();
+
+/* ============================================================
+   p5 — Níveis de teste
+   ============================================================ */
+(function(){
+  var host = $("p5-cards");
+  if(!host) return;
+  var out = $("p5-out");
+  var LVL = [{k:"c", t:"componente"}, {k:"s", t:"sistema"}, {k:"cl", t:"cliente"}];
+  var CASES = [
+    {t:"A função que calcula a taxa de entrega por distância arredonda errado acima de 10 km", a:"c",
+     why:"defeito interno a um componente: quem o desenvolveu detecta com testes próprios"},
+    {t:"O app do entregador envia a hora em UTC; o serviço de pedidos grava como hora local, e o histórico fica com 3 horas de diferença", a:"s",
+     why:"cada componente funciona isolado; o erro aparece na integração"},
+    {t:"O relatório de entregas soma corretamente, mas o dono do restaurante precisava do valor por período de faturamento, e não por dia", a:"cl",
+     why:"o software está conforme a especificação, mas a especificação não refletia a necessidade real"},
+    {t:"A tela de pedidos disponíveis quebra quando dois entregadores aceitam a mesma entrega ao mesmo tempo", a:"s",
+     why:"concorrência entre componentes só aparece com o sistema integrado"}
+  ];
+  var ans = {};
+
+  function render(){
+    host.innerHTML = "";
+    CASES.forEach(function(c, i){
+      var a = ans[i];
+      var row = el("div","pick" + (a ? (a === c.a ? " ok" : " bad") : ""));
+      row.style.cursor = "default";
+      row.innerHTML = '<span class="lead">' + c.t +
+        (a ? '<br><span class="mono" style="font-size:11.5px;color:var(--panel-muted)">teste de ' +
+          LVL.filter(function(l){ return l.k === c.a; })[0].t + " — " + c.why + "</span>" : "") + "</span>" +
+        '<span class="side">' + LVL.map(function(l){
+          return '<button class="mini-btn' + (a === l.k ? (l.k === c.a ? " ok" : " bad") : "") + '" data-i="' + i + '" data-v="' + l.k + '" type="button">' + l.t + "</button>";
+        }).join("") + "</span>";
+      host.appendChild(row);
+    });
+    Array.prototype.forEach.call(host.querySelectorAll(".mini-btn"), function(b){
+      b.addEventListener("click", function(){
+        var i = +b.getAttribute("data-i");
+        if(ans[i]) return;
+        ans[i] = b.getAttribute("data-v");
+        render();
+      });
+    });
+    var n = Object.keys(ans).length;
+    var hits = Object.keys(ans).filter(function(i){ return ans[i] === CASES[i].a; }).length;
+    out.innerHTML = n < CASES.length
+      ? "Defeitos analisados: <b>" + n + " / " + CASES.length + "</b>"
+      : "<b>" + hits + " / " + CASES.length + " corretos.</b><br>Regra prática: defeito <b>dentro</b> de um componente → teste de componente; defeito <b>entre</b> componentes → teste de sistema; defeito de <b>entendimento</b> → só o cliente encontra.";
+    if(n === CASES.length && hits >= 3) done("p5");
+  }
+  render();
+})();
+
+/* ============================================================
+   p6 — Tipos de manutenção
+   ============================================================ */
+(function(){
+  var host = $("p6-cards");
+  if(!host) return;
+  var summary = $("p6-summary"), out = $("p6-out");
+  var TYPES = [{k:"cor", t:"corretiva"}, {k:"ada", t:"adaptativa"}, {k:"evo", t:"evolutiva"}];
+  var CASES = [
+    {t:"Pedidos cancelados continuam aparecendo na lista do entregador", a:"cor", why:"erro de implementação percebido em produção"},
+    {t:"Nova regra municipal exige registro do horário de saída do estabelecimento", a:"ada", why:"mudança no contexto legal externo"},
+    {t:"Os restaurantes pedem um painel com os pratos mais vendidos da semana", a:"evo", why:"nova funcionalidade solicitada pelo negócio"},
+    {t:"A loja de aplicativos passa a exigir uma nova versão mínima do sistema operacional", a:"ada", why:"adaptação a mudança de plataforma"},
+    {t:"O valor da gorjeta some quando o pagamento é feito com dois cartões", a:"cor", why:"defeito funcional a ser reparado"}
+  ];
+  var ans = {};
+
+  function render(){
+    host.innerHTML = "";
+    CASES.forEach(function(c, i){
+      var a = ans[i];
+      var row = el("div","pick" + (a ? (a === c.a ? " ok" : " bad") : ""));
+      row.style.cursor = "default";
+      row.innerHTML = '<span class="lead">' + c.t +
+        (a ? '<br><span class="mono" style="font-size:11.5px;color:var(--panel-muted)">manutenção ' +
+          TYPES.filter(function(t){ return t.k === c.a; })[0].t + " — " + c.why + "</span>" : "") + "</span>" +
+        '<span class="side">' + TYPES.map(function(t){
+          return '<button class="mini-btn' + (a === t.k ? (t.k === c.a ? " ok" : " bad") : "") + '" data-i="' + i + '" data-v="' + t.k + '" type="button">' + t.t + "</button>";
+        }).join("") + "</span>";
+      host.appendChild(row);
+    });
+    Array.prototype.forEach.call(host.querySelectorAll(".mini-btn"), function(b){
+      b.addEventListener("click", function(){
+        var i = +b.getAttribute("data-i");
+        if(ans[i]) return;
+        ans[i] = b.getAttribute("data-v");
+        render();
+      });
+    });
+    var counts = {cor:0, ada:0, evo:0};
+    Object.keys(ans).forEach(function(i){ counts[ans[i]]++; });
+    summary.innerHTML = "";
+    var g = el("div","metric-grid");
+    [["Corretiva", counts.cor, "reparo de bugs"],
+     ["Adaptativa", counts.ada, "mudança de contexto"],
+     ["Evolutiva", counts.evo, "novas funcionalidades"]
+    ].forEach(function(x){
+      g.appendChild(el("div","metric","<span>" + x[0] + "</span><b>" + x[1] + "</b><small>" + x[2] + "</small>"));
+    });
+    summary.appendChild(g);
+    var n = Object.keys(ans).length;
+    var hits = Object.keys(ans).filter(function(i){ return ans[i] === CASES[i].a; }).length;
+    out.innerHTML = n < CASES.length
+      ? "Solicitações classificadas: <b>" + n + " / " + CASES.length + "</b>"
+      : "<b>" + hits + " / " + CASES.length + " corretas.</b><br>Em um ano de operação chegam os três tipos — e cada um deles reabre o processo de software: especificar a mudança, desenvolver, validar e liberar.";
+    if(n === CASES.length && hits >= 4) done("p6");
+  }
+  render();
+})();
+})();
+</script>
+
+<script>
+(function(){
+"use strict";
+var R = window.__ROT;
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+function done(id){ if(window.__apostila) window.__apostila.markDone(id); }
+function esc(s){ return String(s || "").replace(/[&<>]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; }); }
+
+var RNF_HINT = /(segundo|minuto|disponibilidade|criptograf|senha|segur|desempenho|performance|mem[óo]ria|processad|navegador|android|ios|dispositiv|simult[âa]ne|escalab|usabilid|acessibilid|backup|banco de dados|tempo de resposta|offline|conex[ãa]o|lgpd)/i;
+var RF_HINT = /^(o |a |os |as )?(sistema|usu[áa]rio|cliente|entregador|restaurante|aplicativo|app)?\s*(deve|dever[áa]|poder[áa]|permitir|cadastr|registr|consult|visualiz|emitir|gerar|calcul|aceit|avali|acompanh|realiz|edit|receb|confirm|inform|pag)/i;
+
+/* ============================================================
+   A1 — requisitos do RápidoJá
+   ============================================================ */
+(function(){
+  var rfBox = $("a1-rf");
+  if(!rfBox) return;
+  var rnfBox = $("a1-rnf"), out = $("a1-out"), modelbox = $("a1-modelbox");
+
+  function build(box, key, ph){
+    for(var i = 0; i < 5; i++){
+      (function(i){
+        var inp = document.createElement("input");
+        inp.className = "text-input";
+        inp.placeholder = ph + " " + (i + 1);
+        inp.setAttribute("aria-label", ph + " " + (i + 1));
+        inp.style.fontFamily = "var(--font-body)";
+        inp.value = R.get(key + i, "");
+        inp.addEventListener("input", function(){ R.set(key + i, inp.value); status(); });
+        box.appendChild(inp);
+      })(i);
+    }
+  }
+  build(rfBox, "rf", "Requisito funcional");
+  build(rnfBox, "rnf", "Requisito não-funcional");
+
+  function vals(key){
+    var a = [];
+    for(var i = 0; i < 5; i++){
+      var v = (R.get(key + i, "") || "").trim();
+      if(v) a.push(v);
+    }
+    return a;
+  }
+  function status(){
+    var rf = vals("rf"), rnf = vals("rnf");
+    out.innerHTML = "<b>Preenchidos: " + rf.length + " / 5 funcionais e " + rnf.length + " / 5 não-funcionais.</b> Tudo fica salvo neste navegador.";
+    if(rf.length === 5 && rnf.length === 5) done("a1");
+  }
+
+  $("a1-check").addEventListener("click", function(){
+    var rf = vals("rf"), rnf = vals("rnf");
+    if(rf.length < 5 || rnf.length < 5){
+      out.innerHTML = '<span class="warn">Preencha os dez campos antes de verificar.</span> Faltam ' +
+        (5 - rf.length) + " funcional(is) e " + (5 - rnf.length) + " não-funcional(is).";
+      return;
+    }
+    var alerts = [];
+    rf.forEach(function(t, i){
+      if(RNF_HINT.test(t)) alerts.push('<span class="warn">RF ' + (i + 1) + ":</span> a frase menciona qualidade ou restrição (“" + esc(t.slice(0, 60)) + "…”). Confira se não é, na verdade, um requisito não-funcional.");
+      else if(!RF_HINT.test(t)) alerts.push('<span class="warn">RF ' + (i + 1) + ":</span> não identifiquei uma ação clara. Um RF costuma caber em “o sistema deve permitir que… ”.");
+    });
+    rnf.forEach(function(t, i){
+      if(!RNF_HINT.test(t) && !/\d/.test(t)) alerts.push('<span class="warn">RNF ' + (i + 1) + ":</span> sem critério verificável nem palavra de qualidade. Acrescente número, limite ou tecnologia (ex.: “em até 3 segundos”).");
+    });
+    var dupes = rf.filter(function(t){ return rnf.some(function(u){ return u.toLowerCase().trim() === t.toLowerCase().trim(); }); });
+    if(dupes.length) alerts.push('<span class="bad">Há requisito repetido</span> nas duas listas.');
+
+    out.innerHTML = alerts.length
+      ? "<b>Verificação automática — " + alerts.length + " ponto(s) a revisar:</b><br>" + alerts.join("<br>") +
+        "<br>São indícios, não veredito: se você tem justificativa, mantenha sua classificação e defenda-a na entrega."
+      : '<span class="ok">Nenhum indício de troca de classificação.</span> Os cinco funcionais descrevem ações e os cinco não-funcionais trazem critério ou restrição verificável. Bom material para a entrega.';
+    done("a1");
+  });
+
+  $("a1-model").addEventListener("click", function(){
+    if(modelbox.innerHTML){ modelbox.innerHTML = ""; return; }
+    modelbox.innerHTML =
+      '<div class="panel-card" style="margin-bottom:10px"><h4>Exemplo de requisitos funcionais</h4><p>' +
+      "1. O cliente deve pesquisar restaurantes por categoria e por distância.<br>" +
+      "2. O cliente deve montar um pedido a partir do cardápio e efetuar o pagamento online.<br>" +
+      "3. O restaurante deve confirmar o pedido e informar o tempo estimado de preparo.<br>" +
+      "4. O entregador deve aceitar uma entrega disponível e registrá-la como concluída.<br>" +
+      "5. O cliente deve avaliar o pedido após o recebimento.</p></div>" +
+      '<div class="panel-card"><h4>Exemplo de requisitos não-funcionais</h4><p>' +
+      "1. O sistema deve funcionar em navegadores atuais e em aplicativos Android e iOS.<br>" +
+      "2. A posição do entregador deve ser atualizada no mapa a cada 15 segundos.<br>" +
+      "3. Os dados de pagamento devem trafegar criptografados e não podem ser armazenados pelo sistema.<br>" +
+      "4. O sistema deve suportar 2.000 pedidos simultâneos no horário de pico sem degradar o tempo de resposta.<br>" +
+      "5. Qualquer tela deve responder em até 3 segundos em conexão 4G." +
+      '</p><p style="margin-top:10px"><span class="tag-pill warn">atenção</span> use como referência de <b>forma</b>. Copiar o exemplo não atende ao enunciado — a avaliação considera a sua leitura do caso.</p></div>';
+  });
+  status();
+})();
+
+/* ============================================================
+   A1c — modelo de processo + justificativa
+   ============================================================ */
+(function(){
+  var host = $("a2-models");
+  if(!host) return;
+  var just = $("a2-just"), out = $("a2-out"), box = $("a2-modelbox");
+  var MODELS = ["Cascata", "Incremental", "Orientado a reuso"];
+
+  var ta = document.createElement("textarea");
+  ta.className = "text-input";
+  ta.rows = 4;
+  ta.style.cssText = "resize:vertical;font-family:var(--font-body);font-size:14px;line-height:1.6";
+  ta.placeholder = "Justifique a escolha considerando os três perfis de usuário, a necessidade de acompanhamento em tempo real e a maturidade dos requisitos da RápidoJá.";
+  ta.setAttribute("aria-label", "Justificativa do modelo");
+  ta.value = R.get("just", "");
+  ta.addEventListener("input", function(){ R.set("just", ta.value); render(); });
+  just.appendChild(ta);
+
+  function render(){
+    host.innerHTML = "";
+    MODELS.forEach(function(m){
+      var b = el("button","btn btn-sm" + (R.get("modelo", "") === m ? " on" : ""), m);
+      b.type = "button";
+      b.addEventListener("click", function(){ R.set("modelo", m); render(); });
+      host.appendChild(b);
+    });
+    var sel = R.get("modelo", ""), txt = (R.get("just", "") || "").trim();
+    out.innerHTML = !sel
+      ? "Escolha um modelo e escreva a justificativa."
+      : "<b>Modelo escolhido: " + sel + " · justificativa com " + txt.length + " caracteres.</b>" +
+        (txt.length < 120 ? " Amplie: o enunciado pede o porquê da escolha, não apenas o nome do modelo." : ' <span class="ok">Extensão adequada.</span>');
+    if(sel && txt.length >= 120) done("a1");
+  }
+
+  $("a2-model").addEventListener("click", function(){
+    if(box.innerHTML){ box.innerHTML = ""; return; }
+    box.innerHTML = '<div class="panel-card"><h4>Comentário do gabarito</h4><p>' +
+      "Não existe uma única resposta certa — existe justificativa consistente. O <b>Incremental</b> é a escolha mais defensável: são três perfis de usuário com necessidades diferentes, o produto é digital e voltado ao mercado, e boa parte dos requisitos (avaliação, rastreamento, promoções) tende a mudar com o uso real. Entregar em versões permite validar o fluxo do cliente antes de construir o app do entregador, por exemplo.<br><br>" +
+      "O <b>Orientado a reuso</b> é aceitável se a justificativa destacar pagamento, mapas e notificações resolvidos por serviços de mercado — é um híbrido legítimo, e o material admite híbridos.<br><br>" +
+      "O <b>Cascata</b> é o mais difícil de sustentar aqui: exigiria requisitos estáveis e um cliente disposto a só ver o sistema no fim. Se você escolheu Cascata, sua justificativa precisa enfrentar esse ponto." +
+      "</p></div>";
+  });
+  render();
+})();
+
+/* ============================================================
+   A2 — quadro comparativo
+   ============================================================ */
+(function(){
+  var host = $("a3-grid");
+  if(!host) return;
+  var out = $("a3-out");
+  var DIM = ["Definição", "Vantagens", "Desvantagens", "Exemplo de uso", "Métodos que seguem o modelo"];
+  var MOD = ["Cascata", "Incremental", "Orientado a reuso"];
+  var GAB = [
+    ["Fases distintas e sequenciais das atividades fundamentais.", "Atividades intercaladas; sistema entregue como série de versões.", "Integração de componentes existentes em vez de construção do zero."],
+    ["Previsibilidade, documentação e facilidade de auditoria.", "Feedback cedo e baixo custo de mudança.", "Menor custo, prazo e risco; componentes já testados."],
+    ["Rígido a mudanças; cliente só vê o sistema no fim.", "Estrutura pode se degradar; documentação em segundo plano.", "Perda de controle sobre a evolução dos componentes."],
+    ["Sistemas críticos e contratos de escopo fechado.", "Produtos digitais em evolução contínua.", "Portais que integram autenticação, pagamento e documentos."],
+    ["Modelos dirigidos a plano; V-Model.", "Scrum, XP, Kanban.", "Desenvolvimento baseado em componentes; integração de serviços."]
+  ];
+  var showGab = false;
+
+  function render(){
+    host.innerHTML = "";
+    var table = el("div");
+    table.style.cssText = "display:grid;grid-template-columns:150px repeat(3,minmax(210px,1fr));gap:8px;min-width:760px";
+    table.appendChild(el("div"));
+    MOD.forEach(function(m){ table.appendChild(el("p","zone-title", m)); });
+    DIM.forEach(function(d, ri){
+      var lab = el("div","panel-card", "<h4>" + d + "</h4>");
+      lab.style.padding = "12px 14px";
+      table.appendChild(lab);
+      MOD.forEach(function(m, ci){
+        var cell = el("div");
+        var key = "q" + ri + "-" + ci;
+        var ta = document.createElement("textarea");
+        ta.className = "text-input";
+        ta.rows = 3;
+        ta.style.cssText = "resize:vertical;font-family:var(--font-body);font-size:13px;line-height:1.55";
+        ta.setAttribute("aria-label", d + " — " + m);
+        ta.value = R.get(key, "");
+        ta.addEventListener("input", function(){ R.set(key, ta.value); status(); });
+        cell.appendChild(ta);
+        if(showGab) cell.appendChild(el("p","lab-hint", '<span class="tag-pill">gabarito</span> ' + GAB[ri][ci]));
+        table.appendChild(cell);
+      });
+    });
+    host.appendChild(table);
+    status();
+  }
+  function status(){
+    var filled = 0;
+    for(var r = 0; r < 5; r++) for(var c = 0; c < 3; c++){
+      if((R.get("q" + r + "-" + c, "") || "").trim().length > 8) filled++;
+    }
+    out.innerHTML = "<b>Células preenchidas: " + filled + " / 15.</b>" +
+      (filled === 15 ? ' <span class="ok">Quadro completo.</span> Compare com o gabarito e ajuste o que quiser antes de gerar o PDF.' : " O quadro fica salvo automaticamente.");
+    if(filled === 15) done("a2");
+  }
+  $("a3-model").addEventListener("click", function(){ showGab = !showGab; render(); });
+  $("a3-clear").addEventListener("click", function(){
+    for(var r = 0; r < 5; r++) for(var c = 0; c < 3; c++) R.set("q" + r + "-" + c, "");
+    render();
+  });
+  render();
+})();
+
+/* ============================================================
+   A3 — mapa conceitual
+   ============================================================ */
+(function(){
+  var host = $("a4-check");
+  if(!host) return;
+  var meter = $("a4-meter"), out = $("a4-out");
+  var ITEMS = [
+    "Etapas do processo: especificação, desenvolvimento, validação e evolução",
+    "Subatividades de cada etapa",
+    "Modelo Cascata e suas características",
+    "Modelo Incremental e suas características",
+    "Engenharia de Software orientada a reuso",
+    "Requisitos funcionais com exemplos",
+    "Requisitos não-funcionais com exemplos",
+    "Fases de teste: componente, sistema e cliente",
+    "Diferença entre verificação e validação",
+    "Realimentação da evolução sobre as demais etapas"
+  ];
+
+  var link = $("a4-link"), desc = $("a4-desc");
+  link.value = R.get("mapaLink", "");
+  desc.value = R.get("mapaDesc", "");
+  link.addEventListener("input", function(){ R.set("mapaLink", link.value); render(); });
+  desc.addEventListener("input", function(){ R.set("mapaDesc", desc.value); render(); });
+
+  function render(){
+    host.innerHTML = "";
+    ITEMS.forEach(function(t, i){
+      var on = R.get("mapa" + i, false);
+      var b = el("button","pick" + (on ? " ok" : ""));
+      b.type = "button";
+      b.innerHTML = '<span class="lead">' + t + "</span>" +
+        '<span class="side"><span class="tag-pill' + (on ? " ok" : "") + '">' + (on ? "no mapa" : "pendente") + "</span></span>";
+      b.addEventListener("click", function(){ R.set("mapa" + i, !on); render(); });
+      host.appendChild(b);
+    });
+    var n = 0;
+    ITEMS.forEach(function(_, i){ if(R.get("mapa" + i, false)) n++; });
+    meter.innerHTML = "";
+    var row = el("div","bar-row");
+    var pct = n / ITEMS.length * 100;
+    row.innerHTML = '<span class="bar-name">Cobertura</span><span class="bar-track"><span class="bar-fill" style="width:' + pct +
+      "%;background:" + (pct === 100 ? "#2E8B57" : (pct >= 60 ? "#e0a33a" : "#e2685f")) + '"></span></span><span class="bar-val">' + n + " / " + ITEMS.length + "</span>";
+    meter.appendChild(row);
+    var hasLink = (R.get("mapaLink", "") || "").trim().length > 8;
+    out.innerHTML = "<b>Conceitos cobertos: " + n + " / " + ITEMS.length + (hasLink ? " · link informado" : " · link do mapa ainda não informado") + ".</b><br>" +
+      (n === ITEMS.length && hasLink
+        ? '<span class="ok">Mapa completo.</span> Um bom mapa conceitual não é uma lista: mostre as <b>relações</b> entre os blocos — por exemplo, que a evolução realimenta a especificação.'
+        : "O enunciado pede quatro blocos obrigatórios: etapas do processo, modelos, tipos de requisitos e fases de teste e validação.");
+    if(n === ITEMS.length && hasLink) done("a3");
+  }
+  render();
+})();
+
+/* ============================================================
+   A4 — fluxograma
+   ============================================================ */
+(function(){
+  var pool = $("a5-pool");
+  if(!pool) return;
+  var stagesBox = $("a5-stages"), diagram = $("a5-diagram"), out = $("a5-out");
+  var STAGES = [
+    {k:"esp", t:"Especificação"},
+    {k:"des", t:"Desenvolvimento"},
+    {k:"val", t:"Validação"},
+    {k:"evo", t:"Evolução"}
+  ];
+  var SUBS = [
+    {t:"Estudo de viabilidade", s:"esp"},
+    {t:"Elicitação e análise de requisitos", s:"esp"},
+    {t:"Especificação de requisitos", s:"esp"},
+    {t:"Validação de requisitos", s:"esp"},
+    {t:"Projeto de arquitetura", s:"des"},
+    {t:"Projeto de banco de dados", s:"des"},
+    {t:"Projeto de interface", s:"des"},
+    {t:"Programação e depuração", s:"des"},
+    {t:"Teste de componente", s:"val"},
+    {t:"Teste de sistema", s:"val"},
+    {t:"Teste do cliente", s:"val"},
+    {t:"Análise da solicitação de mudança", s:"evo"},
+    {t:"Implementação da mudança", s:"evo"},
+    {t:"Nova validação e liberação", s:"evo"}
+  ];
+  var sel = null, checked = false;
+  function place(i){ return R.get("fluxo" + i, null); }
+
+  function render(){
+    pool.innerHTML = "";
+    SUBS.forEach(function(sb, i){
+      if(place(i)) return;
+      var b = el("button","chip" + (sel === i ? " placed" : ""), sb.t);
+      b.type = "button";
+      b.setAttribute("draggable","true");
+      b.addEventListener("click", function(){ sel = (sel === i) ? null : i; checked = false; render(); });
+      b.addEventListener("dragstart", function(e){ try{ e.dataTransfer.setData("text/plain", String(i)); }catch(err){} });
+      pool.appendChild(b);
+    });
+    if(!pool.children.length) pool.innerHTML = '<span class="tag-pill ok">todas as subatividades distribuídas</span>';
+
+    stagesBox.innerHTML = "";
+    STAGES.forEach(function(st){
+      var wrap = el("div");
+      wrap.innerHTML = '<p class="zone-title">' + st.t + "</p>";
+      var z = el("div","zone");
+      z.style.minHeight = "108px";
+      SUBS.forEach(function(sb, i){
+        if(place(i) !== st.k) return;
+        var ok = sb.s === st.k;
+        var c = el("button","chip " + (checked ? (ok ? "placed" : "wrong") : ""), sb.t);
+        c.type = "button";
+        c.title = "clique para devolver à lista";
+        c.addEventListener("click", function(ev){
+          ev.stopPropagation();
+          R.set("fluxo" + i, null); checked = false; render();
+        });
+        z.appendChild(c);
+      });
+      z.addEventListener("dragover", function(e){ e.preventDefault(); z.classList.add("over"); });
+      z.addEventListener("dragleave", function(){ z.classList.remove("over"); });
+      z.addEventListener("drop", function(e){
+        e.preventDefault(); z.classList.remove("over");
+        var id = "";
+        try{ id = e.dataTransfer.getData("text/plain"); }catch(err){}
+        if(id === "") return;
+        R.set("fluxo" + id, st.k); checked = false; render();
+      });
+      z.addEventListener("click", function(){
+        if(sel === null) return;
+        R.set("fluxo" + sel, st.k); sel = null; checked = false; render();
+      });
+      wrap.appendChild(z);
+      stagesBox.appendChild(wrap);
+    });
+
+    var placed = SUBS.filter(function(_, i){ return place(i); }).length;
+    if(!checked){
+      out.innerHTML = "Distribuídas: <b>" + placed + " / " + SUBS.length + "</b>. Selecione uma subatividade e clique na etapa — ou arraste.";
+    }
+    if(placed === SUBS.length){
+      diagram.innerHTML = "";
+      var g = el("div");
+      g.style.cssText = "display:grid;grid-template-columns:repeat(4,1fr);gap:10px";
+      STAGES.forEach(function(st, k){
+        var items = SUBS.filter(function(_, i){ return place(i) === st.k; });
+        var c = el("div","panel-card");
+        c.innerHTML = "<h4>" + (k + 1) + ". " + st.t + "</h4>" +
+          items.map(function(x){ return '<p style="margin:6px 0 0"><span class="mono" style="font-size:11.5px">→ ' + x.t + "</span></p>"; }).join("");
+        g.appendChild(c);
+      });
+      diagram.appendChild(g);
+      diagram.appendChild(el("p","lab-hint",
+        "Use esta estrutura como rascunho do desenho: quatro blocos em sequência, com uma seta de realimentação da <b>Evolução</b> de volta à <b>Especificação</b>."));
+    }else{
+      diagram.innerHTML = "";
+    }
+  }
+
+  $("a5-check").addEventListener("click", function(){
+    var placed = SUBS.filter(function(_, i){ return place(i); }).length;
+    if(placed < SUBS.length){
+      out.innerHTML = '<span class="warn">Distribua todas as subatividades antes de conferir.</span>';
+      return;
+    }
+    checked = true; render();
+    var hits = SUBS.filter(function(sb, i){ return place(i) === sb.s; }).length;
+    out.innerHTML = "<b>" + hits + " / " + SUBS.length + " subatividades na etapa correta.</b><br>" +
+      (hits === SUBS.length
+        ? '<span class="ok">Fluxograma coerente.</span> Repare que "validação de requisitos" pertence à especificação, e não à validação do software: uma valida o documento, a outra valida o sistema construído.'
+        : "Revise as marcadas em vermelho. Dica: tudo que ocorre antes de existir código pertence à especificação.");
+    if(hits === SUBS.length) done("a4");
+  });
+  $("a5-reset").addEventListener("click", function(){
+    SUBS.forEach(function(_, i){ R.set("fluxo" + i, null); });
+    sel = null; checked = false; render();
+  });
+  var obs = $("a5-obs");
+  obs.value = R.get("fluxoObs", "");
+  obs.addEventListener("input", function(){ R.set("fluxoObs", obs.value); });
+  render();
+})();
+
+/* ============================================================
+   Entrega — checklist e folha de respostas
+   ============================================================ */
+(function(){
+  var host = $("fin-check");
+  if(!host) return;
+  var out = $("fin-out");
+  var nome = $("fin-nome"), turma = $("fin-turma");
+  nome.value = R.get("nome", "");
+  turma.value = R.get("turma", "");
+  nome.addEventListener("input", function(){ R.set("nome", nome.value); render(); });
+  turma.addEventListener("input", function(){ R.set("turma", turma.value); render(); });
+
+  function vals(key){
+    var a = [];
+    for(var i = 0; i < 5; i++){
+      var v = (R.get(key + i, "") || "").trim();
+      if(v) a.push(v);
+    }
+    return a;
+  }
+  function quadroFilled(){
+    var n = 0;
+    for(var r = 0; r < 5; r++) for(var c = 0; c < 3; c++){
+      if((R.get("q" + r + "-" + c, "") || "").trim().length > 8) n++;
+    }
+    return n;
+  }
+  function mapaCount(){
+    var n = 0;
+    for(var i = 0; i < 10; i++){ if(R.get("mapa" + i, false)) n++; }
+    return n;
+  }
+  function fluxoCount(){
+    var n = 0;
+    for(var i = 0; i < 14; i++){ if(R.get("fluxo" + i, null)) n++; }
+    return n;
+  }
+
+  function render(){
+    var checks = [
+      {t:"Atividade 1 — 5 requisitos funcionais", ok: vals("rf").length === 5, v: vals("rf").length + " / 5"},
+      {t:"Atividade 1 — 5 requisitos não-funcionais", ok: vals("rnf").length === 5, v: vals("rnf").length + " / 5"},
+      {t:"Atividade 1 — modelo escolhido e justificado", ok: !!R.get("modelo","") && (R.get("just","") || "").trim().length >= 120, v: R.get("modelo","") || "—"},
+      {t:"Atividade 2 — quadro comparativo", ok: quadroFilled() === 15, v: quadroFilled() + " / 15"},
+      {t:"Atividade 3 — mapa conceitual", ok: mapaCount() === 10 && (R.get("mapaLink","") || "").trim().length > 8, v: mapaCount() + " / 10"},
+      {t:"Atividade 4 — fluxograma", ok: fluxoCount() === 14, v: fluxoCount() + " / 14"},
+      {t:"Identificação preenchida", ok: (nome.value || "").trim().length > 3, v: (nome.value || "").trim() ? "ok" : "—"}
+    ];
+    host.innerHTML = "";
+    checks.forEach(function(c){
+      var row = el("div","pick" + (c.ok ? " ok" : ""));
+      row.style.cursor = "default";
+      row.innerHTML = '<span class="lead">' + c.t + "</span>" +
+        '<span class="side"><span class="tag-pill' + (c.ok ? " ok" : " warn") + '">' + c.v + "</span></span>";
+      host.appendChild(row);
+    });
+    var okAll = checks.every(function(c){ return c.ok; });
+    out.innerHTML = okAll
+      ? '<span class="ok">Tudo pronto.</span> Gere a folha de respostas, salve como PDF e submeta pelo Moodle.'
+      : "<b>Itens pendentes: " + checks.filter(function(c){ return !c.ok; }).length + ".</b> Você pode gerar a folha mesmo assim — os campos vazios aparecem em branco.";
+    if(okAll) done("entrega");
+  }
+
+  $("fin-print").addEventListener("click", function(){
+    var DIM = ["Definição", "Vantagens", "Desvantagens", "Exemplo de uso", "Métodos que seguem o modelo"];
+    var MOD = ["Cascata", "Incremental", "Orientado a reuso"];
+    var SUBS = ["Estudo de viabilidade","Elicitação e análise de requisitos","Especificação de requisitos","Validação de requisitos",
+      "Projeto de arquitetura","Projeto de banco de dados","Projeto de interface","Programação e depuração",
+      "Teste de componente","Teste de sistema","Teste do cliente",
+      "Análise da solicitação de mudança","Implementação da mudança","Nova validação e liberação"];
+    var STAGE_T = {esp:"Especificação", des:"Desenvolvimento", val:"Validação", evo:"Evolução"};
+    var MAPA = ["Etapas do processo","Subatividades de cada etapa","Modelo Cascata","Modelo Incremental","ES orientada a reuso",
+      "Requisitos funcionais","Requisitos não-funcionais","Fases de teste","Verificação × validação","Realimentação da evolução"];
+
+    var h = "<h1>Roteiro de Atividade — Processo de Software</h1>" +
+      '<p class="meta">Engenharia de Software · IFMS — Tecnólogo em ADS · Prof. Me. Wilbert Viana Barbosa<br>' +
+      "Aluno(s): " + esc(R.get("nome","______________________________________")) +
+      " &nbsp;·&nbsp; Turma: " + esc(R.get("turma","____________")) + " &nbsp;·&nbsp; Data: ____ / ____ / ______</p>";
+
+    h += "<h2>Atividade 1 — Requisitos e modelo de processo (caso RápidoJá)</h2>";
+    h += '<p class="lbl">a) Requisitos funcionais</p>';
+    for(var i = 0; i < 5; i++) h += '<div class="ans">' + (i + 1) + ". " + esc(R.get("rf" + i, "")) + "</div>";
+    h += '<p class="lbl">b) Requisitos não-funcionais</p>';
+    for(var j = 0; j < 5; j++) h += '<div class="ans">' + (j + 1) + ". " + esc(R.get("rnf" + j, "")) + "</div>";
+    h += '<p class="lbl">c) Modelo de processo escolhido: ' + esc(R.get("modelo","")) + "</p>";
+    h += '<div class="ans">' + esc(R.get("just","")) + "</div>";
+
+    h += "<h2>Atividade 2 — Quadro comparativo</h2><table><tr><th></th>";
+    MOD.forEach(function(m){ h += "<th>" + m + "</th>"; });
+    h += "</tr>";
+    DIM.forEach(function(d, r){
+      h += "<tr><th>" + d + "</th>";
+      for(var c = 0; c < 3; c++) h += "<td>" + esc(R.get("q" + r + "-" + c, "")) + "</td>";
+      h += "</tr>";
+    });
+    h += "</table>";
+
+    h += "<h2>Atividade 3 — Mapa conceitual</h2>";
+    h += '<p class="lbl">Link do mapa</p><div class="ans">' + esc(R.get("mapaLink","")) + "</div>";
+    h += '<p class="lbl">Conceitos representados</p><div class="ans">' +
+      MAPA.map(function(t, i){ return (R.get("mapa" + i, false) ? "[x] " : "[ ] ") + t; }).join("\n") + "</div>";
+    h += '<p class="lbl">Ideia central e relações</p><div class="ans">' + esc(R.get("mapaDesc","")) + "</div>";
+
+    h += "<h2>Atividade 4 — Fluxograma das subatividades</h2>";
+    ["esp","des","val","evo"].forEach(function(k){
+      var items = SUBS.filter(function(_, i){ return R.get("fluxo" + i, null) === k; });
+      h += '<p class="lbl">' + STAGE_T[k] + "</p><div class=\"ans\">" + (items.length ? items.map(function(x){ return "→ " + x; }).join("\n") : "") + "</div>";
+    });
+    h += '<p class="lbl">Observações do grupo</p><div class="ans">' + esc(R.get("fluxoObs","")) + "</div>";
+
+    $("printSheet").innerHTML = h;
+    window.print();
+  });
+  render();
+})();
+})();
+</script>
+
+<script>
+window.PAINEIS = {
+
+/* ============ MATERIAL DE APOIO ============ */
+"rot-p1":{
+  topico:"ps1",
+  tag:"Panorama · Material de apoio",
+  titulo:"O caminho da RápidoJá, do problema ao sistema em produção",
+  intro:"Os seis materiais de apoio deste roteiro não são tópicos soltos: eles percorrem, em ordem, o caminho que a RápidoJá vai atravessar. Clique em cada camada para ver em que ponto do caminho ela está, o que produz e qual atividade avaliativa depende dela.",
+  fecho:"Repare que a evolução, no fim, volta para a especificação: é um ciclo, não uma linha. Essa realimentação é justamente o que a <b>Atividade 4</b> pede que você represente no fluxograma.",
+  camadas:{
+    rotulo:"Da necessidade ao sistema vivo",
+    rotuloItem:"Etapa",
+    hint:"Cada etapa consome o que a anterior produziu. Pular uma não a elimina: empurra o trabalho para a frente.",
+    fluxo:"e a evolução realimenta o início",
+    itens:[
+      {nome:"O problema do negócio", papel:"antes de qualquer sistema",
+       detalhe:"A RápidoJá entrega comida em uma cidade de médio porte e precisa coordenar três públicos — cliente, restaurante e entregador — que hoje se falam por telefone e aplicativo de mensagens. O sistema é a resposta; o problema veio antes.",
+       exemplo:"Tres perfis, tres necessidades:\n  cliente     → pedir, pagar e acompanhar\n  restaurante → receber, confirmar, informar o preparo\n  entregador  → aceitar, entregar, registrar",
+       exemploRotulo:"O enunciado, resumido"},
+      {nome:"Especificação", papel:"o que o sistema deve fazer e sob quais restrições",
+       detalhe:"Requisitos funcionais descrevem as funções que o usuário compreende que o sistema faça; não-funcionais descrevem o “background” — desempenho, dispositivos suportados, confiabilidade. Erro aqui contamina tudo o que vem depois.",
+       exemplo:"RF  — permitir acompanhar o status da entrega\nRNF — funcionar em computador e em celular",
+       nota:"É o insumo direto da <b>Atividade 1.a e 1.b</b>: cinco requisitos de cada tipo."},
+      {nome:"Escolha do modelo de processo", papel:"como o trabalho será organizado",
+       detalhe:"Cascata, incremental ou orientado a reuso — ou um híbrido. A escolha não é de gosto: depende da estabilidade dos requisitos, do prazo, da existência de componentes reaproveitáveis e do quanto o cliente consegue acompanhar.",
+       exemplo:"Requisitos ainda em descoberta?  → incremental\nEscopo fechado em contrato?      → cascata\nJa existe gateway, mapa, push?   → reuso",
+       nota:"É a <b>Atividade 1.c</b>: escolher e, sobretudo, <i>justificar</i>."},
+      {nome:"Projeto e implementação", papel:"elaborar o sistema executável",
+       detalhe:"Quatro frentes: arquitetura (componentes e sua distribuição), banco de dados, interfaces entre componentes e a seleção ou construção de cada um. Em processos ágeis, projetar e programar se intercalam.",
+       exemplo:"Arquitetura → app cliente, app entregador, servico de pedidos\nBanco       → pedido, item, restaurante, entregador\nInterface   → contrato entre app e servico\nComponentes → reusar mapa e gateway de pagamento"},
+      {nome:"Validação", papel:"é o software correto, e está correto?",
+       detalhe:"Verificação pergunta se o sistema funciona da maneira correta; validação, se é o software que o cliente precisava. O teste acontece em três níveis: componente, sistema e cliente — este último com dados reais.",
+       exemplo:"componente → o calculo do frete isolado\nsistema    → o pedido atravessando os tres apps\ncliente    → entregas de verdade, em uma semana piloto"},
+      {nome:"Evolução", papel:"o sistema continua mudando",
+       detalhe:"Correção de defeitos, adaptação a mudanças do negócio e novas funcionalidades. A evolução revisita especificação, desenvolvimento e validação — e é por isso que o fluxograma da Atividade 4 não termina numa seta reta.",
+       exemplo:"Novo bairro atendido      → adaptativa\nBug no calculo do troco   → corretiva\nCupom de desconto         → evolutiva"}
+    ]
+  },
+  linha:{
+    rotulo:"Linha do tempo — os modelos de processo",
+    hint:"Útil para a Atividade 2: cada modelo nasceu como resposta a um limite do anterior.",
+    itens:[
+      {ano:"1970", t:"Cascata", d:"Royce descreve as fases sequenciais — e adverte, no mesmo artigo, que aplicá-las sem iteração é arriscado. A advertência circulou bem menos do que o diagrama."},
+      {ano:"1986", t:"Espiral", d:"Boehm coloca o risco no comando: cada volta da espiral escolhe o que atacar primeiro pelo risco que oferece, e não pela posição na lista de fases."},
+      {ano:"anos 1990", t:"Desenvolvimento incremental", d:"O sistema passa a ser entregue em versões sucessivas. O cliente vê software funcionando cedo, e a correção de rumo deixa de custar o projeto inteiro."},
+      {ano:"1994", t:"Reuso e componentes", d:"Bibliotecas, serviços e componentes comerciais mudam a pergunta: em vez de “como construo isso?”, passa a ser “o que já existe pronto e como integro?”."},
+      {ano:"2001", t:"Manifesto Ágil", d:"Quatro valores reorganizam as prioridades. As quatro atividades do processo continuam existindo — mudam de tamanho e passam a caber dentro de cada iteração."},
+      {ano:"2009", t:"DevOps", d:"Implantar deixa de ser evento raro e vira rotina. A evolução, antes tratada como fase final, passa a ser o estado normal do sistema."},
+      {ano:"hoje", t:"Híbridos", d:"Na prática, a maioria das equipes combina modelos: contrato e marcos no estilo cascata, execução incremental. É exatamente a “versão híbrida” que o material autoriza."}
+    ]
+  }
+},
+
+/* ============ ATIVIDADES AVALIATIVAS ============ */
+"rot-p2":{
+  topico:"ps2",
+  tag:"Panorama · Atividades",
+  titulo:"As quatro entregas e o que cada uma avalia",
+  intro:"As quatro atividades não são independentes: cada uma exercita um nível diferente de domínio do mesmo conteúdo — identificar, comparar, relacionar e representar. Clique em cada entrega para ver o que ela cobra, onde ela tropeça e o que o professor procura.",
+  fecho:"Tudo vai em <b>um único PDF</b>, submetido pelo Moodle. A tela “Gerar a entrega” reúne o que você preencheu aqui e monta a folha de respostas formatada para impressão.",
+  camadas:{
+    rotulo:"As quatro atividades, em ordem crescente de exigência",
+    rotuloItem:"Entrega",
+    hint:"De cima para baixo, cada atividade pede uma operação mental mais exigente sobre o mesmo material.",
+    fluxo:"de identificar a representar",
+    itens:[
+      {nome:"Atividade 1 — Requisitos e modelo", papel:"identificar e justificar",
+       detalhe:"Cinco requisitos funcionais, cinco não-funcionais e a escolha do modelo de processo com justificativa. O que mais custa ponto aqui é escrever RNF disfarçado de RF — ou justificar o modelo repetindo a definição em vez de ligá-la ao caso.",
+       exemplo:"Teste rapido do requisito:\n  comeca com um verbo de acao do usuario? → RF\n  descreve uma qualidade ou restricao?    → RNF",
+       exemploRotulo:"Como conferir antes de entregar",
+       nota:"A justificativa do modelo precisa citar <b>fatos do enunciado</b>: três perfis, tempo real, web e mobile, cidade de médio porte."},
+      {nome:"Atividade 2 — Quadro comparativo", papel:"comparar",
+       detalhe:"Cascata, incremental e orientado a reuso em cinco dimensões. Comparar é diferente de descrever: as células da mesma linha precisam responder à <i>mesma</i> pergunta, para que a diferença entre os modelos fique visível.",
+       exemplo:"Linha “quando o cliente ve software funcionando”:\n  cascata     → so no fim\n  incremental → ao fim de cada versao\n  reuso       → cedo, com componentes integrados\n\n(tres respostas comparaveis — isso e comparar)"},
+      {nome:"Atividade 3 — Mapa conceitual", papel:"relacionar",
+       detalhe:"Quatro blocos de conceitos: etapas do processo, modelos, tipos de requisito e fases de teste. O que vale não são as caixas, e sim as <b>ligações rotuladas</b> entre elas — é a ligação que mostra que você entendeu.",
+       exemplo:"Fraco:  [Requisitos] —— [Testes]\nForte:  [Requisitos] ——“sao verificados por”——> [Testes]\n                     ——“originam”————————————> [Criterios\n                                                 de aceitacao]",
+       nota:"Mapa com muitas caixas e poucas ligações rotuladas é lista disfarçada de mapa."},
+      {nome:"Atividade 4 — Fluxograma", papel:"representar",
+       detalhe:"As subatividades de cada etapa, na ordem, com as realimentações. É a entrega mais difícil porque exige decidir o que é sequência e o que é ciclo — e porque obriga a assumir uma posição sobre como as etapas se conectam.",
+       exemplo:"Especificacao → Desenvolvimento → Validacao → Evolucao\n      ↑                                          |\n      +------------------------------------------+\n\n(a seta de volta e o que distingue um fluxograma\n de uma lista em caixinhas)"},
+      {nome:"Entrega", papel:"um único PDF, pelo Moodle",
+       detalhe:"As quatro atividades reunidas em um arquivo só. Vale conferir antes: identificação do grupo, as quatro atividades presentes, o link do mapa acessível e as imagens legíveis em tela cheia.",
+       exemplo:"Checklist final:\n  [ ] nome e turma\n  [ ] A1 completa (5 RF + 5 RNF + modelo justificado)\n  [ ] A2 com as 15 celulas\n  [ ] A3 com link acessivel\n  [ ] A4 com as realimentacoes"}
+    ]
+  },
+  linha:{
+    rotulo:"Roteiro sugerido de execução",
+    hint:"Uma ordem que funciona. Clique em cada passo — ou use Reproduzir para ver o percurso inteiro.",
+    itens:[
+      {ano:"passo 1", t:"Ler o material de apoio", d:"Os seis tópicos de apoio desta apostila, com os laboratórios. Sem essa base, as atividades viram cópia de definição — que é exatamente o que perde ponto."},
+      {ano:"passo 2", t:"Reler o caso da RápidoJá", d:"Sublinhe no enunciado os fatos que servem de prova: três perfis de usuário, tempo real, web e mobile, simplicidade, confiabilidade e desempenho. Cada um vira argumento depois."},
+      {ano:"passo 3", t:"Atividade 1", d:"Escreva os dez requisitos e passe pelo verificador desta apostila. Só então escolha o modelo de processo e escreva a justificativa amarrada aos fatos que você sublinhou."},
+      {ano:"passo 4", t:"Atividade 2", d:"Preencha o quadro comparativo usando o comparador do material de apoio 2 como consulta — mas com suas palavras, respondendo à mesma pergunta nas três colunas."},
+      {ano:"passo 5", t:"Atividade 4", d:"Monte o fluxograma aqui, confira o encaixe das subatividades e só então desenhe no editor. Fazer a 4 antes da 3 ajuda: ela organiza as relações que o mapa vai precisar."},
+      {ano:"passo 6", t:"Atividade 3", d:"Com o fluxograma pronto, o mapa conceitual fica mais fácil: boa parte das ligações já foi pensada. Use o checklist de cobertura para não deixar bloco de fora."},
+      {ano:"passo 7", t:"Gerar a entrega", d:"Preencha a identificação, confira o checklist e gere a folha de respostas. No diálogo de impressão do navegador, escolha “Salvar como PDF” e envie pelo Moodle."}
+    ]
+  }
+}
+
+};
+</script>
+
+<script>
+/* ============================================================
+   PAINEL — componente de abertura de módulo
+   Pilha de camadas clicáveis em SVG + linha do tempo navegável.
+   Lê window.PAINEIS e monta em cada [data-painel].
+   ============================================================ */
+window.PAINEL = (function(){
+"use strict";
+var NS = "http://www.w3.org/2000/svg";
+var seq = 0;
+
+function sv(tag, at){
+  var e = document.createElementNS(NS, tag);
+  if(at) for(var k in at) if(at.hasOwnProperty(k)) e.setAttribute(k, at[k]);
+  return e;
+}
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+function txt(t){ return document.createTextNode(t); }
+
+/* cores derivadas do gradiente do design system */
+var G = [[147,87,204],[41,137,216],[44,201,157]];
+function mix(a, b, t){
+  return [0,1,2].map(function(i){ return Math.round(a[i] + (b[i] - a[i]) * t); });
+}
+function cor(i, n){
+  var t = (n > 1) ? i / (n - 1) : 0;
+  var c = (t < 0.5) ? mix(G[0], G[1], t * 2) : mix(G[1], G[2], (t - 0.5) * 2);
+  return "rgb(" + c.join(",") + ")";
+}
+
+/* quebra de texto para SVG */
+function quebrar(texto, max){
+  var palavras = String(texto).split(/\s+/), linhas = [], atual = "";
+  palavras.forEach(function(p){
+    var teste = atual ? atual + " " + p : p;
+    if(teste.length > max && atual){ linhas.push(atual); atual = p; }
+    else atual = teste;
+  });
+  if(atual) linhas.push(atual);
+  return linhas;
+}
+
+/* ------------------------------------------------------------
+   Pilha de camadas
+   ------------------------------------------------------------ */
+function montarCamadas(cfg, aoEscolher){
+  var itens = cfg.itens, n = itens.length;
+  var LX = 54, LW = 428, LH = 54, GAP = 9, TOP = 6;
+  var H = TOP + n * LH + (n - 1) * GAP + 6;
+  var svg = sv("svg", {
+    "class": "pan-svg",
+    viewBox: "0 0 500 " + H,
+    role: "group",
+    "aria-label": cfg.titulo || "Camadas"
+  });
+
+  /* trilho com seta indicando o sentido do fluxo */
+  if(cfg.fluxo){
+    var defs = sv("defs");
+    var mk = sv("marker", { id:"panSeta" + seq, viewBox:"0 0 10 10", refX:"7", refY:"5",
+      markerWidth:"5", markerHeight:"5", orient:"auto-start-reverse" });
+    mk.appendChild(sv("path", { d:"M0,0 L10,5 L0,10 z", fill:"rgba(255,255,255,.45)" }));
+    defs.appendChild(mk);
+    svg.appendChild(defs);
+    var y1 = TOP + 8, y2 = H - 14;
+    svg.appendChild(sv("line", {
+      x1:26, y1:y1, x2:26, y2:y2,
+      stroke:"rgba(255,255,255,.22)", "stroke-width":1.5,
+      "marker-end":"url(#panSeta" + seq + ")"
+    }));
+    var rot = sv("text", { "class":"rail", transform:"rotate(-90 14 " + ((y1+y2)/2) + ")",
+      x:14, y:(y1+y2)/2, "text-anchor":"middle" });
+    rot.appendChild(txt(cfg.fluxo));
+    svg.appendChild(rot);
+  }
+
+  var grupos = [];
+  itens.forEach(function(it, i){
+    var y = TOP + i * (LH + GAP);
+    var c = cor(i, n);
+    var g = sv("g", { "class":"cam", tabindex:"0", role:"button",
+      "aria-label": it.nome + ". " + (it.papel || "") });
+
+    var base = sv("rect", { "class":"base", x:LX, y:y, width:LW, height:LH, rx:5,
+      fill:c, "fill-opacity":.13, stroke:c, "stroke-opacity":.45, "stroke-width":1.5 });
+    g.appendChild(base);
+    g.appendChild(sv("rect", { x:LX, y:y, width:4, height:LH, rx:2, fill:c }));
+
+    var t1 = sv("text", { "class":"cam-t", x:LX + 18, y:y + 23 });
+    t1.appendChild(txt(it.nome));
+    g.appendChild(t1);
+
+    if(it.papel){
+      var t2 = sv("text", { "class":"cam-s", x:LX + 18, y:y + 41 });
+      t2.appendChild(txt(it.papel));
+      g.appendChild(t2);
+    }
+    var t3 = sv("text", { "class":"cam-n", x:LX + LW - 14, y:y + 30, "text-anchor":"end" });
+    t3.appendChild(txt(String(i + 1).padStart(2, "0")));
+    g.appendChild(t3);
+
+    function escolher(){ aoEscolher(i); }
+    g.addEventListener("click", escolher);
+    g.addEventListener("keydown", function(ev){
+      if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); escolher(); }
+    });
+    svg.appendChild(g);
+    grupos.push({ g:g, base:base, cor:c });
+  });
+
+  function marcar(sel){
+    grupos.forEach(function(o, i){
+      var on = (i === sel);
+      o.base.setAttribute("fill-opacity", on ? .32 : .13);
+      o.base.setAttribute("stroke-opacity", on ? 1 : .45);
+      o.base.setAttribute("stroke-width", on ? 2 : 1.5);
+      o.g.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+  return { svg: svg, marcar: marcar, cor: function(i){ return grupos[i].cor; } };
+}
+
+/* ------------------------------------------------------------
+   Linha do tempo
+   ------------------------------------------------------------ */
+function montarLinha(cfg, aoEscolher, gid){
+  var itens = cfg.itens, n = itens.length;
+  var PASSO = 142, MARG = 62;
+  var W = MARG * 2 + (n - 1) * PASSO;
+  var EIXO = 74, H = 132;
+  var svg = sv("svg", { "class":"pan-tl", viewBox:"0 0 " + W + " " + H,
+    width: W, height: H, role:"group", "aria-label": cfg.titulo || "Linha do tempo" });
+
+  var defs = sv("defs");
+  var lg = sv("linearGradient", { id:gid, x1:"0", x2:"1" });
+  [["0","#163D28"],["0.5","#1F5135"],["1","#2E8B57"]].forEach(function(s){
+    lg.appendChild(sv("stop", { offset:s[0], "stop-color":s[1] }));
+  });
+  defs.appendChild(lg);
+  svg.appendChild(defs);
+
+  svg.appendChild(sv("line", { "class":"eixo", x1:MARG - 26, y1:EIXO, x2:W - MARG + 26, y2:EIXO }));
+  var feito = sv("line", { "class":"feito", x1:MARG, y1:EIXO, x2:MARG, y2:EIXO, stroke:"url(#" + gid + ")" });
+  svg.appendChild(feito);
+
+  var marcos = [];
+  itens.forEach(function(it, i){
+    var x = MARG + i * PASSO;
+    var g = sv("g", { "class":"marco", tabindex:"0", role:"button",
+      "aria-label": it.ano + ": " + it.t });
+
+    var hit = sv("circle", { "class":"hit", cx:x, cy:EIXO, r:16, fill:"transparent" });
+    g.appendChild(hit);
+    var anel = sv("circle", { cx:x, cy:EIXO, r:10, fill:"none",
+      stroke:"rgba(255,255,255,.3)", "stroke-width":1.5 });
+    g.appendChild(anel);
+    var ponto = sv("circle", { cx:x, cy:EIXO, r:5, fill:"rgba(255,255,255,.45)" });
+    g.appendChild(ponto);
+
+    var ano = sv("text", { "class":"ano off", x:x, y:EIXO - 26, "text-anchor":"middle" });
+    ano.appendChild(txt(it.ano));
+    g.appendChild(ano);
+
+    var linhas = quebrar(it.t, 17).slice(0, 2);
+    var rots = [];
+    linhas.forEach(function(ln, li){
+      var r = sv("text", { "class":"rot", x:x, y:EIXO + 30 + li * 15, "text-anchor":"middle" });
+      r.appendChild(txt(ln));
+      g.appendChild(r);
+      rots.push(r);
+    });
+
+    function escolher(){ aoEscolher(i); }
+    g.addEventListener("click", escolher);
+    g.addEventListener("keydown", function(ev){
+      if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); escolher(); }
+    });
+    svg.appendChild(g);
+    marcos.push({ g:g, ponto:ponto, anel:anel, ano:ano, rots:rots, x:x });
+  });
+
+  function marcar(sel){
+    marcos.forEach(function(m, i){
+      var on = (i === sel);
+      m.ponto.setAttribute("r", on ? 7 : 5);
+      m.ponto.setAttribute("fill", on ? "#fff" : "rgba(255,255,255,.45)");
+      m.anel.setAttribute("r", on ? 13 : 10);
+      m.anel.setAttribute("stroke", on ? "#2E8B57" : "rgba(255,255,255,.3)");
+      m.ano.setAttribute("class", on ? "ano" : "ano off");
+      m.rots.forEach(function(r){ r.setAttribute("class", on ? "rot on" : "rot"); });
+      m.g.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    feito.setAttribute("x2", marcos[sel].x);
+  }
+  return { svg: svg, marcar: marcar, largura: W, foco: function(i){ marcos[i].g.focus(); } };
+}
+
+/* ------------------------------------------------------------
+   Montagem do painel
+   ------------------------------------------------------------ */
+function montar(host, cfg){
+  seq++;
+  var gid = "panGrad" + seq;
+  var vistasCam = {}, vistasTl = {}, concluido = false;
+
+  var raiz = el("div", "pan");
+  raiz.appendChild(el("p", "pan-tag", cfg.tag || "Panorama do módulo"));
+  raiz.appendChild(el("h3", null, cfg.titulo));
+  if(cfg.intro) raiz.appendChild(el("p", "pan-intro", cfg.intro));
+
+  /* --- camadas --- */
+  var cam = cfg.camadas;
+  raiz.appendChild(el("p", "pan-sec", cam.rotulo || "Camadas"));
+  if(cam.hint) raiz.appendChild(el("p", "pan-sub", cam.hint));
+
+  var grade = el("div", "pan-layers");
+  var colEsq = el("div");
+  var det = el("div", "pan-det");
+  grade.appendChild(colEsq);
+  grade.appendChild(det);
+  raiz.appendChild(grade);
+
+  var leitura = el("p", "pan-read");
+
+  function pintarDetalhe(i){
+    var it = cam.itens[i];
+    det.innerHTML = "";
+    var k = el("p", "kick");
+    var bolinha = el("i");
+    bolinha.style.background = camadas.cor(i);
+    k.appendChild(bolinha);
+    k.appendChild(txt((cam.rotuloItem || "Camada") + " " + String(i + 1).padStart(2, "0") + " de " + String(cam.itens.length).padStart(2, "0")));
+    det.appendChild(k);
+    det.appendChild(el("h4", null, it.nome));
+    det.appendChild(el("p", null, it.detalhe));
+    if(it.exemplo){
+      det.appendChild(el("p", "ex-lbl", it.exemploRotulo || "Na prática"));
+      var pre = el("pre", "ex");
+      pre.textContent = it.exemplo;   /* texto puro: o exemplo contém tags */
+      det.appendChild(pre);
+    }
+    if(it.nota) det.appendChild(el("p", null, it.nota));
+  }
+
+  var camadas = montarCamadas(cam, function(i){
+    camadas.marcar(i);
+    pintarDetalhe(i);
+    vistasCam[i] = true;
+    atualizar();
+  });
+  colEsq.appendChild(camadas.svg);
+
+  /* --- linha do tempo --- */
+  var tl = cfg.linha;
+  var tlDet, linha, indice = 0, tocando = null;
+  if(tl){
+    raiz.appendChild(el("hr", "pan-rule"));
+    raiz.appendChild(el("p", "pan-sec", tl.rotulo || "Linha do tempo"));
+    if(tl.hint) raiz.appendChild(el("p", "pan-sub", tl.hint));
+
+    var wrap = el("div", "pan-tl-wrap");
+    linha = montarLinha(tl, function(i){ irPara(i, true); }, gid);
+    wrap.appendChild(linha.svg);
+    raiz.appendChild(wrap);
+
+    tlDet = el("div", "pan-det");
+    tlDet.style.minHeight = "0";
+    tlDet.style.marginTop = "16px";
+    raiz.appendChild(tlDet);
+
+    var ctrl = el("div", "pan-ctrl");
+    var bAnt = el("button", "btn btn-sm", "◀ Anterior");
+    var bProx = el("button", "btn btn-sm", "Próximo ▶");
+    var bPlay = el("button", "btn btn-sm solid", "Reproduzir");
+    var conta = el("span", "pan-conta");
+    [bAnt, bProx, bPlay].forEach(function(b){ b.type = "button"; });
+    bAnt.addEventListener("click", function(){ parar(); irPara(Math.max(0, indice - 1), true); });
+    bProx.addEventListener("click", function(){ parar(); irPara(Math.min(tl.itens.length - 1, indice + 1), true); });
+    bPlay.addEventListener("click", function(){
+      if(tocando){ parar(); return; }
+      bPlay.textContent = "Pausar";
+      bPlay.classList.add("on");
+      tocando = setInterval(function(){
+        if(indice >= tl.itens.length - 1){ parar(); return; }
+        irPara(indice + 1, false);
+      }, 2300);
+    });
+    function parar(){
+      if(tocando){ clearInterval(tocando); tocando = null; }
+      bPlay.textContent = "Reproduzir";
+      bPlay.classList.remove("on");
+    }
+    ctrl.appendChild(bAnt); ctrl.appendChild(bProx); ctrl.appendChild(bPlay); ctrl.appendChild(conta);
+    raiz.appendChild(ctrl);
+
+    var irPara = function(i, manual){
+      indice = i;
+      linha.marcar(i);
+      var it = tl.itens[i];
+      tlDet.innerHTML = "";
+      var k = el("p", "kick");
+      k.appendChild(txt(it.ano));
+      tlDet.appendChild(k);
+      tlDet.appendChild(el("h4", null, it.t));
+      tlDet.appendChild(el("p", null, it.d));
+      vistasTl[i] = true;
+      conta.textContent = Object.keys(vistasTl).length + " de " + tl.itens.length + " marcos";
+      /* mantém o marco selecionado visível na rolagem horizontal */
+      var alvo = (i / Math.max(1, tl.itens.length - 1)) * (linha.largura - wrap.clientWidth);
+      if(linha.largura > wrap.clientWidth) wrap.scrollTo({ left: Math.max(0, alvo), behavior: manual ? "auto" : "smooth" });
+      atualizar();
+    };
+  }
+
+  raiz.appendChild(leitura);
+  host.appendChild(raiz);
+
+  function atualizar(){
+    var a = Object.keys(vistasCam).length, A = cam.itens.length;
+    var b = tl ? Object.keys(vistasTl).length : 0, B = tl ? tl.itens.length : 0;
+    if(a >= A && b >= B){
+      if(!concluido){
+        concluido = true;
+        if(cfg.topico && window.__apostila) window.__apostila.markDone(cfg.topico);
+      }
+      leitura.innerHTML = "<b class='ok'>Panorama completo.</b> " + (cfg.fecho || "");
+    }else{
+      var faltam = [];
+      if(a < A) faltam.push((A - a) + " camada(s)");
+      if(b < B) faltam.push((B - b) + " marco(s)");
+      leitura.innerHTML = "Explorado: <b>" + a + " de " + A + "</b> camadas" +
+        (tl ? " e <b>" + b + " de " + B + "</b> marcos" : "") +
+        ". Faltam " + faltam.join(" e ") + ".";
+    }
+  }
+
+  camadas.marcar(0);
+  pintarDetalhe(0);
+  vistasCam[0] = true;
+  if(tl) irPara(0, true);
+  atualizar();
+}
+
+function build(){
+  var dados = window.PAINEIS || {};
+  Array.prototype.forEach.call(document.querySelectorAll("[data-painel]"), function(host){
+    var id = host.getAttribute("data-painel");
+    if(dados[id] && !host.getAttribute("data-montado")){
+      host.setAttribute("data-montado", "1");
+      montar(host, dados[id]);
+    }
+  });
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", build);
+else build();
+
+return { montar: montar, build: build };
+})();
+</script>
+
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

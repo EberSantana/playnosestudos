@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="utf-8">
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&]professor\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>:root{color-scheme:light}body{margin:0;font:14px system-ui}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Subnetting na Prática</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@400;600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+/* Layout: cabeçalho fixo de curso + navegação por módulo + seções (resumo, caderno, flashcards, PBL, V/F, quiz) + laboratório */
+:root{
+  --bg:#f4f6fb; --surface:#ffffff; --surface2:#eaeefa; --ink:#0e1a36; --muted:#4f5c7a; --line:#d5ddef;
+  --accent:#1F5135; --accent-ink:#ffffff; --accent-soft:#E3EEE7;
+  --amber:#8a5200; --amber-soft:#ffefcf;
+  --good:#0b7a49; --good-soft:#ddf5e9; --bad:#b3261e; --bad-soft:#fde4e1;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0a1126; --surface:#111a36; --surface2:#19244a; --ink:#e8ecfa; --muted:#9eabcb; --line:#25315a;
+  --accent:#6BAA68; --accent-ink:#0a1126; --accent-soft:#1A2D20;
+  --amber:#ffbd59; --amber-soft:#3b2a0b;
+  --good:#4fd899; --good-soft:#0f3325; --bad:#ff8174; --bad-soft:#3d1713; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1126; --surface:#111a36; --surface2:#19244a; --ink:#e8ecfa; --muted:#9eabcb; --line:#25315a;
+  --accent:#6BAA68; --accent-ink:#0a1126; --accent-soft:#1A2D20;
+  --amber:#ffbd59; --amber-soft:#3b2a0b;
+  --good:#4fd899; --good-soft:#0f3325; --bad:#ff8174; --bad-soft:#3d1713; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--f-body);padding-inline:16px;padding-block:20px 56px}
+.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2,h3,h4{font-family:var(--f-display);line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(2rem,6vw,3.4rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.6rem;font-weight:800}
+h3{font-size:1.15rem;font-weight:600}
+h4{font-size:1rem;font-weight:600}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.92em}
+code{background:var(--surface2);padding:1px 6px;border-radius:5px}
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;justify-content:space-between;align-items:flex-end}
+.top p{color:var(--muted);max-width:52ch}
+.eyebrow{font:600 .78rem/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.meter{min-width:200px}
+.meter b{font-family:var(--f-mono);font-size:1.4rem}
+.bar{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+nav.main,nav.sub{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 .95rem var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 14px;border-radius:8px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip small{font:600 .75rem var(--f-mono);opacity:.8}
+nav.sub .chip{font-size:.88rem;padding:7px 12px;background:transparent}
+nav.sub .chip[aria-pressed="true"]{background:var(--surface2);color:var(--ink);border-color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.panel{display:flex;flex-direction:column;gap:16px}
+.lead{color:var(--muted);max-width:68ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.item .tag{font:600 .75rem var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.item.done{border-color:var(--good)}
+textarea,input[type=text],input[type=number]{width:100%;font:400 1rem var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{min-height:76px;resize:vertical}
+input.mono{font-family:var(--f-mono)}
+label{font-size:.88rem;color:var(--muted);font-weight:600}
+.btn{font:700 .95rem var(--f-body);background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:10px 16px;cursor:pointer;align-self:flex-start}
+.btn:disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed}
+.hint{font-size:.85rem;color:var(--muted)}
+.answer{background:var(--accent-soft);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.answer b.k{font:600 .75rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.verdict{font-weight:700;padding:8px 12px;border-radius:8px}
+.verdict.ok{background:var(--good-soft);color:var(--good)}
+.verdict.no{background:var(--bad-soft);color:var(--bad)}
+.vf{display:flex;gap:8px;flex-wrap:wrap}
+.vf button,.opts button{font:600 .95rem var(--f-body);border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:9px 16px;cursor:pointer;text-align:left}
+.vf button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opts{display:grid;gap:8px}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.right{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+.opts button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+.opts button:disabled{cursor:default}
+.scene{background:var(--amber-soft);border-radius:10px;padding:14px 16px}
+.scene h3{color:var(--amber)}
+.steps{display:flex;flex-direction:column;gap:12px}
+.step{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+ul.clean{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+/* prédio do condomínio */
+.building{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.building div{border-radius:8px;padding:12px 8px;text-align:center;font:600 .8rem/1.3 var(--f-mono);background:var(--accent-soft);color:var(--ink)}
+.building div:nth-child(2){background:var(--amber-soft)}
+.building div:nth-child(3){background:var(--good-soft)}
+.building div:nth-child(4){background:var(--surface2)}
+.building b{display:block;font:800 1.5rem var(--f-display)}
+/* bits */
+.bits{display:flex;flex-wrap:wrap;gap:6px 10px;font-family:var(--f-mono)}
+.oct{display:flex;gap:2px}
+.b{width:1.35em;text-align:center;border-radius:4px;padding:2px 0;font-size:.95rem}
+.b.net{background:var(--accent);color:var(--accent-ink)}
+.b.sub{background:var(--amber);color:var(--surface)}
+.b.host{background:var(--surface2);color:var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.kv div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.kv span{display:block;font-size:.78rem;color:var(--muted);font-weight:600}
+.kv b{font-family:var(--f-mono);font-size:1rem;overflow-wrap:anywhere}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;max-height:380px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--surface2);position:sticky;top:0;font-size:.8rem;letter-spacing:.04em}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>div{flex:1 1 150px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.err{color:var(--bad);font-weight:600}
+@media (max-width:520px){.building{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow">Redes de Computadores · Técnico em Informática</div>
+      <h1>Subnetting na Prática</h1>
+      <p style="margin-top:10px">Resolva primeiro, confira depois. As respostas só aparecem depois que você tenta.</p>
+    </div>
+    <div class="meter" aria-live="polite">
+      <span class="hint">Seu progresso</span><br><b id="pct">0</b><span class="mono"> / 160 atividades</span>
+      <div class="bar"><i id="bar"></i></div>
+    </div>
+  </header>
+  <nav class="main" id="nav" aria-label="Módulos"></nav>
+  <nav class="sub" id="sub" aria-label="Seções do módulo" hidden></nav>
+  <main class="panel" id="content"></main>
+</div>
+
+<script>
+/* ============ CONTEÚDO ============ */
+const MODS = [
+{
+ name:'Fundamentos', sub:'IP, máscara e binário',
+ resumo:`<ul class="clean">
+  <li>Um endereço <b>IPv4</b> tem 32 bits, escritos em 4 octetos (0 a 255), como <code>192.168.1.10</code>.</li>
+  <li>Cada octeto usa as posições <code>128 64 32 16 8 4 2 1</code>.</li>
+  <li>A <b>máscara</b> separa a parte da rede da parte do host. <code>/24</code> significa 24 bits de rede.</li>
+  <li><b>Endereço de rede</b> tem todos os bits de host em 0. <b>Broadcast</b> tem todos em 1. Os dois não vão para dispositivos.</li>
+  <li>Hosts utilizáveis = <code>2<sup>h</sup> − 2</code>, onde <i>h</i> é o número de bits de host.</li></ul>`,
+ flash:[
+  ['O que é um endereço IPv4?','Um número de 32 bits, escrito em 4 octetos decimais (0 a 255) separados por ponto, que identifica um dispositivo na rede.'],
+  ['Quantos bits tem um octeto e qual o maior valor dele?','8 bits. O maior valor é 255 (11111111).'],
+  ['Quais são os valores das 8 posições de um octeto?','128, 64, 32, 16, 8, 4, 2, 1.'],
+  ['Para que serve a máscara de sub-rede?','Define quais bits do IP pertencem à rede e quais pertencem ao host.'],
+  ['Escreva 255.255.255.0 em binário.','11111111.11111111.11111111.00000000 (24 bits 1, portanto /24).'],
+  ['O que é a notação CIDR?','Uma barra seguida da quantidade de bits 1 da máscara. Exemplo: /24 = 24 bits de rede.'],
+  ['Como é o endereço de REDE em binário?','Todos os bits da parte de host valem 0. Ele identifica a própria rede.'],
+  ['Como é o endereço de BROADCAST em binário?','Todos os bits da parte de host valem 1. Ele alcança todos os hosts da rede.'],
+  ['O que são hosts utilizáveis?','Os endereços entre o de rede e o de broadcast. Só eles podem ser atribuídos a dispositivos.'],
+  ['Converta 192 para binário.','11000000, pois 192 = 128 + 64.']
+ ],
+ vf:[
+  ['Um octeto pode valer 256.',false,'Um octeto vai de 0 a 255. Existem 256 valores possíveis, mas o maior deles é 255.'],
+  ['Um endereço IPv4 possui 32 bits.',true,'São 4 octetos de 8 bits: 4 × 8 = 32.'],
+  ['A máscara 255.255.255.0 equivale a /24.',true,'255 = 11111111. Três octetos cheios dão 24 bits 1.'],
+  ['Em 192.168.1.0/24, o endereço 192.168.1.255 pode ser dado a um computador.',false,'192.168.1.255 é o broadcast dessa rede. Ele não é atribuído a dispositivos.'],
+  ['O endereço de rede tem todos os bits de host em 1.',false,'É o contrário: no endereço de rede os bits de host são 0. Todos em 1 é o broadcast.'],
+  ['/26 significa que a rede suporta 26 hosts.',false,'/26 são 26 bits de REDE. Sobram 6 bits de host, então 2⁶ − 2 = 62 hosts.'],
+  ['11111111 em binário vale 255.',true,'128+64+32+16+8+4+2+1 = 255.'],
+  ['192.168.1.0 pode ser usado em um PC da rede 192.168.1.0/24.',false,'É o endereço da própria rede (bits de host em 0).'],
+  ['Dois computadores com o mesmo IP na mesma rede funcionam normalmente.',false,'Gera conflito de IP. Os pacotes não sabem para qual dos dois ir.'],
+  ['A máscara mostra onde termina a parte de rede e começa a parte de host.',true,'Os bits 1 da máscara cobrem a rede. Os bits 0 cobrem o host.']
+ ],
+ caderno:[
+  ['Converta para binário: <code>10</code>, <code>64</code>, <code>200</code> e <code>255</code>.','<code>10 = 00001010</code><br><code>64 = 01000000</code><br><code>200 = 11001000</code> (128+64+8)<br><code>255 = 11111111</code>'],
+  ['Converta para decimal: <code>10101010</code>, <code>11110000</code>, <code>00001111</code> e <code>11000000</code>.','<code>10101010 = 170</code> (128+32+8+2)<br><code>11110000 = 240</code><br><code>00001111 = 15</code><br><code>11000000 = 192</code>'],
+  ['Escreva <code>255.255.255.0</code> em binário e conte quantos bits valem 1.','<code>11111111.11111111.11111111.00000000</code><br>São 24 bits 1, então a máscara é <code>/24</code>.'],
+  ['Escreva a máscara <code>/16</code> em decimal.','16 bits 1 = dois octetos cheios: <code>255.255.0.0</code>.'],
+  ['O IP é <code>192.168.10.37/24</code>. Qual é o endereço de rede e o de broadcast?','Rede: <code>192.168.10.0</code><br>Broadcast: <code>192.168.10.255</code><br>Como é /24, só o último octeto muda.'],
+  ['Em uma rede /24, quantos bits são de host e quantos hosts utilizáveis existem?','8 bits de host. Hosts = 2⁸ − 2 = <b>254</b>.'],
+  ['Quais destes IPs são inválidos? <code>192.168.1.256</code>, <code>10.0.0.1</code>, <code>172.16.0.300</code>, <code>192.168.1</code>','Inválidos: <code>192.168.1.256</code> e <code>172.16.0.300</code> (octeto acima de 255) e <code>192.168.1</code> (faltam octetos). Válido: <code>10.0.0.1</code>.'],
+  ['Monte a tabela 128 64 32 16 8 4 2 1 e escreva o número <code>172</code> em binário.','172 = 128 + 32 + 8 + 4<br><code>10101100</code>'],
+ ],
+ quiz:[
+  ['Quantos bits tem um endereço IPv4?',['8','16','32','64'],2,'4 octetos × 8 bits = 32 bits.'],
+  ['Qual é a máscara decimal de /24?',['255.0.0.0','255.255.0.0','255.255.255.0','255.255.255.255'],2,'24 bits 1 formam três octetos 255.'],
+  ['Qual destes endereços é inválido?',['192.168.0.1','10.255.255.254','172.16.256.1','8.8.8.8'],2,'256 passa do limite de 255.'],
+  ['Quantos hosts utilizáveis tem uma rede /24?',['256','255','254','253'],2,'2⁸ − 2 = 254.'],
+  ['Quanto vale 11000000 em decimal?',['128','192','224','240'],1,'128 + 64 = 192.'],
+  ['Qual é o broadcast de 192.168.5.0/24?',['192.168.5.1','192.168.5.254','192.168.5.255','192.168.0.255'],2,'Bits de host todos em 1: último octeto 255.'],
+  ['Em uma rede /16, quantos bits são de host?',['8','16','24','32'],1,'32 − 16 = 16.'],
+  ['Qual é a máscara de /8?',['255.0.0.0','255.255.0.0','255.255.255.0','0.0.0.255'],0,'8 bits 1 = um octeto cheio.'],
+  ['A máscara de sub-rede serve para:',['Criptografar dados','Separar rede e host','Aumentar a velocidade','Trocar o IP'],1,'Ela marca onde acaba a rede e começa o host.'],
+  ['Qual é o endereço de rede de 10.0.0.0/8?',['10.0.0.0','10.0.0.1','10.255.255.255','0.0.0.0'],0,'10.0.0.0 já tem todos os bits de host em 0.']
+ ],
+ pbl:[
+  {title:'Rede do laboratório novo',scene:'O IF recebeu a rede <code>192.168.50.0/24</code> para um laboratório com 20 computadores, 1 roteador e 1 impressora de rede.',
+   steps:[
+    ['Qual é a máscara em decimal e quantos bits são de rede e de host?','Máscara <code>255.255.255.0</code>. São 24 bits de rede e 8 bits de host.'],
+    ['Quais são os endereços de rede e de broadcast?','Rede: <code>192.168.50.0</code>. Broadcast: <code>192.168.50.255</code>.'],
+    ['A rede comporta os 22 dispositivos? Quantos hosts utilizáveis existem?','Sim. Há 254 hosts utilizáveis (de <code>192.168.50.1</code> a <code>192.168.50.254</code>) e só 22 são necessários.'],
+    ['Proponha um IP para o roteador (gateway) e a faixa para os PCs.','Gateway: <code>192.168.50.1</code>. PCs: <code>192.168.50.10</code> a <code>192.168.50.29</code>. Impressora: <code>192.168.50.5</code>. Outras divisões também valem, desde que fiquem entre .1 e .254.']
+   ]},
+  {title:'O PC que não conecta',scene:'O PC do João foi configurado com <code>192.168.50.255/24</code> e não acessa a rede. O gateway é <code>192.168.50.1</code>.',
+   steps:[
+    ['Que tipo de endereço é <code>192.168.50.255</code> nessa rede?','É o endereço de <b>broadcast</b>, pois todos os bits de host valem 1.'],
+    ['Explique por que ele não pode ser usado por um PC e proponha um IP correto.','O broadcast é reservado para falar com todos os hosts ao mesmo tempo. Um IP correto seria <code>192.168.50.20</code>, que está entre .1 e .254 e livre.']
+   ]}
+ ]
+},
+{
+ name:'Por que dividir', sub:'Bits emprestados',
+ resumo:`<ul class="clean">
+  <li><b>Subnetting</b> divide uma rede grande em redes menores (sub-redes).</li>
+  <li>Benefícios: uso eficiente de IPs, menos broadcast (menos ruído), mais organização e segurança.</li>
+  <li>Para dividir, <b>emprestamos bits</b> da parte de host e passamos para a parte de rede. A máscara aumenta.</li>
+  <li>Com <i>n</i> bits emprestados temos <code>2<sup>n</sup></code> sub-redes.</li>
+  <li>Exemplo: <code>/24</code> + 2 bits = <code>/26</code> → 4 sub-redes de 64 endereços (62 utilizáveis).</li></ul>`,
+ flash:[
+  ['O que é subnetting?','Dividir uma rede maior em redes menores (sub-redes), emprestando bits da parte de host.'],
+  ['Cite três benefícios do subnetting.','Uso eficiente dos IPs, menos tráfego de broadcast e mais segurança e organização.'],
+  ['O que é domínio de broadcast?','O conjunto de dispositivos que recebem o broadcast enviado por qualquer um deles. Cada sub-rede tem o seu.'],
+  ['O que são bits emprestados?','Bits da parte de host que passam a fazer parte da rede para criar sub-redes.'],
+  ['Quantas sub-redes surgem com n bits emprestados?','2ⁿ sub-redes.'],
+  ['Quantos bits emprestar para 4 sub-redes?','2 bits, pois 2² = 4.'],
+  ['Quantos bits emprestar para 8 sub-redes?','3 bits, pois 2³ = 8.'],
+  ['O que acontece com a máscara /24 ao emprestar 2 bits?','Vira /26, ou 255.255.255.192.'],
+  ['Qual dispositivo conecta sub-redes diferentes?','O roteador (ou switch de camada 3).'],
+  ['Como calcular hosts utilizáveis de uma sub-rede?','2ʰ − 2, onde h são os bits de host restantes. Em /26: h = 6, logo 62 hosts.']
+ ],
+ vf:[
+  ['Subnetting aumenta a quantidade total de endereços IP disponíveis.',false,'Ele apenas reparte o espaço existente. Ainda perdemos 2 endereços (rede e broadcast) em cada sub-rede.'],
+  ['Dividir a rede reduz o tráfego de broadcast em cada parte.',true,'Cada sub-rede é um domínio de broadcast menor, com menos dispositivos ouvindo.'],
+  ['Emprestar 3 bits resulta em 6 sub-redes.',false,'2³ = 8 sub-redes. A quantidade é sempre potência de 2.'],
+  ['Dispositivos de sub-redes diferentes precisam de um roteador para se comunicar.',true,'Cada sub-rede é uma rede distinta. A passagem entre elas é feita pelo roteador.'],
+  ['Ao emprestar bits, a máscara diminui (por exemplo, de /24 para /22).',false,'A máscara aumenta, de /24 para /26, por exemplo. Mais bits viram rede.'],
+  ['Dividir 192.168.1.0/24 em /26 gera 4 sub-redes de 64 endereços.',true,'2 bits emprestados = 4 sub-redes. 256 ÷ 4 = 64 endereços cada.'],
+  ['Cada sub-rede /26 tem 64 hosts utilizáveis.',false,'Tem 64 endereços, mas 62 utilizáveis, porque rede e broadcast não contam.'],
+  ['Sub-redes ajudam a isolar departamentos, como secretaria e laboratório.',true,'O tráfego entre elas passa pelo roteador, onde regras de acesso podem ser aplicadas.'],
+  ['Emprestar bits significa tirá-los da parte de rede.',false,'Os bits saem da parte de HOST e passam para a de rede.'],
+  ['Emprestar 1 bit de uma /24 gera duas sub-redes /25.',true,'2¹ = 2 sub-redes e a máscara vira /25.']
+ ],
+ caderno:[
+  ['Quantas sub-redes surgem com 1, 2, 3 e 4 bits emprestados?','1 bit → 2 sub-redes<br>2 bits → 4<br>3 bits → 8<br>4 bits → 16'],
+  ['Quantos bits emprestar para obter pelo menos 6 sub-redes?','Precisamos de 2ⁿ ≥ 6. Com n = 2 temos 4 (pouco). Com n = <b>3</b> temos 8. Emprestam-se 3 bits.'],
+  ['Divida <code>192.168.1.0/24</code> em 2 sub-redes. Escreva a nova máscara e as duas redes.','Nova máscara: <code>/25</code> (255.255.255.128). Redes: <code>192.168.1.0/25</code> e <code>192.168.1.128/25</code>.'],
+  ['Complete: /25, /26, /27 e /28. Para cada um, dê a máscara decimal e os hosts utilizáveis.','<code>/25 → 255.255.255.128 → 126 hosts</code><br><code>/26 → 255.255.255.192 → 62 hosts</code><br><code>/27 → 255.255.255.224 → 30 hosts</code><br><code>/28 → 255.255.255.240 → 14 hosts</code>'],
+  ['Um prédio tem 256 apartamentos. Divida em 4 blocos iguais e diga a numeração de cada bloco.','Cada bloco tem 64 apartamentos: 0–63, 64–127, 128–191 e 192–255.'],
+  ['Explique com suas palavras por que dividir uma rede reduz o broadcast.','Resposta modelo: o broadcast só chega aos dispositivos da mesma sub-rede. Com redes menores, menos dispositivos recebem cada mensagem, então há menos ruído.'],
+  ['A escola tem <code>192.168.10.0/24</code> e 3 setores: Biblioteca, Laboratório e Administração. Quantos bits emprestar e qual a máscara?','São necessários 3 setores, então 2² = 4 sub-redes bastam: <b>2 bits</b>, máscara <code>/26</code>. Sobra uma sub-rede para crescimento.'],
+  ['Ao dividir uma /24 em 4 sub-redes, quantos endereços deixam de ser utilizáveis no total? Compare com os 254 originais.','Cada sub-rede perde 2 (rede e broadcast): 4 × 2 = 8. Utilizáveis: 4 × 62 = <b>248</b>, contra 254 antes.']
+ ],
+ quiz:[
+  ['Com 2 bits emprestados, quantas sub-redes existem?',['2','3','4','8'],2,'2² = 4.'],
+  ['Qual é a nova máscara ao emprestar 3 bits de uma /24?',['/25','/26','/27','/28'],2,'24 + 3 = 27.'],
+  ['Quantos hosts utilizáveis tem uma /27?',['14','30','32','62'],1,'5 bits de host: 2⁵ − 2 = 30.'],
+  ['Qual NÃO é benefício do subnetting?',['Menos broadcast','Mais organização','Aumentar o total de IPs','Isolar setores'],2,'O total de endereços não aumenta, apenas é dividido.'],
+  ['Quantos bits emprestar para 16 sub-redes?',['2','3','4','5'],2,'2⁴ = 16.'],
+  ['A máscara 255.255.255.224 corresponde a:',['/25','/26','/27','/28'],2,'224 = 11100000: 3 bits no último octeto, 24 + 3 = 27.'],
+  ['Qual dispositivo liga sub-redes diferentes?',['Hub','Roteador','Cabo','Repetidor'],1,'O roteador encaminha pacotes entre redes.'],
+  ['Quantos hosts utilizáveis tem uma /25?',['62','126','128','254'],1,'7 bits de host: 2⁷ − 2 = 126.'],
+  ['Dividir uma /24 com 1 bit emprestado dá qual máscara?',['255.255.255.64','255.255.255.128','255.255.255.192','255.255.255.240'],1,'/25 = 255.255.255.128.'],
+  ['Em uma /26, quantos bits de host restam?',['4','5','6','8'],2,'32 − 26 = 6.']
+ ],
+ pbl:[
+  {title:'Quatro setores, uma rede',scene:'O campus recebeu <code>192.168.100.0/24</code>. Precisa separar Secretaria, Laboratório 1, Laboratório 2 e Biblioteca, cada um com no máximo 50 dispositivos.',
+   steps:[
+    ['Quantos bits emprestar para ter pelo menos 4 sub-redes?','2 bits, porque 2² = 4.'],
+    ['Qual é a nova máscara (CIDR e decimal)?','<code>/26</code> = <code>255.255.255.192</code>.'],
+    ['Quantos endereços e quantos hosts utilizáveis por sub-rede? Atende 50 dispositivos?','Cada sub-rede tem 64 endereços e 62 utilizáveis. Sim, atende 50.'],
+    ['Liste as 4 redes.','<code>192.168.100.0/26</code>, <code>192.168.100.64/26</code>, <code>192.168.100.128/26</code> e <code>192.168.100.192/26</code>.']
+   ]},
+  {title:'Cinco departamentos',scene:'Uma empresa tem <code>10.10.10.0/24</code> e 5 departamentos de até 25 máquinas cada.',
+   steps:[
+    ['Quantos bits emprestar?','Precisa de 5 sub-redes. 2² = 4 não basta, 2³ = 8 serve. Emprestam-se <b>3 bits</b>.'],
+    ['Qual a máscara e quantos hosts cabem em cada sub-rede? Atende 25?','Máscara <code>/27</code>. Cada sub-rede tem 30 hosts utilizáveis, então atende 25.'],
+    ['Sobram quantas sub-redes? Para que usar?','Sobram 3 sub-redes (8 − 5). Podem ser reservadas para crescimento, visitantes ou gerência.']
+   ]}
+ ]
+},
+{
+ name:'Calculando', sub:'Salto, rede e broadcast',
+ resumo:`<ul class="clean">
+  <li>O <b>salto</b> (tamanho do bloco) é <code>256 − valor da máscara no octeto que muda</code>. Em /26: 256 − 192 = 64.</li>
+  <li>As sub-redes começam nos múltiplos do salto: 0, 64, 128, 192.</li>
+  <li><b>Broadcast</b> = início da próxima sub-rede − 1.</li>
+  <li><b>Faixa utilizável</b> = rede + 1 até broadcast − 1.</li>
+  <li>Valores da máscara no último octeto: <code>128, 192, 224, 240, 248, 252</code>, equivalentes a <code>/25 … /30</code>.</li>
+  <li>Para achar a sub-rede de um IP: veja qual múltiplo do salto vem logo antes (ou igual) ao último octeto.</li></ul>`,
+ flash:[
+  ['Como se calcula o salto (tamanho do bloco)?','256 menos o valor da máscara no octeto que muda. Em /26: 256 − 192 = 64.'],
+  ['Qual o valor do último octeto da máscara /26?','192.'],
+  ['Liste os valores de máscara no último octeto para /25 a /30.','128, 192, 224, 240, 248, 252.'],
+  ['Onde começa cada sub-rede?','Nos múltiplos do salto: 0, salto, 2×salto, etc.'],
+  ['Como achar o broadcast de uma sub-rede?','É o endereço logo antes do início da próxima sub-rede (próxima rede − 1).'],
+  ['Como achar a faixa de hosts utilizáveis?','Do endereço de rede + 1 até o broadcast − 1.'],
+  ['Qual é o salto de /25, /27 e /28?','128, 32 e 16, respectivamente.'],
+  ['Como descobrir a sub-rede de um IP?','Pegue o último octeto e ache o maior múltiplo do salto que seja menor ou igual a ele.'],
+  ['Quantos hosts utilizáveis tem um bloco de salto S?','S − 2. Exemplo: salto 64 → 62 hosts.'],
+  ['Quantos hosts utilizáveis tem uma /27 e por quê?','30. São 5 bits de host: 2⁵ − 2 = 30.']
+ ],
+ vf:[
+  ['Em uma /26, o salto é 64.',true,'256 − 192 = 64.'],
+  ['Em 192.168.1.0/26, a segunda sub-rede começa em 192.168.1.64.',true,'Os blocos começam em 0, 64, 128 e 192.'],
+  ['O broadcast de 192.168.1.64/26 é 192.168.1.128.',false,'O broadcast é o último endereço do bloco: 192.168.1.127. O .128 já é o início da próxima sub-rede.'],
+  ['O IP 192.168.1.100/26 pertence à sub-rede 192.168.1.64/26.',true,'O bloco 64 vai de 64 a 127, e 100 está dentro dele.'],
+  ['Os hosts utilizáveis de 192.168.1.128/26 vão de .129 até .190.',true,'Rede .128, broadcast .191. Utilizáveis: .129 a .190.'],
+  ['O salto de /27 é 16.',false,'256 − 224 = 32. O salto 16 é da /28.'],
+  ['O primeiro host utilizável é igual ao endereço de rede.',false,'O primeiro host é rede + 1. O endereço de rede não pode ser atribuído.'],
+  ['Em /28 há 16 endereços por bloco e 14 utilizáveis.',true,'Salto 16, menos 2 = 14.'],
+  ['O IP 192.168.1.200/26 está na sub-rede 192.168.1.128/26.',false,'O bloco 128 vai até 191. O 200 está no bloco que começa em 192.'],
+  ['A máscara 255.255.255.240 é /28.',true,'240 = 11110000, ou seja, 4 bits no último octeto: 24 + 4 = 28.']
+ ],
+ caderno:[
+  ['Para <code>192.168.1.0/27</code>, calcule o salto e liste os endereços de rede das 8 sub-redes.','Salto = 256 − 224 = 32.<br>Redes: <code>.0, .32, .64, .96, .128, .160, .192, .224</code>.'],
+  ['Para <code>192.168.1.96/27</code>, dê rede, broadcast e faixa utilizável.','Rede <code>192.168.1.96</code>. Broadcast <code>192.168.1.127</code>. Hosts: <code>192.168.1.97</code> a <code>192.168.1.126</code>.'],
+  ['Divida <code>172.16.0.0/24</code> em sub-redes /28. Mostre rede, hosts e broadcast das 3 primeiras.','Salto 16.<br><code>.0</code>: hosts .1–.14, broadcast .15<br><code>.16</code>: hosts .17–.30, broadcast .31<br><code>.32</code>: hosts .33–.46, broadcast .47'],
+  ['Em qual sub-rede está <code>192.168.1.77/26</code>? Dê rede e broadcast.','Salto 64. O maior múltiplo ≤ 77 é 64. Rede <code>192.168.1.64</code>, broadcast <code>192.168.1.127</code>.'],
+  ['Para <code>192.168.1.150/27</code>, dê rede, broadcast e faixa de hosts.','Salto 32. 150 ÷ 32 ≈ 4,7, então o bloco começa em 4 × 32 = 128.<br>Rede <code>.128</code>, broadcast <code>.159</code>, hosts <code>.129</code> a <code>.158</code>.'],
+  ['Divida <code>192.168.1.0/24</code> em 2 sub-redes /25 e preencha rede, hosts e broadcast.','<code>192.168.1.0/25</code>: hosts .1–.126, broadcast .127<br><code>192.168.1.128/25</code>: hosts .129–.254, broadcast .255'],
+  ['Em <code>/28</code>, <code>192.168.1.17</code> e <code>192.168.1.30</code> estão na mesma sub-rede?','Salto 16. Os dois estão no bloco 16–31. <b>Sim</b>, estão na mesma sub-rede (rede .16, broadcast .31).'],
+  ['Em <code>/28</code>, <code>192.168.1.14</code> e <code>192.168.1.17</code> estão na mesma sub-rede? E conversam sem roteador?','O 14 está no bloco 0–15 e o 17 no bloco 16–31. <b>Não</b>, estão em sub-redes diferentes e precisam de roteador.']
+ ],
+ quiz:[
+  ['Qual é o salto de uma /26?',['16','32','64','128'],2,'256 − 192 = 64.'],
+  ['Qual é o broadcast de 192.168.1.0/26?',['192.168.1.31','192.168.1.63','192.168.1.64','192.168.1.127'],1,'O bloco vai de 0 a 63.'],
+  ['Qual é o primeiro host de 192.168.1.64/26?',['192.168.1.64','192.168.1.65','192.168.1.66','192.168.1.63'],1,'Rede + 1 = .65.'],
+  ['Qual é o último host utilizável de 192.168.1.0/27?',['192.168.1.30','192.168.1.31','192.168.1.32','192.168.1.29'],0,'Broadcast .31, último host .30.'],
+  ['Qual é a rede do IP 192.168.1.45/28?',['192.168.1.16','192.168.1.32','192.168.1.40','192.168.1.45'],1,'Salto 16: 45 está no bloco 32–47.'],
+  ['Qual é o broadcast da sub-rede de 192.168.1.45/28?',['192.168.1.47','192.168.1.48','192.168.1.46','192.168.1.63'],0,'O bloco 32–47 termina em .47.'],
+  ['Quantos hosts utilizáveis tem uma /28?',['8','14','16','30'],1,'16 − 2 = 14.'],
+  ['Qual é a máscara decimal de /29?',['255.255.255.224','255.255.255.240','255.255.255.248','255.255.255.252'],2,'29 − 24 = 5 bits: 128+64+32+16+8 = 248.'],
+  ['Quantas sub-redes /27 cabem em uma /24?',['4','8','16','32'],1,'256 ÷ 32 = 8.'],
+  ['O IP 192.168.1.130/25 pertence a qual sub-rede?',['192.168.1.0/25','192.168.1.128/25','192.168.1.64/25','192.168.1.192/25'],1,'Salto 128: 130 está no bloco 128–255.']
+ ],
+ pbl:[
+  {title:'Dividindo a 192.168.1.0/24 em 4',scene:'Complete a tabela de sub-redes da rede <code>192.168.1.0/24</code> dividida em 4 partes iguais, uma para cada setor.',
+   steps:[
+    ['Quantos bits emprestar, qual a nova máscara e qual o salto?','2 bits. Máscara <code>/26</code> (255.255.255.192). Salto = 256 − 192 = 64.'],
+    ['Liste os endereços de rede das 4 sub-redes.','<code>192.168.1.0</code>, <code>192.168.1.64</code>, <code>192.168.1.128</code> e <code>192.168.1.192</code>.'],
+    ['Preencha o broadcast e a faixa de hosts de cada uma.','Sub-rede 1: hosts .1–.62, broadcast .63<br>Sub-rede 2: hosts .65–.126, broadcast .127<br>Sub-rede 3: hosts .129–.190, broadcast .191<br>Sub-rede 4: hosts .193–.254, broadcast .255'],
+    ['Escolha o IP do roteador em cada sub-rede (primeiro host utilizável).','<code>192.168.1.1</code>, <code>192.168.1.65</code>, <code>192.168.1.129</code> e <code>192.168.1.193</code>.']
+   ]},
+  {title:'Eles se enxergam?',scene:'Dois PCs: A com <code>192.168.1.130/26</code> e B com <code>192.168.1.70/26</code>. O técnico acha que estão na mesma rede.',
+   steps:[
+    ['Descubra a sub-rede de cada um.','A: 130 está no bloco 128–191, então rede <code>192.168.1.128/26</code>. B: 70 está no bloco 64–127, então rede <code>192.168.1.64/26</code>.'],
+    ['Eles se comunicam diretamente? O que é preciso?','Não. Estão em sub-redes diferentes. A comunicação precisa passar por um roteador, com cada PC usando o gateway da sua própria sub-rede.']
+   ]}
+ ]
+},
+{
+ name:'Dimensionamento', sub:'Quantos hosts? (2º ano)',
+ resumo:`<ul class="clean">
+  <li>Problema inverso: dado o número de hosts, achar a máscara. Procure o menor <i>h</i> com <code>2<sup>h</sup> − 2 ≥ hosts</code>.</li>
+  <li>Máscara = <code>32 − h</code>. Para 50 hosts: h = 6 (62) → <code>/26</code>.</li>
+  <li>Atalhos: 2 hosts → /30, 6 → /29, 14 → /28, 30 → /27, 62 → /26, 126 → /25, 254 → /24.</li>
+  <li><b>VLSM</b> usa máscaras de tamanhos diferentes na mesma rede. Comece pela maior sub-rede e vá reduzindo.</li>
+  <li>Sub-redes <b>não podem se sobrepor</b>.</li>
+  <li>Faixas privadas: <code>10.0.0.0/8</code>, <code>172.16.0.0/12</code> e <code>192.168.0.0/16</code>.</li></ul>`,
+ flash:[
+  ['Qual é a fórmula de hosts utilizáveis?','2ʰ − 2, onde h é a quantidade de bits de host.'],
+  ['Como achar a máscara para N hosts?','Ache o menor h com 2ʰ − 2 ≥ N. A máscara é /(32 − h).'],
+  ['Qual máscara atende 50 hosts?','/26. São 6 bits de host, ou seja, 62 hosts utilizáveis.'],
+  ['Qual máscara atende 100 hosts?','/25. São 7 bits de host, ou seja, 126 hosts utilizáveis.'],
+  ['Qual máscara atende 10 hosts?','/28. São 4 bits de host, ou seja, 14 hosts utilizáveis.'],
+  ['Para que serve a máscara /30?','Para enlaces ponto a ponto, como a ligação entre dois roteadores. Tem exatamente 2 hosts utilizáveis.'],
+  ['O que é VLSM?','Variable Length Subnet Mask. Usar máscaras de tamanhos diferentes na mesma rede, conforme a necessidade de cada sub-rede.'],
+  ['Em que ordem se aloca com VLSM?','Da maior sub-rede para a menor, para manter os blocos alinhados e sem sobreposição.'],
+  ['Por que o VLSM economiza endereços?','Evita dar um bloco enorme a um setor pequeno.'],
+  ['Quais são as faixas de IPs privados?','10.0.0.0/8, 172.16.0.0/12 (172.16 a 172.31) e 192.168.0.0/16.']
+ ],
+ vf:[
+  ['Para 30 hosts, a máscara /27 é suficiente.',true,'/27 tem 5 bits de host: 2⁵ − 2 = 30 hosts utilizáveis, exatamente o necessário.'],
+  ['31 hosts cabem em uma /27.',false,'A /27 tem só 30 utilizáveis. Para 31 hosts é preciso uma /26.'],
+  ['Uma /30 oferece 2 hosts utilizáveis.',true,'2 bits de host: 2² − 2 = 2.'],
+  ['VLSM exige que todas as sub-redes tenham o mesmo tamanho.',false,'É justamente o contrário. VLSM permite tamanhos diferentes.'],
+  ['Em VLSM, começa-se alocando a menor sub-rede.',false,'Começa-se pela maior. Assim os blocos ficam alinhados.'],
+  ['192.168.0.0/16 está na faixa de endereços privados.',true,'192.168.0.0/16 é uma das três faixas privadas.'],
+  ['O endereço 172.32.0.1 é privado.',false,'A faixa privada vai de 172.16.0.0 a 172.31.255.255. O 172.32 é público.'],
+  ['Para 100 hosts, uma /26 atende.',false,'/26 tem 62 utilizáveis. Para 100 hosts é preciso /25 (126).'],
+  ['Duas sub-redes da mesma rede não podem se sobrepor.',true,'Endereços repetidos em duas sub-redes gerariam roteamento ambíguo.'],
+  ['Cada bit a mais na parte de host dobra a quantidade de endereços do bloco.',true,'2ʰ cresce por potência de 2. Ex.: /27 (32) vira /26 (64).']
+ ],
+ caderno:[
+  ['Qual a menor máscara (maior CIDR possível) que atende <b>20 hosts</b>?','2⁴ − 2 = 14 (pouco). 2⁵ − 2 = 30 (serve). h = 5, máscara <code>/27</code>.'],
+  ['Qual máscara atende <b>60 hosts</b>?','2⁶ − 2 = 62. h = 6, máscara <code>/26</code>.'],
+  ['Qual máscara atende <b>120 hosts</b>?','2⁷ − 2 = 126. h = 7, máscara <code>/25</code>.'],
+  ['Qual máscara atende um enlace entre <b>2 roteadores</b>?','2 hosts utilizáveis: h = 2, máscara <code>/30</code>.'],
+  ['Com <code>192.168.1.0/24</code>, aloque por VLSM: Lab A (100 hosts), Lab B (50), Admin (20) e Enlace (2). Informe rede/CIDR e broadcast de cada um.','Lab A: <code>192.168.1.0/25</code>, broadcast .127<br>Lab B: <code>192.168.1.128/26</code>, broadcast .191<br>Admin: <code>192.168.1.192/27</code>, broadcast .223<br>Enlace: <code>192.168.1.224/30</code>, broadcast .227'],
+  ['No exercício anterior, quantos endereços da /24 ainda estão livres?','Foram usados 128 + 64 + 32 + 4 = 228 endereços. Sobram 256 − 228 = <b>28</b> (de .228 a .255).'],
+  ['Um setor com 10 PCs recebeu uma /24 inteira. Quantos endereços utilizáveis são desperdiçados? Qual máscara seria adequada?','254 − 10 = <b>244</b> desperdiçados. A máscara adequada seria <code>/28</code> (14 hosts).'],
+  ['Um aluno propôs <code>192.168.1.0/26</code> e <code>192.168.1.32/27</code> na mesma rede. Qual é o erro?','Há sobreposição. A /26 ocupa de .0 a .63 e a /27 começa em .32, que já está dentro da /26. A /27 poderia começar em .64.']
+ ],
+ quiz:[
+  ['Qual máscara atende 14 hosts?',['/27','/28','/29','/30'],1,'/28 tem 14 utilizáveis.'],
+  ['Qual máscara atende 15 hosts?',['/26','/27','/28','/29'],1,'/28 só tem 14. Com 15 é preciso /27 (30).'],
+  ['Quantos hosts utilizáveis tem uma /29?',['2','4','6','8'],2,'3 bits de host: 2³ − 2 = 6.'],
+  ['Qual máscara é ideal para o enlace entre dois roteadores?',['/24','/28','/29','/30'],3,'/30 tem exatamente 2 utilizáveis.'],
+  ['VLSM significa:',['Very Large Subnet Mask','Variable Length Subnet Mask','Virtual LAN Subnet Mask','Valid Local Subnet Mask'],1,'Máscara de sub-rede de tamanho variável.'],
+  ['Em VLSM, qual sub-rede alocar primeiro?',['A menor','A maior','A do meio','Tanto faz'],1,'Da maior para a menor mantém o alinhamento.'],
+  ['10.0.0.0/8 é um endereço:',['Público','Privado','Multicast','Inválido'],1,'10.0.0.0/8 é faixa privada.'],
+  ['Quantos endereços totais tem uma /25?',['64','126','128','256'],2,'2⁷ = 128 (126 utilizáveis).'],
+  ['Qual máscara atende 500 hosts?',['/22','/23','/24','/25'],1,'2⁹ − 2 = 510, então h = 9 e a máscara é /23.'],
+  ['Qual par de sub-redes se sobrepõe?',['192.168.1.0/26 e 192.168.1.64/26','192.168.1.0/25 e 192.168.1.64/26','192.168.1.0/26 e 192.168.1.128/26','192.168.1.0/27 e 192.168.1.32/27'],1,'A /25 cobre .0 a .127 e a /26 em .64 cobre .64 a .127, que já está dentro.']
+ ],
+ pbl:[
+  {title:'Campus com VLSM',scene:'Com <code>192.168.10.0/24</code> o campus precisa de: Wi-Fi (60 hosts), Lab de Redes (28), Lab de Programação (25), Administrativo (12) e um enlace entre roteadores (2).',
+   steps:[
+    ['Descubra a máscara de cada setor.','Wi-Fi 60 → <code>/26</code> (62). Lab Redes 28 → <code>/27</code> (30). Lab Prog 25 → <code>/27</code> (30). Admin 12 → <code>/28</code> (14). Enlace 2 → <code>/30</code>.'],
+    ['Ordene do maior para o menor e aloque os blocos a partir de .0.','Wi-Fi <code>192.168.10.0/26</code> (.0–.63)<br>Lab Redes <code>192.168.10.64/27</code> (.64–.95)<br>Lab Prog <code>192.168.10.96/27</code> (.96–.127)<br>Admin <code>192.168.10.128/28</code> (.128–.143)<br>Enlace <code>192.168.10.144/30</code> (.144–.147)'],
+    ['Informe o broadcast de cada sub-rede.','Wi-Fi .63, Lab Redes .95, Lab Prog .127, Admin .143, Enlace .147.'],
+    ['Quanto espaço sobrou para crescimento?','Foram usados até .147. Livre de <code>192.168.10.148</code> a <code>192.168.10.255</code> (108 endereços).']
+   ]},
+  {title:'Seis filiais',scene:'A empresa recebeu <code>10.10.0.0/24</code> e tem 6 filiais com até 25 máquinas cada.',
+   steps:[
+    ['Qual máscara atende 25 hosts?','2⁵ − 2 = 30, então <code>/27</code>.'],
+    ['Liste as 6 redes.','<code>10.10.0.0/27</code>, <code>10.10.0.32/27</code>, <code>10.10.0.64/27</code>, <code>10.10.0.96/27</code>, <code>10.10.0.128/27</code> e <code>10.10.0.160/27</code>.'],
+    ['Que espaço sobra e como poderia ser usado?','Sobra <code>10.10.0.192/26</code> (64 endereços), que pode virar mais 2 sub-redes /27 para novas filiais.']
+   ]}
+ ]
+}
+];
+
+/* ============ ESTADO E PROGRESSO ============ */
+const KINDS=[['resumo','Resumo'],['caderno','Caderno'],['flash','Flashcards'],['pbl','PBL'],['vf','Verdadeiro ou Falso'],['quiz','Quiz']];
+let tab='home', sub='resumo';
+let done=new Set();
+try{ done=new Set(JSON.parse(localStorage.getItem('subnet-done')||'[]')); }catch(e){}
+function mark(id){ done.add(id); try{ localStorage.setItem('subnet-done',JSON.stringify([...done])); }catch(e){} paintProgress();  if(window.progressoMudou) progressoMudou(); }
+function modCount(m){ let n=0; done.forEach(k=>{ if(k.startsWith('m'+m+'-')) n++; }); return n; }
+function paintProgress(){
+  document.getElementById('pct').textContent=done.size;
+  document.getElementById('bar').style.width=(done.size/160*100)+'%';
+  document.querySelectorAll('[data-modchip]').forEach(c=>{ c.querySelector('small').textContent=modCount(+c.dataset.modchip)+'/40'; });
+}
+const $=s=>document.querySelector(s);
+
+/* ============ NAVEGAÇÃO ============ */
+function paintNav(){
+  let h=`<button class="chip" data-tab="home" aria-pressed="${tab==='home'}">Início</button>`;
+  MODS.forEach((m,i)=>{ h+=`<button class="chip" data-tab="${i}" data-modchip="${i}" aria-pressed="${tab===i}">Módulo ${i+1} · ${m.name} <small>${modCount(i)}/40</small></button>`; });
+  h+=`<button class="chip" data-tab="lab" aria-pressed="${tab==='lab'}">Laboratório</button>`;
+  $('#nav').innerHTML=h;
+  const s=$('#sub');
+  if(typeof tab==='number'){
+    s.hidden=false;
+    s.innerHTML=KINDS.map(k=>`<button class="chip" data-sub="${k[0]}" aria-pressed="${sub===k[0]}">${k[1]}</button>`).join('');
+  } else s.hidden=true;
+}
+function go(t,sb){ tab=t; if(sb) sub=sb; paintNav(); render(); }
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab]'); if(t){ const v=t.dataset.tab; go(v==='home'||v==='lab'?v:+v, 'resumo'); return; }
+  const s=e.target.closest('[data-sub]'); if(s){ go(tab,s.dataset.sub); return; }
+  handleItemClick(e);
+});
+
+/* ============ RENDER ============ */
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+function render(){
+  const c=$('#content');
+  if(tab==='home') c.innerHTML=homeHtml();
+  else if(tab==='lab'){ c.innerHTML=labHtml(); initLab(); }
+  else {
+    const m=MODS[tab];
+    let h=`<div><div class="eyebrow">Módulo ${tab+1}</div><h2>${m.name}: ${m.sub}</h2></div>`;
+    if(sub==='resumo') h+=`<div class="card"><h3>Ideias principais</h3>${m.resumo}</div><p class="hint">Cada módulo tem 40 atividades: 8 de caderno, 10 flashcards, 2 PBL, 10 de verdadeiro ou falso e 10 de quiz.</p>`;
+    if(sub==='caderno') h+=`<p class="lead">Resolva no caderno. Anote sua resposta aqui para liberar a conferência.</p><div class="grid">`+m.caderno.map((q,i)=>cadernoHtml(q,i)).join('')+`</div>`;
+    if(sub==='flash') h+=`<p class="lead">Tente lembrar antes de virar o cartão. Escreva o que você sabe e depois confira.</p><div class="grid">`+m.flash.map((q,i)=>flashHtml(q,i)).join('')+`</div>`;
+    if(sub==='pbl') h+=`<p class="lead">Aprendizagem baseada em problemas. Resolva cada passo no caderno, escreva sua resposta e depois veja a solução.</p>`+m.pbl.map((p,i)=>pblHtml(p,i)).join('');
+    if(sub==='vf') h+=`<p class="lead">Escolha verdadeiro ou falso e justifique com suas palavras. O gabarito vem depois.</p><div class="grid">`+m.vf.map((q,i)=>vfHtml(q,i)).join('')+`</div>`;
+    if(sub==='quiz') h+=`<p class="lead">Toque na alternativa que você acha correta. A explicação aparece em seguida.</p><div class="grid">`+m.quiz.map((q,i)=>quizHtml(q,i)).join('')+`</div>`;
+    c.innerHTML=h; applyDone();
+  }
+}
+function applyDone(){ document.querySelectorAll('.item[data-id]').forEach(el=>{ if(done.has(el.dataset.id)) el.classList.add('done'); }); }
+const ctx=(m,k,i,extra='')=>`data-id="m${m}-${k}-${i}" data-kind="${k}" data-i="${i}" ${extra}`;
+
+function cadernoHtml(q,i){ return `<article class="item" ${ctx(tab,'caderno',i)}>
+  <span class="tag">ATIVIDADE ${i+1}</span><p>${q[0]}</p>
+  <div><label for="c${i}">Sua resposta</label><textarea id="c${i}" data-gate placeholder="Anote como você resolveu"></textarea></div>
+  <button class="btn" data-act="reveal" disabled>Conferir resposta</button><div class="slot"></div></article>`; }
+function flashHtml(q,i){ return `<article class="item" ${ctx(tab,'flash',i)}>
+  <span class="tag">CARTÃO ${i+1}</span><h4>${q[0]}</h4>
+  <div><label for="f${i}">O que você lembra?</label><textarea id="f${i}" data-gate placeholder="Responda antes de virar"></textarea></div>
+  <button class="btn" data-act="reveal" disabled>Virar cartão</button><div class="slot"></div></article>`; }
+function vfHtml(q,i){ return `<article class="item" ${ctx(tab,'vf',i)}>
+  <span class="tag">AFIRMAÇÃO ${i+1}</span><p>${q[0]}</p>
+  <div class="vf" role="group" aria-label="Sua escolha"><button data-act="pick" data-v="1" aria-pressed="false">Verdadeiro</button><button data-act="pick" data-v="0" aria-pressed="false">Falso</button></div>
+  <div><label for="v${i}">Justifique</label><textarea id="v${i}" data-gate placeholder="Por que você escolheu essa opção?"></textarea></div>
+  <button class="btn" data-act="reveal" disabled>Conferir</button><div class="slot"></div></article>`; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function quizHtml(q,i){
+  const order=shuffle(q[1].map((t,k)=>k));
+  return `<article class="item" ${ctx(tab,'quiz',i)}>
+  <span class="tag">QUESTÃO ${i+1}</span><p>${q[0]}</p>
+  <div class="opts">${order.map(k=>`<button data-act="opt" data-k="${k}">${esc(q[1][k])}</button>`).join('')}</div><div class="slot"></div></article>`; }
+function pblHtml(p,pi){ return `<section class="card" data-pbl="${pi}">
+  <h3>PBL ${pi+1}: ${p.title}</h3><div class="scene"><p>${p.scene}</p></div>
+  <div class="steps">${p.steps.map((s,si)=>`<div class="item step" ${ctx(tab,'pbls',pi+'-'+si,'data-p="'+pi+'" data-s="'+si+'"').replace('data-id="m'+tab+'-pbls-'+pi+'-'+si+'"','data-id="m'+tab+'-pblstep-'+pi+'-'+si+'"')}>
+    <span class="tag">PASSO ${si+1}</span><p>${s[0]}</p>
+    <div><label for="p${pi}_${si}">Sua resolução</label><textarea id="p${pi}_${si}" data-gate placeholder="Escreva o que você encontrou"></textarea></div>
+    <button class="btn" data-act="reveal" disabled>Ver solução do passo</button><div class="slot"></div></div>`).join('')}</div></section>`; }
+
+function ans(label,html){ return `<div class="answer"><b class="k">${label}</b><div>${html}</div></div>`; }
+
+function handleItemClick(e){
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  const it=b.closest('.item'); if(!it) return;
+  const m=tab, kind=it.dataset.kind, act=b.dataset.act;
+  if(act==='pick'){ it.querySelectorAll('[data-act=pick]').forEach(x=>x.setAttribute('aria-pressed',x===b)); gate(it); return; }
+  if(act==='opt'){
+    const q=MODS[m].quiz[+it.dataset.i]; const k=+b.dataset.k;
+    it.querySelectorAll('.opts button').forEach(x=>{ x.disabled=true; if(+x.dataset.k===q[2]) x.classList.add('right'); });
+    if(k!==q[2]) b.classList.add('wrong');
+    it.querySelector('.slot').innerHTML=`<div class="verdict ${k===q[2]?'ok':'no'}">${k===q[2]?'Correto.':'Não foi dessa vez.'}</div>`+ans('Explicação',q[3]);
+    mark(it.dataset.id); it.classList.add('done'); return;
+  }
+  if(act==='reveal' && !b.disabled){
+    const slot=it.querySelector('.slot'); b.disabled=true; b.hidden=true;
+    it.querySelectorAll('textarea').forEach(t=>t.readOnly=true);
+    if(kind==='caderno'){ slot.innerHTML=ans('Resposta',MODS[m].caderno[+it.dataset.i][1])+'<p class="hint">Compare com a sua. Se for diferente, refaça o cálculo no caderno.</p>'; }
+    else if(kind==='flash'){ slot.innerHTML=ans('Resposta',esc(MODS[m].flash[+it.dataset.i][1])); }
+    else if(kind==='vf'){
+      const q=MODS[m].vf[+it.dataset.i]; const sel=it.querySelector('[data-act=pick][aria-pressed=true]').dataset.v==='1';
+      it.querySelectorAll('[data-act=pick]').forEach(x=>x.disabled=true);
+      slot.innerHTML=`<div class="verdict ${sel===q[1]?'ok':'no'}">${sel===q[1]?'Sua escolha bate com o gabarito.':'Sua escolha diverge do gabarito.'}</div>`+ans('Gabarito: '+(q[1]?'Verdadeiro':'Falso'),esc(q[2]));
+    }
+    else if(kind==='pbls'){
+      const p=+it.dataset.p,s=+it.dataset.s; slot.innerHTML=ans('Solução',MODS[m].pbl[p].steps[s][1]);
+      const card=it.closest('[data-pbl]');
+      if(card.querySelectorAll('.step .answer').length===MODS[m].pbl[p].steps.length) mark('m'+m+'-pbl-'+p);
+    }
+    if(kind!=='pbls'){ mark(it.dataset.id); it.classList.add('done'); }
+  }
+}
+document.addEventListener('input',e=>{ const t=e.target.closest('textarea[data-gate]'); if(t){ const it=t.closest('.item'); if(it) gate(it); } });
+function gate(it){
+  const ta=it.querySelector('textarea[data-gate]'), btn=it.querySelector('[data-act=reveal]'); if(!ta||!btn) return;
+  let ok=ta.value.trim().length>=3;
+  if(it.dataset.kind==='vf') ok=ok && !!it.querySelector('[data-act=pick][aria-pressed=true]');
+  btn.disabled=!ok;
+}
+
+/* ============ INÍCIO ============ */
+function homeHtml(){ return `
+ <div class="card">
+  <h2>Comece pelo prédio</h2>
+  <p class="lead">Imagine um prédio com 256 apartamentos. Se todo mundo grita no corredor, ninguém se entende. Dividido em 4 blocos de 64, cada bloco tem seu corredor e sua portaria. Isso é <b>subnetting</b>.</p>
+  <div class="building" aria-label="Prédio dividido em 4 blocos">
+   <div><b>Bloco A</b>192.168.1.0/26<br>64 endereços</div><div><b>Bloco B</b>192.168.1.64/26<br>64 endereços</div>
+   <div><b>Bloco C</b>192.168.1.128/26<br>64 endereços</div><div><b>Bloco D</b>192.168.1.192/26<br>64 endereços</div>
+  </div>
+  <p class="hint">Prédio = rede /24 · Blocos = sub-redes · Portaria = roteador · Gritar no corredor = broadcast</p>
+ </div>
+ <div class="grid">
+  <div class="card"><h3>Como estudar</h3><ul class="clean"><li>Leia o <b>Resumo</b> do módulo.</li><li>Resolva no <b>caderno</b> antes de conferir.</li><li>Faça os cartões, o PBL, o V ou F e o quiz.</li><li>Use o <b>Laboratório</b> para verificar seus cálculos.</li></ul></div>
+  <div class="card"><h3>Trilha dos módulos</h3><ul class="clean">${MODS.map((m,i)=>`<li><b>Módulo ${i+1}</b>: ${m.name}, ${m.sub}</li>`).join('')}</ul></div>
+  <div class="card"><h3>Sugestão de aulas</h3><ul class="clean"><li><b>Aula 1</b>: módulos 1 e 2 (1º ano)</li><li><b>Aula 2</b>: módulo 3 e laboratório (1º ano)</li><li><b>2º ano</b>: módulo 4, com VLSM</li></ul></div>
+ </div>`; }
+
+/* ============ LABORATÓRIO ============ */
+function ip2int(s){ const p=s.trim().split('.'); if(p.length!==4) return null; let n=0; for(const x of p){ if(!/^\d{1,3}$/.test(x)||+x>255) return null; n=n*256+ +x; } return n>>>0; }
+function int2ip(n){ return [n>>>24&255,n>>>16&255,n>>>8&255,n&255].join('.'); }
+function maskOf(c){ return c===0?0:(0xFFFFFFFF<<(32-c))>>>0; }
+function bitsHtml(n,cidr,borrow){ let h='<div class="bits">'; for(let o=0;o<4;o++){ h+='<span class="oct">'; for(let b=0;b<8;b++){ const i=o*8+b; const bit=(n>>>(31-i))&1; const cl=i<cidr?'net':(i<cidr+borrow?'sub':'host'); h+=`<span class="b ${cl}">${bit}</span>`; } h+='</span>'; } return h+'</div>'; }
+function labHtml(){ return `
+ <div><div class="eyebrow">Laboratório</div><h2>Confira seus cálculos</h2><p class="lead">Faça primeiro no caderno. Depois use as ferramentas para conferir.</p></div>
+ <section class="card"><h3>1. Calculadora de rede</h3>
+  <div class="row"><div><label for="lip">Endereço IP</label><input id="lip" class="mono" type="text" value="192.168.1.77"></div>
+  <div><label for="lcidr">Prefixo (/1 a /30)</label><input id="lcidr" class="mono" type="number" min="1" max="30" value="26"></div></div>
+  <div id="lout"></div></section>
+ <section class="card"><h3>2. Divisor de redes (bits emprestados)</h3>
+  <div class="row"><div><label for="dip">Rede base</label><input id="dip" class="mono" type="text" value="192.168.1.0"></div>
+  <div><label for="dcidr">Prefixo base</label><input id="dcidr" class="mono" type="number" min="8" max="28" value="24"></div>
+  <div><label for="dbits">Bits emprestados: <b id="dbv">2</b></label><input id="dbits" type="range" min="1" max="6" value="2"></div></div>
+  <div id="dout"></div></section>
+ <section class="card"><h3>3. Quantos hosts eu preciso?</h3>
+  <div class="row"><div><label for="hn">Número de dispositivos</label><input id="hn" class="mono" type="number" min="1" max="1000000" value="50"></div></div>
+  <div id="hout"></div></section>`; }
+function initLab(){
+  const calc=()=>{
+    const ip=ip2int($('#lip').value), c=+$('#lcidr').value, o=$('#lout');
+    if(ip===null||!(c>=1&&c<=30)){ o.innerHTML='<p class="err">Digite um IP válido (4 octetos de 0 a 255) e um prefixo de 1 a 30.</p>'; return; }
+    const m=maskOf(c), net=(ip&m)>>>0, bc=(net|(~m>>>0))>>>0, h=32-c;
+    o.innerHTML=`<div class="kv"><div><span>Máscara</span><b>${int2ip(m)} /${c}</b></div><div><span>Endereço de rede</span><b>${int2ip(net)}</b></div><div><span>Broadcast</span><b>${int2ip(bc)}</b></div>
+    <div><span>Faixa utilizável</span><b>${int2ip(net+1)} a ${int2ip(bc-1)}</b></div><div><span>Salto no octeto que muda</span><b>${2**(h%8===0?8:h%8)}</b></div><div><span>Hosts utilizáveis</span><b>${(2**h-2).toLocaleString('pt-BR')} (2^${h} − 2)</b></div></div>
+    ${bitsHtml(ip,c,0)}<div class="legend"><span><i style="background:var(--accent)"></i>bits de rede</span><span><i style="background:var(--surface2)"></i>bits de host</span></div>`;
+  };
+  const div=()=>{
+    const ip=ip2int($('#dip').value), c=+$('#dcidr').value; let b=+$('#dbits').value; const o=$('#dout');
+    if(ip===null||!(c>=8&&c<=28)){ o.innerHTML='<p class="err">Digite uma rede válida e um prefixo de 8 a 28.</p>'; return; }
+    const maxb=Math.min(6,30-c); if(b>maxb){ b=maxb; $('#dbits').value=b; } $('#dbits').max=maxb; $('#dbv').textContent=b;
+    const nc=c+b, m=maskOf(nc), size=2**(32-nc), n=2**b, base=(ip&maskOf(c))>>>0;
+    let rows=''; for(let i=0;i<Math.min(n,64);i++){ const s=(base+i*size)>>>0, e=(s+size-1)>>>0; rows+=`<tr><td>${i+1}</td><td>${int2ip(s)}/${nc}</td><td>${int2ip(s+1)} a ${int2ip(e-1)}</td><td>${int2ip(e)}</td></tr>`; }
+    o.innerHTML=`<div class="kv"><div><span>Nova máscara</span><b>${int2ip(m)} /${nc}</b></div><div><span>Sub-redes (2^${b})</span><b>${n}</b></div><div><span>Endereços por sub-rede</span><b>${size}</b></div><div><span>Hosts utilizáveis</span><b>${size-2}</b></div></div>
+    ${bitsHtml(base,c,b)}<div class="legend"><span><i style="background:var(--accent)"></i>rede original</span><span><i style="background:var(--amber)"></i>bits emprestados</span><span><i style="background:var(--surface2)"></i>host restante</span></div>
+    <div class="tbl"><table><thead><tr><th>#</th><th>Rede</th><th>Hosts utilizáveis</th><th>Broadcast</th></tr></thead><tbody>${rows}</tbody></table></div>${n>64?'<p class="hint">Mostrando as 64 primeiras sub-redes.</p>':''}`;
+  };
+  const hosts=()=>{
+    const n=+$('#hn').value, o=$('#hout'); if(!(n>=1)){ o.innerHTML='<p class="err">Digite um número maior que zero.</p>'; return; }
+    let h=2; while(2**h-2<n) h++; if(32-h<1){ o.innerHTML='<p class="err">Número grande demais para IPv4.</p>'; return; }
+    const c=32-h; o.innerHTML=`<div class="kv"><div><span>Bits de host necessários</span><b>${h}</b></div><div><span>Máscara</span><b>${int2ip(maskOf(c))} /${c}</b></div><div><span>Hosts utilizáveis</span><b>${(2**h-2).toLocaleString('pt-BR')}</b></div><div><span>Sobram</span><b>${(2**h-2-n).toLocaleString('pt-BR')}</b></div></div>`;
+  };
+  ['#lip','#lcidr'].forEach(s=>$(s).addEventListener('input',calc));
+  ['#dip','#dcidr','#dbits'].forEach(s=>$(s).addEventListener('input',div));
+  $('#hn').addEventListener('input',hosts);
+  calc(); div(); hosts();
+}
+
+paintNav(); paintProgress(); render();
+</script>
+
+<script>
+window.PROGRESSO_ID = "subnetting-v1";
+window.PROGRESSO_DADOS = () => { const det = {}; MODS.forEach((m,i)=>{ det["m"+(i+1)] = modCount(i); }); return { feitas: done.size, total: 160, pontos: done.size*10, detalhe: det }; };
+</script>
+<script src="../config.js"></script>
+<script src="../progresso-turma.js"></script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

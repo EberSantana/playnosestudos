@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="utf-8">
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&]professor\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recursos de aula</title>
+<meta name="description" content="Ferramentas para a sala de aula.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>:root{--bg:#EEF2F0;--panel:#fff;--ink:#16261C;--ink-2:#3F4F5B;--muted:#5B6871;--line:#D5DDDA;--accent:#1F5135;--side:#16261C;--side-ink:#DCE5EA}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0F171D;--panel:#16222B;--ink:#E4ECEF;--ink-2:#B8C6CD;--muted:#8699A4;--line:#2A3A45;--accent:#6BAA68;--side:#0B140E}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;font-size:17px;line-height:1.55}
+header{background:var(--side);color:var(--side-ink);padding-inline:clamp(16px,5vw,64px);padding-block:40px 36px}
+.wrap{max-width:1040px;margin:0 auto}
+.back{display:inline-block;color:var(--accent);text-decoration:none;font-size:15px;margin-bottom:14px}
+.back:hover{text-decoration:underline}
+.eyebrow{display:block;font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+header .eyebrow,header .back{color:#7FBF7A}
+h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:clamp(36px,6vw,58px);line-height:1.05;margin:8px 0 10px;color:#fff;text-wrap:balance}
+header p{margin:0;max-width:62ch;color:#B8C6CD}
+main{padding-inline:clamp(16px,5vw,64px);padding-block:28px 64px}
+h2.sec{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:28px;margin:18px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+a.card{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:inherit}
+a.card:hover,a.card:focus-visible{border-color:var(--accent);outline:none}
+a.card h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:28px;margin:0;line-height:1.1;text-wrap:balance}
+a.card p{margin:0;color:var(--ink-2);font-size:15.5px}
+a.card .go{margin-top:auto;padding-top:6px;font-weight:600;color:var(--accent)}
+.meta{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+footer{color:var(--muted);font-size:14px;margin-top:32px}
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<header><div class="wrap"><a class="back" href="../">← Todas as disciplinas</a>
+  <span class="eyebrow">Para usar em qualquer disciplina</span>
+  <h1>Recursos de aula</h1>
+  <p>Ferramentas para a sala de aula.</p>
+</div></header>
+<main><div class="wrap">
+  <div class="grid">
+    <a class="card" href="cronometro-de-equipes.html">
+      <span class="meta">Ferramenta</span>
+      <h2>Cronômetro de Aula - Ranking de Equipes</h2>
+      
+      <span class="go">Abrir →</span>
+    </a>
+    <a class="card" href="linha-do-tempo-tecnologica.html">
+      <span class="meta">Apostila</span>
+      <h2>Linha do Tempo Tecnológica</h2>
+
+      <span class="go">Abrir →</span>
+    </a>
+    <a class="card" href="codigos-para-aprender-com-ia.html">
+      <span class="meta">Guia de prompts</span>
+      <h2>14 Códigos para Aprender com IA</h2>
+      <p>Atalhos de prompt prontos para copiar: comece um assunto do zero, descomplique uma explicação ou pratique o que aprendeu.</p>
+      <span class="go">Abrir →</span>
+    </a>
+  </div>
+  <footer>Prof. Eber Santana · IFS Campus Tobias Barreto. O progresso fica salvo no navegador do aparelho que você usar.</footer>
+</div></main>
+<script src="../config.js"></script>
+<script src="../progresso-turma.js"></script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

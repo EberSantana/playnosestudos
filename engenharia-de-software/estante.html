@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estante de Engenharia de Software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
+<style>
+:root{
+  --bg:#f4f6f2; --surface:#ffffff; --surface-2:#eef1ea;
+  --ink:#151d1a; --ink-2:#4a5650; --ink-3:#66716b;
+  --line:#dde2d9; --line-2:#c9d1c5;
+  --accent:#14594a; --accent-2:#0e4238; --accent-soft:#e2efe9; --on-accent:#ffffff;
+  --free:#2f6b34; --free-soft:#e6f0e2; --free-line:#bcd6b4;
+  --ppc:#8a5a12; --ppc-soft:#f6eddd; --ppc-line:#e0c9a3;
+  --shadow:0 1px 2px rgba(20,40,32,.06), 0 8px 24px -16px rgba(20,40,32,.25);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1311; --surface:#161d1a; --surface-2:#1c2421;
+    --ink:#e7ece7; --ink-2:#a9b4ad; --ink-3:#7d8882;
+    --line:#26302c; --line-2:#334039;
+    --accent:#7fc9b1; --accent-2:#a5ddc8; --accent-soft:#17302a; --on-accent:#0e1311;
+    --free:#8fc98a; --free-soft:#16261a; --free-line:#2c4a2e;
+    --ppc:#d9ac6a; --ppc-soft:#2a2115; --ppc-line:#4a3a22;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1311; --surface:#161d1a; --surface-2:#1c2421;
+  --ink:#e7ece7; --ink-2:#a9b4ad; --ink-3:#7d8882;
+  --line:#26302c; --line-2:#334039;
+  --accent:#7fc9b1; --accent-2:#a5ddc8; --accent-soft:#17302a; --on-accent:#0e1311;
+  --free:#8fc98a; --free-soft:#16261a; --free-line:#2c4a2e;
+  --ppc:#d9ac6a; --ppc-soft:#2a2115; --ppc-line:#4a3a22;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1120px; margin:0 auto; padding-inline:16px}
+
+/* ---------- topo ---------- */
+header.hero{
+  background:var(--surface); border-bottom:1px solid var(--line);
+}
+.hero-in{padding-block:34px 26px}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--accent); font-weight:500; margin:0 0 10px;
+}
+h1{
+  font-family:"Source Serif 4",Georgia,serif; font-weight:700; font-size:clamp(28px,5.2vw,44px);
+  line-height:1.08; letter-spacing:-.015em; margin:0 0 10px; text-wrap:balance;
+}
+.lead{margin:0; max-width:62ch; color:var(--ink-2); font-size:15.5px}
+.sub{margin:6px 0 0; color:var(--ink-3); font-size:13px}
+.stats{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px}
+.stat{
+  background:var(--surface-2); border:1px solid var(--line); border-radius:3px;
+  padding:7px 12px; display:flex; align-items:baseline; gap:7px;
+}
+.stat b{font-family:"IBM Plex Mono",monospace; font-size:17px; font-weight:600; color:var(--accent);
+  font-variant-numeric:tabular-nums}
+.stat span{font-size:12px; color:var(--ink-2)}
+
+/* ---------- abas ---------- */
+nav.tabs{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:30;
+  background:var(--surface); border-bottom:1px solid var(--line);
+}
+.tabs-in{display:flex; gap:2px; overflow-x:auto; scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{
+  appearance:none; border:0; background:none; cursor:pointer; white-space:nowrap;
+  font:inherit; font-size:13.5px; font-weight:500; color:var(--ink-2);
+  padding:13px 14px; border-bottom:2px solid transparent; margin-bottom:-1px;
+}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--accent); border-bottom-color:var(--accent); font-weight:600}
+.tab:focus-visible{outline:2px solid var(--accent); outline-offset:-4px; border-radius:2px}
+
+main{padding-block:26px 60px}
+
+/* ---------- filtros ---------- */
+.filters{display:grid; gap:14px; margin-bottom:22px}
+.search{position:relative}
+.search input{
+  width:100%; font:inherit; font-size:15px; color:var(--ink);
+  background:var(--surface); border:1px solid var(--line-2); border-radius:3px;
+  padding:11px 13px 11px 38px;
+}
+.search input:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent)}
+.search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--ink-3)}
+.chiprow{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+.chiplabel{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-2); margin-right:4px; padding-top:2px;
+}
+.chip{
+  appearance:none; cursor:pointer; font:inherit; font-size:12.5px;
+  background:var(--surface); color:var(--ink-2); border:1px solid var(--line-2);
+  border-radius:99px; padding:4px 11px;
+}
+.chip:hover{border-color:var(--accent); color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent); font-weight:500}
+.chip:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.count{font-size:12.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+
+/* ---------- lista ---------- */
+.temahead{
+  display:flex; align-items:baseline; gap:10px; margin:30px 0 10px;
+  padding-bottom:7px; border-bottom:1px solid var(--line-2);
+}
+.temahead:first-child{margin-top:0}
+.temahead h2{
+  font-family:"Source Serif 4",Georgia,serif; font-size:20px; font-weight:600;
+  margin:0; letter-spacing:-.01em;
+}
+.temahead .n{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--ink-3)}
+.list{display:grid; gap:0}
+.item{
+  display:grid; grid-template-columns:52px 1fr; gap:14px;
+  padding:16px 0; border-bottom:1px solid var(--line);
+}
+.item.free{background:linear-gradient(90deg,var(--free-soft),transparent 55%);
+  margin-inline:-10px; padding-inline:10px}
+.code{
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:500;
+  color:var(--ink-3); padding-top:3px; letter-spacing:.02em;
+}
+.t{font-family:"Source Serif 4",Georgia,serif; font-size:17px; font-weight:600;
+  line-height:1.25; margin:0 0 3px; letter-spacing:-.005em}
+.ficha{margin:0 0 7px; font-size:12.5px; color:var(--ink-3)}
+.badges{display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px}
+.b{
+  font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  border-radius:2px; padding:2.5px 7px; border:1px solid var(--line-2); color:var(--ink-2);
+  background:var(--surface-2);
+}
+.b.ppc{background:var(--ppc-soft); border-color:var(--ppc-line); color:var(--ppc); font-weight:600}
+.b.gratis{background:var(--free-soft); border-color:var(--free-line); color:var(--free); font-weight:600}
+.b.niv{background:var(--accent-soft); border-color:transparent; color:var(--accent)}
+.why{margin:0 0 6px; font-size:14px; color:var(--ink); max-width:68ch}
+.why b{font-weight:600}
+.onde{margin:0; font-size:12.5px; color:var(--ink-2); max-width:72ch}
+.onde b{color:var(--ink-3); font-weight:600}
+.onde a{color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent-soft); word-break:break-word}
+.onde a:hover{border-bottom-color:var(--accent)}
+.empty{padding:50px 0; text-align:center; color:var(--ink-3)}
+
+/* ---------- trilhas ---------- */
+.trilha{margin-bottom:34px}
+.trilha h3{
+  font-family:"Source Serif 4",Georgia,serif; font-size:19px; font-weight:600; margin:0 0 4px;
+}
+.trilha p.d{margin:0 0 14px; font-size:13.5px; color:var(--ink-2); max-width:70ch}
+.steps{list-style:none; margin:0; padding:0; counter-reset:s}
+.steps li{
+  counter-increment:s; display:grid; grid-template-columns:30px 1fr; gap:12px;
+  padding:11px 0; border-bottom:1px solid var(--line); align-items:start;
+}
+.steps li::before{
+  content:counter(s,decimal-leading-zero);
+  font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--accent);
+  border:1px solid var(--line-2); border-radius:2px; text-align:center; padding:2px 0;
+  background:var(--surface);
+}
+.steps .st{font-family:"Source Serif 4",Georgia,serif; font-size:15.5px; font-weight:600; line-height:1.3}
+.steps .sa{font-size:12.5px; color:var(--ink-3)}
+
+/* ---------- tabelas ---------- */
+.tablewrap{overflow-x:auto; border:1px solid var(--line); border-radius:3px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; min-width:640px; font-size:13.5px}
+th{
+  text-align:left; font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3); font-weight:500;
+  padding:10px 14px; border-bottom:1px solid var(--line-2); background:var(--surface-2);
+}
+td{padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.aulas{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--accent); white-space:nowrap}
+td.ref{font-size:12.5px; color:var(--ink-2)}
+
+/* ---------- fontes / notas ---------- */
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:16px 17px}
+.card h4{font-family:"Source Serif 4",Georgia,serif; font-size:16px; font-weight:600; margin:0 0 6px}
+.card p{margin:0 0 8px; font-size:13.5px; color:var(--ink-2)}
+.card a{color:var(--accent); font-size:12.5px; text-decoration:none; border-bottom:1px solid var(--accent-soft);
+  word-break:break-word}
+.notas{margin-top:34px; border-top:1px solid var(--line-2); padding-top:16px}
+.notas h4{
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-3); margin:0 0 9px; font-weight:500;
+}
+.notas ul{margin:0; padding-left:18px}
+.notas li{font-size:12.5px; color:var(--ink-2); margin-bottom:6px; max-width:80ch}
+footer{border-top:1px solid var(--line); margin-top:44px; padding-block:20px 8px;
+  font-size:12px; color:var(--ink-3)}
+
+.sec-intro{margin:0 0 20px; font-size:14.5px; color:var(--ink-2); max-width:70ch}
+h2.sec{font-family:"Source Serif 4",Georgia,serif; font-size:23px; font-weight:600; margin:0 0 6px;
+  letter-spacing:-.01em}
+
+@media (max-width:560px){
+  .item{grid-template-columns:1fr; gap:4px}
+  .code{padding-top:0}
+  .steps li{grid-template-columns:26px 1fr; gap:10px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+<style>html,body{margin:0}img{max-width:100%}[hidden]{display:none!important}@media (pointer:coarse){button.chip{min-height:38px}}
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+
+
+<header class="hero"><div class="wrap hero-in">
+  <p class="eyebrow">IFS · Campus Tobias Barreto</p>
+  <h1>Estante de Engenharia de Software</h1>
+  <p class="lead">Catálogo de livros de Engenharia de Software, metodologias de desenvolvimento e áreas
+  correlatas, montado sobre o PPC do curso e o conteúdo programático das disciplinas. Cada título diz
+  por que ler e em qual aula ele entra.</p>
+  <p class="sub" id="sub"></p>
+  <div class="stats" id="stats"></div>
+</div></header>
+
+<nav class="tabs"><div class="wrap"><div class="tabs-in" role="tablist" id="tabs"></div></div></nav>
+
+<main class="wrap">
+  <section id="pane-catalogo" role="tabpanel">
+    <div class="filters">
+      <div class="search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+        <input id="q" type="search" placeholder="Buscar por título, autor, tema ou assunto…"
+               autocomplete="off" aria-label="Buscar no catálogo">
+      </div>
+      <div class="chiprow" id="f-acesso"><span class="chiplabel">Acesso</span></div>
+      <div class="chiprow" id="f-nivel"><span class="chiplabel">Nível</span></div>
+      <div class="chiprow" id="f-tema"><span class="chiplabel">Tema</span></div>
+      <p class="count" id="count"></p>
+    </div>
+    <div id="lista"></div>
+  </section>
+
+  <section id="pane-trilhas" role="tabpanel" hidden>
+    <h2 class="sec">Trilhas de leitura</h2>
+    <p class="sec-intro">Quatro sequências, cada uma pensada para um perfil. A ordem importa: cada
+    título prepara o seguinte.</p>
+    <div id="trilhas"></div>
+  </section>
+
+  <section id="pane-mapa" role="tabpanel" hidden>
+    <h2 class="sec">Conteúdo programático × bibliografia</h2>
+    <p class="sec-intro">Cada bloco de aulas de Engenharia de Software, conforme o Conteúdo Programático
+    das Disciplinas da COINF v0.3, com os títulos do catálogo que o cobrem.</p>
+    <div class="tablewrap"><table><thead><tr>
+      <th>Aulas</th><th>Conteúdo</th><th>Livros indicados</th></tr></thead>
+      <tbody id="mapa"></tbody></table></div>
+  </section>
+
+  <section id="pane-onde" role="tabpanel" hidden>
+    <h2 class="sec">Onde conseguir os títulos</h2>
+    <p class="sec-intro">Antes de pedir que o aluno compre, verifique o acervo e as assinaturas
+    institucionais — boa parte da bibliografia básica já está disponível.</p>
+    <div class="cards" id="onde"></div>
+    <div class="notas"><h4>Observações</h4><ul id="notas"></ul></div>
+  </section>
+
+  <footer class="wrap" style="padding-inline:0">
+    <span id="rodape"></span>
+  </footer>
+</main>
+
+<script id="dados" type="application/json">{"meta": {"titulo": "Catálogo de Livros — Engenharia de Software e Áreas Correlatas", "subtitulo": "Curso Técnico em Desenvolvimento de Sistemas · IFS Campus Tobias Barreto", "organizador": "Prof. MSc. Eber da Silva de Santana", "versao": "1.0", "data": "18 de setembro de 2026", "base": "Resolução CS/IFS nº 216/2023 (PPC) · Conteúdo Programático das Disciplinas da COINF v0.3"}, "temas": [["T01", "Fundamentos de Engenharia de Software"], ["T02", "Processos e Metodologias Ágeis"], ["T03", "Engenharia de Requisitos"], ["T04", "Modelagem e UML"], ["T05", "Gestão de Projetos"], ["T06", "Qualidade e Testes de Software"], ["T07", "Arquitetura e Padrões de Projeto"], ["T08", "Código Limpo e Boas Práticas"], ["T09", "Banco de Dados"], ["T10", "Git, DevOps e Entrega Contínua"], ["T11", "Programação e Desenvolvimento Web"], ["T12", "Clássicos, Carreira e Leitura de Apoio"]], "trilhas": {"A": "Trilha A — Integrado, 2º ano (Banco de Dados e Engenharia de Software)", "B": "Trilha B — Subsequente em Informática (Engenharia de Software)", "C": "Trilha C — Professor (preparação de aulas e projetos)", "D": "Trilha D — Aprofundamento (quem quer ir além)"}, "trilhaItens": {"A": ["F01", "A01", "A02", "B01", "U01", "R02", "B05", "A03", "X07", "C01"], "B": ["B01", "B02", "F01", "R01", "U02", "A06", "G02", "Q03", "C01", "D01"], "C": ["B01", "B02", "F03", "R04", "U04", "G01", "Q01", "C05", "F06", "F07"], "D": ["U05", "P01", "P04", "C02", "P05", "P06", "D03", "D04", "Q04", "X01"]}, "livros": [{"id": "B01", "titulo": "Engenharia de Software: uma abordagem profissional", "autores": "PRESSMAN, Roger S.; MAXIM, Bruce R.", "edicao": "8. ed.", "editora": "AMGH", "ano": "2016", "isbn": "9788580555332", "tema": "T01", "nivel": "Intermediário", "acesso": "Acervo / Minha Biblioteca", "ppc": "Básica", "disciplina": "Banco de Dados e Engenharia de Software; Projeto Integrador 2", "aulas": "Aulas 01–12 (introdução, modelos de processo, gerenciamento)", "porque": "É o livro-texto oficial da disciplina no PPC. Cobre processo de software, modelos sequenciais, evolucionários e ágeis exatamente na ordem do conteúdo programático. Use como referência principal de leitura e de prova.", "link": ""}, {"id": "B02", "titulo": "Engenharia de Software", "autores": "SOMMERVILLE, Ian", "edicao": "10. ed.", "editora": "Pearson Education do Brasil", "ano": "2018", "isbn": "9788543024974", "tema": "T01", "nivel": "Intermediário", "acesso": "Acervo / Minha Biblioteca", "ppc": "Complementar", "disciplina": "Banco de Dados e Engenharia de Software", "aulas": "Aulas 01–08 (processos), Aulas 15–18 (requisitos)", "porque": "O outro pilar clássico da área, com texto mais direto que o Pressman. Excelente nos capítulos de processos de software, agilidade e engenharia de requisitos.", "link": ""}, {"id": "B03", "titulo": "Arquitetura de Software", "autores": "GALLOTTI, Giocondo Marino Antônio (org.)", "edicao": "1. ed.", "editora": "Pearson", "ano": "2016", "isbn": "9788543017358", "tema": "T07", "nivel": "Intermediário", "acesso": "Acervo / Minha Biblioteca", "ppc": "Básica", "disciplina": "Tópicos Especiais", "aulas": "Tópicos em Engenharia, Arquitetura e Teste de Software", "porque": "Bibliografia básica de Tópicos Especiais no PPC. Boa porta de entrada para arquitetura em camadas — o mesmo assunto tratado em Programação 3 (Controllers, SRP, Repository).", "link": ""}, {"id": "B04", "titulo": "Testes de Software e Gerência de Configuração", "autores": "GONÇALVES, Priscila; BARRETO, Jeanine; ZENKER, Aline; FAGUNDES, Rubem; ROCHA, Breno; BIRFELD, Karine; TEIXEIRA, Maristela", "edicao": "1. ed.", "editora": "Grupo A (SAGAH)", "ano": "2019", "isbn": "9788595029361", "tema": "T06", "nivel": "Iniciante", "acesso": "Acervo / Minha Biblioteca", "ppc": "Complementar", "disciplina": "Tópicos Especiais", "aulas": "Tópicos em Teste de Software; versionamento (Git/GitHub) em Programação 3", "porque": "Texto nacional e didático que junta os dois assuntos que o curso trata juntos: testar o software e controlar versões. Linguagem acessível para o nível técnico.", "link": ""}, {"id": "B05", "titulo": "Banco de Dados: teoria e desenvolvimento", "autores": "ALVES, William Pereira", "edicao": "2. ed.", "editora": "Érica", "ano": "2021", "isbn": "9788536533759", "tema": "T09", "nivel": "Iniciante", "acesso": "Acervo / Minha Biblioteca", "ppc": "Básica", "disciplina": "Banco de Dados e Engenharia de Software", "aulas": "1º bim.: modelagem conceitual e lógica, normalização; 2º bim.: SQL", "porque": "Bibliografia básica do PPC para a metade de Banco de Dados da disciplina. Prático, com exemplos de modelagem e SQL no nível certo para o técnico.", "link": ""}, {"id": "B06", "titulo": "Banco de Dados: projeto e implementação", "autores": "MACHADO, Felipe Nery Rodrigues", "edicao": "4. ed.", "editora": "Érica", "ano": "2020", "isbn": "9788536532707", "tema": "T09", "nivel": "Intermediário", "acesso": "Acervo / Minha Biblioteca", "ppc": "Complementar", "disciplina": "Banco de Dados e Engenharia de Software", "aulas": "Modelagem conceitual, lógica e física; normalização", "porque": "Referência nacional para o projeto de banco de dados passo a passo. Ótimo apoio para a etapa de modelagem dos projetos integradores.", "link": ""}, {"id": "B07", "titulo": "Sistemas de Banco de Dados", "autores": "ELMASRI, Ramez; NAVATHE, Shamkant B.", "edicao": "7. ed.", "editora": "Pearson", "ano": "2018", "isbn": "9788543025001", "tema": "T09", "nivel": "Avançado", "acesso": "Acervo / Minha Biblioteca", "ppc": "Complementar", "disciplina": "Banco de Dados e Engenharia de Software", "aulas": "Modelo ER, modelo relacional, normalização, SQL", "porque": "O tratado da área. Denso para o técnico, mas indispensável para quem vai prestar vestibular/ENEM para Computação ou aprofundar em normalização.", "link": ""}, {"id": "B08", "titulo": "JavaScript descomplicado: programação para a Web, IoT e dispositivos móveis", "autores": "OLIVEIRA, Cláudio Luís V.; ZANETTI, Humberto Augusto P.", "edicao": "1. ed.", "editora": "Érica", "ano": "2020", "isbn": "9788536533100", "tema": "T11", "nivel": "Iniciante", "acesso": "Acervo / Minha Biblioteca", "ppc": "Básica", "disciplina": "Tópicos Especiais; Projeto Integrador", "aulas": "Programação 1 (JavaScript) e Construção de Sites 2 (DOM, eventos, JSON)", "porque": "Bibliografia básica do PPC e casa com a linguagem adotada em Programação 1. Serve de consulta enquanto o aluno resolve as listas de exercícios.", "link": ""}, {"id": "B09", "titulo": "HTML 5: guia prático", "autores": "TERUEL, Evandro Carlos", "edicao": "2. ed.", "editora": "Érica", "ano": "2014", "isbn": "9788536519296", "tema": "T11", "nivel": "Iniciante", "acesso": "Acervo / Minha Biblioteca", "ppc": "Básica", "disciplina": "Projeto Integrador 2; Construção de Sites 1", "aulas": "Construção de Sites 1, Aulas 01–10 (HTML 5)", "porque": "Referência de consulta rápida de tags, formulários e tabelas — exatamente o recorte do 1º bimestre de Construção de Sites 1.", "link": ""}, {"id": "B10", "titulo": "Java: como programar", "autores": "DEITEL, Paul; DEITEL, Harvey", "edicao": "10. ed.", "editora": "Pearson", "ano": "2017", "isbn": "9788543004792", "tema": "T11", "nivel": "Intermediário", "acesso": "Acervo / Minha Biblioteca", "ppc": "Básica", "disciplina": "Projeto Integrador 2", "aulas": "Apoio a Programação 2 (Orientação a Objetos)", "porque": "Bibliografia básica do PPC. Mesmo com o curso usando TypeScript, os capítulos de orientação a objetos (classes, herança, polimorfismo) são conceitualmente os mesmos.", "link": ""}, {"id": "B11", "titulo": "Data Mining: conceitos, técnicas, algoritmos, orientações e aplicações", "autores": "GOLDSCHMIDT, Ronaldo; PASSOS, Emmanuel; BEZERRA, Eduardo", "edicao": "2. ed.", "editora": "Elsevier/GEN", "ano": "2015", "isbn": "", "tema": "T12", "nivel": "Avançado", "acesso": "Acervo / Minha Biblioteca", "ppc": "Complementar", "disciplina": "Tópicos Especiais", "aulas": "Tópicos em Mineração de Dados e Business Intelligence", "porque": "Indicado no PPC para a vertente de dados de Tópicos Especiais. Leitura para o aluno que quer seguir por análise de dados e IA.", "link": ""}, {"id": "B12", "titulo": "Business Intelligence e Análise de Dados para Gestão do Negócio", "autores": "SHARDA, Ramesh; DELEN, Dursun; TURBAN, Efraim", "edicao": "4. ed.", "editora": "Bookman", "ano": "2019", "isbn": "9788582605202", "tema": "T12", "nivel": "Avançado", "acesso": "Acervo / Minha Biblioteca", "ppc": "Complementar", "disciplina": "Tópicos Especiais", "aulas": "Implementando KPIs para Dashboard (Programação 3)", "porque": "Conecta o conteúdo de KPIs e dashboards de Programação 3 com a visão de negócio — útil no discurso do Termo de Abertura de Projeto.", "link": ""}, {"id": "F01", "titulo": "Engenharia de Software Moderna: princípios e práticas para desenvolvimento de software com produtividade", "autores": "VALENTE, Marco Tulio", "edicao": "1. ed.", "editora": "Edição do autor (UFMG)", "ano": "2020", "isbn": "", "tema": "T01", "nivel": "Iniciante", "acesso": "GRATUITO (online)", "ppc": "", "disciplina": "Engenharia de Software (todas as turmas)", "aulas": "Aulas 01–38 (cobre processos, ágil, requisitos, UML, testes, arquitetura)", "porque": "A melhor recomendação gratuita em português. Texto curto, atual e legível online no celular — perfeito para o aluno que não vai comprar livro. Cobre praticamente toda a ementa da disciplina.", "link": "https://engsoftmoderna.info/"}, {"id": "F02", "titulo": "Engenharia de Software: conceitos e práticas", "autores": "WAZLAWICK, Raul Sidnei", "edicao": "1. ed.", "editora": "Elsevier/Campus", "ano": "2013", "isbn": "", "tema": "T01", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 03–08 (modelos de processo)", "porque": "Autor brasileiro, texto claro e crítico sobre o que funciona e o que não funciona nos modelos de processo. Bom para embasar o debate sugerido na Aula 04.", "link": ""}, {"id": "F03", "titulo": "Engenharia de Software: fundamentos, métodos e padrões", "autores": "PAULA FILHO, Wilson de Pádua", "edicao": "3. ed.", "editora": "LTC", "ano": "2009", "isbn": "", "tema": "T01", "nivel": "Avançado", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Apoio ao professor (processos, qualidade, métricas)", "porque": "Referência nacional robusta, muito usada em concursos e em cursos superiores. Mais indicada ao professor e ao aluno do subsequente com perfil analítico.", "link": ""}, {"id": "F04", "titulo": "Engenharia de Software: teoria e prática", "autores": "PFLEEGER, Shari Lawrence", "edicao": "2. ed.", "editora": "Pearson", "ano": "2004", "isbn": "", "tema": "T01", "nivel": "Intermediário", "acesso": "Acervo", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 01–02 (importância da Engenharia de Software)", "porque": "Traz estudos de caso reais de falhas de software — material excelente para a abertura da disciplina e para a Aula 02 (artigo sobre a importância da ES).", "link": ""}, {"id": "F05", "titulo": "Metodologias Ágeis: engenharia de software sob medida", "autores": "SBROCCO, José Henrique Teixeira de Carvalho; MACEDO, Paulo Cesar de", "edicao": "1. ed.", "editora": "Érica", "ano": "2012", "isbn": "", "tema": "T02", "nivel": "Iniciante", "acesso": "Acervo / Minha Biblioteca", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 07–08 (XP e Scrum)", "porque": "Escrito para o público técnico brasileiro, compara modelos tradicionais e ágeis em linguagem simples. Boa alternativa nacional ao capítulo de agilidade do Pressman.", "link": ""}, {"id": "F06", "titulo": "Guide to the Software Engineering Body of Knowledge (SWEBOK) v4.0", "autores": "IEEE Computer Society", "edicao": "v4.0", "editora": "IEEE Computer Society", "ano": "2024", "isbn": "", "tema": "T01", "nivel": "Avançado", "acesso": "GRATUITO (cadastro)", "ppc": "", "disciplina": "Apoio ao professor", "aulas": "Referência para ementa e plano de ensino", "porque": "O mapa oficial das áreas de conhecimento da Engenharia de Software. Serve para justificar escolhas de conteúdo no plano de ensino e no projeto pedagógico. Em inglês.", "link": "https://www.computer.org/education/bodies-of-knowledge/software-engineering/v4"}, {"id": "F07", "titulo": "Software Engineering at Google", "autores": "WINTERS, Titus; MANSHRECK, Tom; WRIGHT, Hyrum", "edicao": "1. ed.", "editora": "O'Reilly", "ano": "2020", "isbn": "", "tema": "T01", "nivel": "Avançado", "acesso": "GRATUITO (online)", "ppc": "", "disciplina": "Apoio ao professor / Aprofundamento", "aulas": "Aulas 01–02 (o que é engenharia de software de verdade)", "porque": "Mostra engenharia de software em escala real. O capítulo inicial — 'programação ao longo do tempo' — rende uma ótima discussão de abertura. Em inglês, leitura livre.", "link": "https://abseil.io/resources/swe-book"}, {"id": "A01", "titulo": "O Guia do Scrum (Scrum Guide 2020)", "autores": "SCHWABER, Ken; SUTHERLAND, Jeff", "edicao": "2020", "editora": "Scrum.org", "ano": "2020", "isbn": "", "tema": "T02", "nivel": "Iniciante", "acesso": "GRATUITO (PDF)", "ppc": "", "disciplina": "Engenharia de Software; Projeto Integrador", "aulas": "Aulas 07–08 (Scrum), Aulas 11–12 (Gerenciamento de Projetos)", "porque": "14 páginas, em português, de graça e é a fonte oficial. Leitura obrigatória antes de qualquer projeto em equipe. Imprima e distribua.", "link": "https://scrumguides.org/docs/scrumguide/v2020/2020-Scrum-Guide-PortugueseBR-3.0.pdf"}, {"id": "A02", "titulo": "Manifesto para Desenvolvimento Ágil de Software", "autores": "BECK, Kent et al.", "edicao": "—", "editora": "agilemanifesto.org", "ano": "2001", "isbn": "", "tema": "T02", "nivel": "Iniciante", "acesso": "GRATUITO (online)", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aula 07 (introdução aos modelos ágeis)", "porque": "Uma página com 4 valores e 12 princípios. Ponto de partida da aula de agilidade: peça que a turma traduza cada princípio para o projeto que está desenvolvendo.", "link": "https://agilemanifesto.org/iso/ptbr/manifesto.html"}, {"id": "A03", "titulo": "Scrum e XP direto das Trincheiras", "autores": "KNIBERG, Henrik", "edicao": "1. ed.", "editora": "InfoQ / C4Media", "ano": "2007", "isbn": "", "tema": "T02", "nivel": "Iniciante", "acesso": "GRATUITO (PDF)", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 07–08 (XP e Scrum), Aulas 11–12 (Kanban e quadros)", "porque": "Relato prático de como uma equipe real fez Scrum e XP, com fotos de quadros e cartões. É o material que faz o aluno entender que o processo é concreto, não teoria.", "link": "https://www.infoq.com/br/minibooks/scrum-xp-from-the-trenches/"}, {"id": "A04", "titulo": "Scrum: a arte de fazer o dobro do trabalho na metade do tempo", "autores": "SUTHERLAND, Jeff", "edicao": "1. ed.", "editora": "Sextante", "ano": "2019", "isbn": "", "tema": "T02", "nivel": "Iniciante", "acesso": "Compra / Acervo", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 07–08 (Scrum)", "porque": "Livro de leitura corrida, quase narrativo, escrito pelo cocriador do Scrum. Ótimo para engajar o aluno do integrado que ainda acha Engenharia de Software 'chata'.", "link": ""}, {"id": "A05", "titulo": "Scrum: gestão ágil para projetos de sucesso", "autores": "SABBAGH, Rafael", "edicao": "1. ed.", "editora": "Casa do Código", "ano": "2014", "isbn": "", "tema": "T02", "nivel": "Intermediário", "acesso": "Compra (e-book)", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 07–08, 11–12", "porque": "O Scrum explicado por um autor brasileiro, com vocabulário e exemplos do nosso mercado. Preço de e-book acessível para indicação de compra à turma.", "link": ""}, {"id": "A06", "titulo": "Métodos Ágeis para Desenvolvimento de Software", "autores": "PRIKLADNICKI, Rafael; WILLI, Renato; MILANI, Fabiano (org.)", "edicao": "1. ed.", "editora": "Bookman", "ano": "2014", "isbn": "", "tema": "T02", "nivel": "Intermediário", "acesso": "Acervo / Minha Biblioteca", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 07–08, 11–12", "porque": "Coletânea brasileira que cobre Scrum, XP, Kanban, Lean e práticas técnicas em um só volume. Excelente custo-benefício para o acervo da biblioteca.", "link": ""}, {"id": "A07", "titulo": "Programação Extrema (XP) Explicada: acolha as mudanças", "autores": "BECK, Kent; ANDRES, Cynthia", "edicao": "2. ed.", "editora": "Bookman", "ano": "2004", "isbn": "", "tema": "T02", "nivel": "Intermediário", "acesso": "Acervo", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aula 07 (programação extrema — XP)", "porque": "A fonte original do XP. Os capítulos de práticas (programação em par, integração contínua, testes) explicam por que o curso adota Git e testes desde cedo.", "link": ""}, {"id": "A08", "titulo": "Kanban: mudança evolucionária de sucesso para seu negócio de tecnologia", "autores": "ANDERSON, David J.", "edicao": "1. ed.", "editora": "Blue Hole Press", "ano": "2011", "isbn": "", "tema": "T02", "nivel": "Intermediário", "acesso": "Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 11–12 (Gerenciamento de Projetos: Scrum, Kanban, PMBOK)", "porque": "A obra de referência do Kanban, citado nominalmente no conteúdo programático. Base para montar o quadro de tarefas dos projetos da turma (Trello, Planner, papel).", "link": ""}, {"id": "A09", "titulo": "Desenvolvimento de Software com Scrum: aplicando métodos ágeis com sucesso", "autores": "COHN, Mike", "edicao": "1. ed.", "editora": "Bookman", "ano": "2011", "isbn": "", "tema": "T02", "nivel": "Avançado", "acesso": "Acervo", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 07–08, 11–12", "porque": "Vai além do 'como fazer' e trata de adoção, resistência e papéis. Leitura para quem já entendeu o básico e vai coordenar equipe no Projeto Integrador.", "link": ""}, {"id": "A10", "titulo": "Scrum 360: um guia completo e prático de agilidade", "autores": "AUDY, Jorge", "edicao": "1. ed.", "editora": "Casa do Código", "ano": "2015", "isbn": "", "tema": "T02", "nivel": "Intermediário", "acesso": "Compra (e-book)", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 07–08, 11–14 (do Scrum ao Termo de Abertura)", "porque": "Autor brasileiro com forte experiência de indústria. Bom por ligar agilidade a produto e a visão de negócio, que é o pulo do gato no Termo de Abertura de Projeto.", "link": ""}, {"id": "A11", "titulo": "Gerenciamento Ágil de Projetos", "autores": "MASSARI, Vitor", "edicao": "2. ed.", "editora": "Brasport", "ano": "2016", "isbn": "", "tema": "T05", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 11–14 (Gerenciamento de Projetos e Termo de Abertura)", "porque": "Faz a ponte entre PMBOK e ágil — exatamente o par que o conteúdo programático coloca lado a lado na Aula 11.", "link": ""}, {"id": "A12", "titulo": "Scrum e Agile em Projetos: guia completo", "autores": "CRUZ, Fábio", "edicao": "2. ed.", "editora": "Brasport", "ano": "2018", "isbn": "", "tema": "T02", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 07–12", "porque": "Cobre também certificações ágeis. Útil para o aluno do subsequente que já pensa em diferencial no currículo.", "link": ""}, {"id": "R01", "titulo": "Engenharia de Requisitos: software orientado ao negócio", "autores": "VAZQUEZ, Carlos Eduardo; SIMÕES, Guilherme Siqueira", "edicao": "1. ed.", "editora": "Brasport", "ano": "2016", "isbn": "", "tema": "T03", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 15–18 (Engenharia de Requisitos, Elicitação, Regras de Negócio)", "porque": "A melhor referência nacional de requisitos. Trata elicitação e regras de negócio com exemplos brasileiros — casa direto com as Aulas 15 a 18.", "link": ""}, {"id": "R02", "titulo": "Análise e Gestão de Requisitos de Software: onde nascem os sistemas", "autores": "MACHADO, Felipe Nery Rodrigues", "edicao": "2. ed.", "editora": "Érica", "ano": "2016", "isbn": "", "tema": "T03", "nivel": "Iniciante", "acesso": "Acervo / Minha Biblioteca", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 15–18", "porque": "Didático e barato, pensado para curso técnico. Traz modelos prontos de documento de requisitos que a turma pode reaproveitar no projeto.", "link": ""}, {"id": "R03", "titulo": "Escrevendo Casos de Uso Eficazes", "autores": "COCKBURN, Alistair", "edicao": "1. ed.", "editora": "Bookman", "ano": "2005", "isbn": "", "tema": "T03", "nivel": "Intermediário", "acesso": "Acervo", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 23–26 (Diagrama e Descrições de Casos de Uso)", "porque": "A referência sobre descrição estendida de caso de uso — justamente o ponto onde os alunos mais erram no 2º bimestre. Traz níveis de objetivo e fluxos alternativos.", "link": ""}, {"id": "R04", "titulo": "Software Requirements", "autores": "WIEGERS, Karl; BEATTY, Joy", "edicao": "3. ed.", "editora": "Microsoft Press", "ano": "2013", "isbn": "", "tema": "T03", "nivel": "Avançado", "acesso": "Compra", "ppc": "", "disciplina": "Apoio ao professor", "aulas": "Aulas 15–18", "porque": "Referência internacional de requisitos, com dezenas de templates e checklists. Em inglês; indicado ao professor para montar os artefatos do projeto.", "link": ""}, {"id": "R05", "titulo": "User Stories Applied: for Agile Software Development", "autores": "COHN, Mike", "edicao": "1. ed.", "editora": "Addison-Wesley", "ano": "2004", "isbn": "", "tema": "T03", "nivel": "Intermediário", "acesso": "Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 15–18 (alternativa ágil ao documento de requisitos)", "porque": "Explica histórias de usuário e critérios de aceite. Ótimo complemento quando a turma adota Scrum no projeto em vez de documento formal.", "link": ""}, {"id": "U01", "titulo": "UML 2: uma abordagem prática", "autores": "GUEDES, Gilleanes T. A.", "edicao": "3. ed.", "editora": "Novatec", "ano": "2018", "isbn": "", "tema": "T04", "nivel": "Iniciante", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 23–30 (Casos de Uso, Atividades, Classes)", "porque": "O livro de UML mais usado em cursos técnicos brasileiros. Um estudo de caso único atravessa todos os diagramas — exatamente o formato de projeto do 2º bimestre.", "link": ""}, {"id": "U02", "titulo": "Princípios de Análise e Projeto de Sistemas com UML", "autores": "BEZERRA, Eduardo", "edicao": "3. ed.", "editora": "Elsevier/Campus", "ano": "2015", "isbn": "", "tema": "T04", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 23–34 (modelagem completa do projeto)", "porque": "Liga requisitos, casos de uso e diagrama de classes numa linha só de raciocínio. É o livro que resolve a dúvida 'como saio do caso de uso para a classe?'.", "link": ""}, {"id": "U03", "titulo": "UML Essencial: um breve guia para a linguagem-padrão", "autores": "FOWLER, Martin", "edicao": "3. ed.", "editora": "Bookman", "ano": "2005", "isbn": "", "tema": "T04", "nivel": "Iniciante", "acesso": "Acervo", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aula 23 (Introdução à UML)", "porque": "Fino, direto e barato. Serve de consulta rápida de notação durante as aulas práticas — o aluno não precisa ler tudo, só a página do diagrama da vez.", "link": ""}, {"id": "U04", "titulo": "UML: guia do usuário", "autores": "BOOCH, Grady; RUMBAUGH, James; JACOBSON, Ivar", "edicao": "2. ed.", "editora": "Elsevier/Campus", "ano": "2006", "isbn": "", "tema": "T04", "nivel": "Avançado", "acesso": "Acervo", "ppc": "", "disciplina": "Apoio ao professor", "aulas": "Aulas 23–30", "porque": "Escrito pelos criadores da UML. É a fonte para dirimir dúvidas de notação quando a turma discorda sobre um símbolo.", "link": ""}, {"id": "U05", "titulo": "Utilizando UML e Padrões: uma introdução à análise e ao projeto orientados a objetos", "autores": "LARMAN, Craig", "edicao": "3. ed.", "editora": "Bookman", "ano": "2007", "isbn": "", "tema": "T04", "nivel": "Avançado", "acesso": "Acervo", "ppc": "", "disciplina": "Engenharia de Software; Tópicos Especiais", "aulas": "Aulas 29–34 (Diagrama de Classes e projeto OO)", "porque": "Ensina a projetar, não só a desenhar. Os padrões GRASP explicam por que uma responsabilidade vai nesta classe e não naquela — ponte com o SRP visto em Programação 3.", "link": ""}, {"id": "U06", "titulo": "Desenvolvendo Aplicações com UML 2.2: do conceito à implementação", "autores": "MELO, Ana Cristina", "edicao": "3. ed.", "editora": "Brasport", "ano": "2010", "isbn": "", "tema": "T04", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 23–34", "porque": "Autora brasileira, forte no encadeamento entre modelo e código. Bom para mostrar à turma que o diagrama de classes vira classe no TypeScript.", "link": ""}, {"id": "G01", "titulo": "Um Guia do Conhecimento em Gerenciamento de Projetos (Guia PMBOK)", "autores": "PROJECT MANAGEMENT INSTITUTE (PMI)", "edicao": "7. ed.", "editora": "PMI", "ano": "2021", "isbn": "", "tema": "T05", "nivel": "Avançado", "acesso": "Compra / Associado PMI", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 11–14 (Gerenciamento de Projetos e Termo de Abertura)", "porque": "Citado nominalmente na Aula 11. A 7ª edição é baseada em princípios, mais próxima do ágil. O Termo de Abertura de Projeto da Aula 13 vem daqui.", "link": ""}, {"id": "G02", "titulo": "Gerenciamento de Projetos: estabelecendo diferenciais competitivos", "autores": "VARGAS, Ricardo Viana", "edicao": "9. ed.", "editora": "Brasport", "ano": "2018", "isbn": "", "tema": "T05", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 11–14", "porque": "O autor brasileiro mais didático da área e com muito material gratuito em vídeo e templates. Ótimo apoio para a Aula 13 (Termo de Abertura).", "link": ""}, {"id": "G03", "titulo": "Gestão de Projetos: as melhores práticas", "autores": "KERZNER, Harold", "edicao": "3. ed.", "editora": "Bookman", "ano": "2016", "isbn": "", "tema": "T05", "nivel": "Avançado", "acesso": "Acervo", "ppc": "", "disciplina": "Apoio ao professor", "aulas": "Aulas 11–12", "porque": "Referência mundial em maturidade e boas práticas de projeto. Leitura de aprofundamento para o professor e para o aluno que já trabalha.", "link": ""}, {"id": "G04", "titulo": "O Mítico Homem-Mês: ensaios sobre engenharia de software", "autores": "BROOKS JR., Frederick P.", "edicao": "Ed. comemorativa", "editora": "Alta Books", "ano": "2018", "isbn": "", "tema": "T12", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Aulas 01–02 e 11–12 (por que projetos de software atrasam)", "porque": "O clássico dos clássicos. 'Acrescentar gente a um projeto atrasado o atrasa ainda mais' é a melhor frase para abrir a discussão sobre prazos com a turma.", "link": ""}, {"id": "Q01", "titulo": "Introdução ao Teste de Software", "autores": "DELAMARO, Márcio Eduardo; MALDONADO, José Carlos; JINO, Mario (org.)", "edicao": "2. ed.", "editora": "Elsevier", "ano": "2016", "isbn": "", "tema": "T06", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Tópicos Especiais; Engenharia de Software", "aulas": "Tópicos em Teste de Software", "porque": "A referência brasileira de teste de software, produzida por pesquisadores da USP/UNICAMP. Cobre teste funcional, estrutural e de mutação com rigor.", "link": ""}, {"id": "Q02", "titulo": "Garantia da Qualidade de Software: adequando-se aos padrões CMM, ISO, Six Sigma e Gestão da Qualidade", "autores": "BARTIÉ, Alexandre", "edicao": "1. ed.", "editora": "Elsevier/Campus", "ano": "2002", "isbn": "", "tema": "T06", "nivel": "Intermediário", "acesso": "Acervo", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Apoio às aulas de qualidade e processo", "porque": "Liga qualidade de software a normas e modelos de maturidade — diálogo direto com a linha de pesquisa em normas ISO e maturidade.", "link": ""}, {"id": "Q03", "titulo": "Testes de Software: produzindo sistemas melhores e mais confiáveis", "autores": "MOLINARI, Leonardo", "edicao": "4. ed.", "editora": "Érica", "ano": "2008", "isbn": "", "tema": "T06", "nivel": "Iniciante", "acesso": "Acervo / Minha Biblioteca", "ppc": "", "disciplina": "Engenharia de Software", "aulas": "Tópicos em Teste de Software", "porque": "Texto introdutório em português, adequado ao nível técnico. Bom para a primeira aula de testes, antes de partir para automação.", "link": ""}, {"id": "Q04", "titulo": "TDD: Desenvolvimento Guiado por Testes", "autores": "BECK, Kent", "edicao": "1. ed.", "editora": "Bookman", "ano": "2010", "isbn": "", "tema": "T06", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Programação 2 e 3; Tópicos Especiais", "aulas": "Prática em Programação 3 (rotas, CRUD, camada de segurança)", "porque": "Fonte original do TDD. Mostra o ciclo vermelho-verde-refatora aplicável direto nas listas de exercícios de Prisma e Express.", "link": ""}, {"id": "Q05", "titulo": "Testes Automatizados de Software: um guia prático", "autores": "ANICHE, Maurício", "edicao": "1. ed.", "editora": "Casa do Código", "ano": "2015", "isbn": "", "tema": "T06", "nivel": "Intermediário", "acesso": "Compra (e-book)", "ppc": "", "disciplina": "Programação 2 e 3; Tópicos Especiais", "aulas": "Apoio prático às atividades orientadas de Programação 3", "porque": "Autor brasileiro, foco em prática: o que testar, quando parar de testar, como escrever bons testes. E-book acessível para a turma.", "link": ""}, {"id": "Q06", "titulo": "Syllabus CTFL — Certified Tester Foundation Level (em português)", "autores": "ISTQB / BSTQB", "edicao": "Versão vigente", "editora": "BSTQB", "ano": "—", "isbn": "", "tema": "T06", "nivel": "Iniciante", "acesso": "GRATUITO (PDF)", "ppc": "", "disciplina": "Tópicos Especiais", "aulas": "Tópicos em Teste de Software", "porque": "Programa oficial da certificação de testes, em português e de graça. Vocabulário padronizado e trilha de certificação concreta para o egresso do técnico.", "link": "https://bstqb.org.br/"}, {"id": "P01", "titulo": "Padrões de Projeto: soluções reutilizáveis de software orientado a objetos", "autores": "GAMMA, Erich; HELM, Richard; JOHNSON, Ralph; VLISSIDES, John", "edicao": "1. ed.", "editora": "Bookman", "ano": "2000", "isbn": "", "tema": "T07", "nivel": "Avançado", "acesso": "Acervo", "ppc": "", "disciplina": "Tópicos Especiais; Programação 2", "aulas": "Tópicos em Arquitetura de Software", "porque": "O 'GoF', origem do vocabulário de padrões. Denso: use como consulta pontual (Singleton, Factory, Observer) e não como leitura linear.", "link": ""}, {"id": "P02", "titulo": "Use a Cabeça! Padrões de Projetos (Head First Design Patterns)", "autores": "FREEMAN, Eric; ROBSON, Elisabeth; SIERRA, Kathy; BATES, Bert", "edicao": "2. ed.", "editora": "Alta Books", "ano": "2009", "isbn": "", "tema": "T07", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Tópicos Especiais; Programação 2", "aulas": "Tópicos em Arquitetura de Software", "porque": "A versão visual e bem-humorada do GoF. É a forma mais eficaz de apresentar padrões a adolescentes do integrado.", "link": ""}, {"id": "P03", "titulo": "Mergulho nos Padrões de Projeto (Refactoring.Guru, em português)", "autores": "SHVETS, Alexander", "edicao": "—", "editora": "Refactoring.Guru", "ano": "—", "isbn": "", "tema": "T07", "nivel": "Iniciante", "acesso": "GRATUITO (parte online)", "ppc": "", "disciplina": "Tópicos Especiais; Programação 2", "aulas": "Tópicos em Arquitetura de Software", "porque": "Catálogo ilustrado de padrões e de refatorações, em português e com exemplos em TypeScript — a mesma linguagem de Programação 2 e 3. Consulta gratuita no navegador.", "link": "https://refactoring.guru/pt-br/design-patterns"}, {"id": "P04", "titulo": "Arquitetura Limpa: o guia do artesão para estrutura e design de software", "autores": "MARTIN, Robert C.", "edicao": "1. ed.", "editora": "Alta Books", "ano": "2019", "isbn": "", "tema": "T07", "nivel": "Avançado", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Tópicos Especiais; Programação 3", "aulas": "Arquitetura em camadas, SRP, Repository Pattern (Programação 3)", "porque": "Explica por que separar controller, serviço e repositório — exatamente a arquitetura que Programação 3 pede nas atividades orientadas.", "link": ""}, {"id": "P05", "titulo": "Domain-Driven Design: atacando as complexidades no coração do software", "autores": "EVANS, Eric", "edicao": "1. ed.", "editora": "Alta Books", "ano": "2016", "isbn": "", "tema": "T07", "nivel": "Avançado", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Aprofundamento", "aulas": "Tópicos em Arquitetura de Software", "porque": "Para quem já domina o básico e quer modelar domínios complexos. Leitura de trilha de aprofundamento, não de disciplina regular.", "link": ""}, {"id": "P06", "titulo": "Criando Microsserviços", "autores": "NEWMAN, Sam", "edicao": "2. ed.", "editora": "Novatec", "ano": "2022", "isbn": "", "tema": "T07", "nivel": "Avançado", "acesso": "Compra", "ppc": "", "disciplina": "Aprofundamento", "aulas": "Tópicos em Arquitetura de Software", "porque": "Mostra o oposto do monolito. Útil para o aluno entender o cenário que vai encontrar no mercado depois de dominar a API REST de Programação 3.", "link": ""}, {"id": "C01", "titulo": "Código Limpo: habilidades práticas do Agile Software", "autores": "MARTIN, Robert C.", "edicao": "1. ed.", "editora": "Alta Books", "ano": "2011", "isbn": "", "tema": "T08", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Programação 1, 2 e 3", "aulas": "Todas as listas de exercícios e atividades orientadas", "porque": "Nomes, funções curtas, comentários. É o livro que mais rápido melhora o código entregue pelos alunos nos projetos.", "link": ""}, {"id": "C02", "titulo": "Refatoração: aperfeiçoando o design de códigos existentes", "autores": "FOWLER, Martin", "edicao": "2. ed.", "editora": "Novatec", "ano": "2020", "isbn": "", "tema": "T08", "nivel": "Avançado", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Programação 2 e 3", "aulas": "Revisões de projeto e acompanhamento (Aulas 31–34)", "porque": "A 2ª edição usa JavaScript nos exemplos — combina com a stack do curso. Excelente para as aulas de acompanhamento de projeto, quando o código já existe e precisa melhorar.", "link": ""}, {"id": "C03", "titulo": "O Programador Pragmático: de aprendiz a mestre", "autores": "HUNT, Andrew; THOMAS, David", "edicao": "2. ed.", "editora": "Alta Books", "ano": "2021", "isbn": "", "tema": "T08", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Todas as disciplinas de programação", "aulas": "Leitura transversal ao curso", "porque": "Conselhos de ofício que atravessam qualquer linguagem: automatizar, versionar, não se repetir. Ótimo presente de fim de curso para a turma.", "link": ""}, {"id": "C04", "titulo": "Orientação a Objetos e SOLID para Ninjas", "autores": "ANICHE, Maurício", "edicao": "1. ed.", "editora": "Casa do Código", "ano": "2015", "isbn": "", "tema": "T08", "nivel": "Intermediário", "acesso": "Compra (e-book)", "ppc": "", "disciplina": "Programação 2 e 3", "aulas": "Arquitetura em camadas e SRP (Programação 3)", "porque": "Explica SOLID em português e sem misticismo. O capítulo de SRP é leitura direta para a aula de 'Arquitetura em camadas' de Programação 3.", "link": ""}, {"id": "C05", "titulo": "Code Complete: um guia prático para a construção de software", "autores": "McCONNELL, Steve", "edicao": "2. ed.", "editora": "Bookman", "ano": "2005", "isbn": "", "tema": "T08", "nivel": "Avançado", "acesso": "Acervo", "ppc": "", "disciplina": "Apoio ao professor", "aulas": "Referência de construção de software", "porque": "Enciclopédia da construção de software, baseada em evidência empírica. Fonte sólida para justificar práticas em sala com dados, não com opinião.", "link": ""}, {"id": "D01", "titulo": "Pro Git (2ª edição, em português)", "autores": "CHACON, Scott; STRAUB, Ben", "edicao": "2. ed.", "editora": "Apress", "ano": "2014", "isbn": "", "tema": "T10", "nivel": "Iniciante", "acesso": "GRATUITO (online/PDF)", "ppc": "", "disciplina": "Programação 3; Projeto Integrador", "aulas": "Versionamento com Git e GitHub (Programação 3)", "porque": "O livro oficial do Git, traduzido e gratuito. Os capítulos 1 a 3 cobrem tudo que o curso usa: commit, branch, merge e repositório remoto.", "link": "https://git-scm.com/book/pt-br/v2"}, {"id": "D02", "titulo": "Controlando Versões com Git e GitHub", "autores": "SANTOS, Alexandre Aquiles; FURTADO, Rodrigo", "edicao": "1. ed.", "editora": "Casa do Código", "ano": "2014", "isbn": "", "tema": "T10", "nivel": "Iniciante", "acesso": "Compra (e-book)", "ppc": "", "disciplina": "Programação 3; Projeto Integrador", "aulas": "Configuração do GitHub, comandos básicos e publicação de repositório", "porque": "Em português e orientado a tarefa. Resolve as dúvidas típicas de conflito de merge que aparecem quando a turma trabalha em equipe.", "link": ""}, {"id": "D03", "titulo": "Entrega Contínua: como entregar software de forma rápida e confiável", "autores": "HUMBLE, Jez; FARLEY, David", "edicao": "1. ed.", "editora": "Bookman", "ano": "2014", "isbn": "", "tema": "T10", "nivel": "Avançado", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Aprofundamento", "aulas": "Integração contínua (extensão de XP, Aula 07)", "porque": "Mostra o que acontece depois do commit. Leitura de aprofundamento para quem quer entender pipeline, automação e implantação.", "link": ""}, {"id": "D04", "titulo": "Manual de DevOps: como obter agilidade, confiabilidade e segurança em organizações tecnológicas", "autores": "KIM, Gene; DEBOIS, Patrick; WILLIS, John; HUMBLE, Jez", "edicao": "1. ed.", "editora": "Alta Books", "ano": "2018", "isbn": "", "tema": "T10", "nivel": "Avançado", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Aprofundamento", "aulas": "Visão de ciclo de vida completo", "porque": "Conecta desenvolvimento, operação e segurança. Boa ponte com a disciplina de Redes de Computadores e Segurança da Informação do 3º ano.", "link": ""}, {"id": "D05", "titulo": "O Projeto Fênix: um romance sobre TI, DevOps e sobre ajudar o seu negócio a competir", "autores": "KIM, Gene; BEHR, Kevin; SPAFFORD, George", "edicao": "1. ed.", "editora": "Alta Books", "ano": "2018", "isbn": "", "tema": "T12", "nivel": "Iniciante", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Leitura de apoio", "aulas": "Aulas 01–02 e 11–12 (por que o processo importa)", "porque": "É um romance, não um manual. Funciona muito bem como leitura paralela para o aluno do integrado perceber os efeitos de um processo ruim de TI.", "link": ""}, {"id": "X01", "titulo": "Introdução a Sistemas de Bancos de Dados", "autores": "DATE, C. J.", "edicao": "8. ed.", "editora": "Elsevier/Campus", "ano": "2004", "isbn": "", "tema": "T09", "nivel": "Avançado", "acesso": "Acervo", "ppc": "", "disciplina": "Banco de Dados e Engenharia de Software", "aulas": "Modelo relacional e normalização", "porque": "Fundamentação teórica do modelo relacional. Para o aluno que quer entender por que a 3ª forma normal é o que é, e não só aplicar a regra.", "link": ""}, {"id": "X02", "titulo": "MySQL: guia do programador", "autores": "MILANI, André", "edicao": "1. ed.", "editora": "Novatec", "ano": "2007", "isbn": "", "tema": "T09", "nivel": "Iniciante", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Banco de Dados e Engenharia de Software", "aulas": "2º bimestre: SQL (insert, select, update, delete)", "porque": "Consulta prática de SQL no SGBD usado em laboratório. Complementa o Alves na hora de escrever as consultas.", "link": ""}, {"id": "X03", "titulo": "PostgreSQL: Documentação Oficial (em português)", "autores": "PostgreSQL Global Development Group", "edicao": "Versão vigente", "editora": "PostgreSQL", "ano": "—", "isbn": "", "tema": "T09", "nivel": "Intermediário", "acesso": "GRATUITO (online)", "ppc": "", "disciplina": "Banco de Dados e Engenharia de Software; Programação 3", "aulas": "SQL e uso com Prisma ORM", "porque": "Fonte definitiva e gratuita de sintaxe SQL do SGBD adotado. Ensine a turma a consultar documentação oficial — é competência profissional.", "link": "https://www.postgresql.org/docs/"}, {"id": "X04", "titulo": "MDN Web Docs (HTML, CSS e JavaScript, em português)", "autores": "Mozilla Foundation", "edicao": "—", "editora": "Mozilla", "ano": "—", "isbn": "", "tema": "T11", "nivel": "Iniciante", "acesso": "GRATUITO (online)", "ppc": "", "disciplina": "Construção de Sites 1 e 2; Programação 1", "aulas": "Todo o conteúdo de HTML, CSS, DOM e eventos", "porque": "A referência de web mais confiável, em português e gratuita. Substitui com vantagem qualquer apostila de tags.", "link": "https://developer.mozilla.org/pt-BR/"}, {"id": "X05", "titulo": "Aprendendo TypeScript / Documentação oficial do TypeScript", "autores": "Microsoft", "edicao": "—", "editora": "Microsoft", "ano": "—", "isbn": "", "tema": "T11", "nivel": "Intermediário", "acesso": "GRATUITO (online)", "ppc": "", "disciplina": "Programação 2 e 3", "aulas": "Revisão de TypeScript, interfaces e typecasting (Programação 3)", "porque": "Handbook oficial com os tópicos exatos do curso: tipos, interfaces e classes. Consulta obrigatória durante as listas de exercícios.", "link": "https://www.typescriptlang.org/docs/"}, {"id": "X06", "titulo": "Algoritmos: Lógica para Desenvolvimento de Programação de Computadores", "autores": "MANZANO, José Augusto N. G.; OLIVEIRA, Jayr Figueiredo de", "edicao": "29. ed.", "editora": "Érica", "ano": "2019", "isbn": "", "tema": "T11", "nivel": "Iniciante", "acesso": "Acervo / Minha Biblioteca", "ppc": "", "disciplina": "Programação 1; Informática Básica", "aulas": "Programação 1, Aulas 01–02 (introdução a algoritmos)", "porque": "O clássico brasileiro de lógica de programação. Base para o aluno que chega sem nenhuma vivência de algoritmos antes do JavaScript.", "link": ""}, {"id": "X07", "titulo": "Entendendo Algoritmos: um guia ilustrado para programadores e outros curiosos", "autores": "BHARGAVA, Aditya Y.", "edicao": "1. ed.", "editora": "Novatec", "ano": "2017", "isbn": "", "tema": "T11", "nivel": "Iniciante", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Programação 1 e 2", "aulas": "Apoio a arrays, laços e busca (Programação 1, Aulas 21–32)", "porque": "Todo ilustrado, quase sem matemática pesada. É o livro que destrava o aluno do integrado que trava em lógica.", "link": ""}, {"id": "X08", "titulo": "Sistemas Operacionais Modernos", "autores": "TANENBAUM, Andrew S.; BOS, Herbert", "edicao": "4. ed.", "editora": "Pearson", "ano": "2016", "isbn": "", "tema": "T12", "nivel": "Avançado", "acesso": "Acervo / Minha Biblioteca", "ppc": "", "disciplina": "Organização de Computadores e Sistemas Operacionais", "aulas": "2º bim.: processos, threads, deadlock, escalonamento", "porque": "Referência mundial que cobre exatamente o 2º bimestre de Organização de Computadores e Sistemas Operacionais.", "link": ""}, {"id": "X09", "titulo": "Organização Estruturada de Computadores", "autores": "TANENBAUM, Andrew S.; AUSTIN, Todd", "edicao": "6. ed.", "editora": "Pearson", "ano": "2013", "isbn": "", "tema": "T12", "nivel": "Intermediário", "acesso": "Acervo / Minha Biblioteca", "ppc": "", "disciplina": "Organização de Computadores e Sistemas Operacionais", "aulas": "1º bim.: Von Neumann, sistemas de numeração, processadores e memórias", "porque": "Cobre o 1º bimestre da disciplina, da arquitetura de Von Neumann às hierarquias de memória, com bom nível de abstração.", "link": ""}, {"id": "X10", "titulo": "Fundamentos de Segurança da Informação: com base na ISO 27001 e na ISO 27002", "autores": "HINTZBERGEN, Jule; HINTZBERGEN, Kees; SMULDERS, André; BAARS, Hans", "edicao": "1. ed.", "editora": "Brasport", "ano": "2018", "isbn": "", "tema": "T12", "nivel": "Intermediário", "acesso": "Acervo / Compra", "ppc": "", "disciplina": "Redes de Computadores e Segurança da Informação (3º ano)", "aulas": "Conceitos, vulnerabilidades, mecanismos de defesa", "porque": "Alinha a disciplina de segurança do 3º ano às normas ISO 27001/27002, na mesma linha dos requisitos não funcionais de segurança discutidos em Engenharia de Software.", "link": ""}, {"id": "X11", "titulo": "Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018)", "autores": "BRASIL. Presidência da República", "edicao": "Texto compilado", "editora": "Planalto", "ano": "2018", "isbn": "", "tema": "T12", "nivel": "Iniciante", "acesso": "GRATUITO (online)", "ppc": "", "disciplina": "Informática Básica (aspectos legais e éticos); Engenharia de Software", "aulas": "Regras de negócio e requisitos legais (Aula 17)", "porque": "Requisito legal é requisito. Ler a LGPD faz a turma entender por que o sistema precisa pedir consentimento e proteger dados — tema dos extras de Informática Básica.", "link": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"}, {"id": "X12", "titulo": "Prototipagem e design de interfaces: material oficial do Figma (Figma Learn)", "autores": "Figma Inc.", "edicao": "—", "editora": "Figma", "ano": "—", "isbn": "", "tema": "T04", "nivel": "Iniciante", "acesso": "GRATUITO (online)", "ppc": "", "disciplina": "Engenharia de Software (extras)", "aulas": "Extras: prototipagem de telas/interfaces", "porque": "O conteúdo programático prevê prototipagem no Figma como extra. O material oficial é gratuito e suficiente para o nível do curso.", "link": "https://help.figma.com/"}], "mapa": [["Aulas 01–02", "Introdução à Engenharia de Software", "B01 (Pressman, Parte 1) · F01 (Valente, cap. 1) · F04 (Pfleeger, estudos de caso) · G04 (Brooks) · F07 (Google)"], ["Aulas 03–06", "Modelos sequenciais e evolucionários (cascata, V, espiral, prototipagem)", "B01 (Pressman) · B02 (Sommerville, cap. 2) · F02 (Wazlawick) · F05 (Sbrocco)"], ["Aulas 07–08", "Modelos ágeis (XP e Scrum)", "A01 (Guia do Scrum) · A02 (Manifesto Ágil) · A03 (Kniberg) · A07 (Beck, XP) · A06 (Prikladnicki)"], ["Aulas 09–10", "Estudo de caso 'Portal de Notícias'", "F01 (Valente) · A05 (Sabbagh) · R02 (Machado, requisitos)"], ["Aulas 11–12", "Gerenciamento de Projetos (Scrum, Kanban, PMBOK)", "G01 (PMBOK 7) · A08 (Anderson, Kanban) · A11 (Massari) · G02 (Vargas)"], ["Aulas 13–14", "Termo de Abertura de Projeto", "G01 (PMBOK 7) · G02 (Vargas) · A10 (Audy)"], ["Aulas 15–16", "Engenharia de Requisitos e técnicas de elicitação", "R01 (Vazquez & Simões) · R02 (Machado) · B02 (Sommerville, cap. 4) · R05 (Cohn)"], ["Aulas 17–18", "Regras de negócio", "R01 (Vazquez & Simões) · R04 (Wiegers) · X11 (LGPD, requisitos legais)"], ["Aulas 23–26", "Introdução à UML, Diagrama e Descrições de Casos de Uso", "U01 (Guedes) · U03 (Fowler) · R03 (Cockburn) · U02 (Bezerra)"], ["Aulas 27–28", "Diagrama de Atividades", "U01 (Guedes) · U03 (Fowler) · U04 (Booch et al.)"], ["Aulas 29–30", "Diagrama de Classes", "U02 (Bezerra) · U05 (Larman, GRASP) · U06 (Melo) · C04 (Aniche, SOLID)"], ["Aulas 31–38", "Acompanhamento, entrega e correção dos projetos", "C01 (Código Limpo) · C02 (Refatoração) · Q05 (Aniche, testes) · D01 (Pro Git)"], ["Extras", "Prototipagem de telas/interfaces (Figma)", "X12 (Figma Learn) · U03 (Fowler, notação)"]], "onde": [["Biblioteca do IFS — Campus Tobias Barreto", "Consulte o acervo físico pelo sistema Pergamum e verifique os títulos da bibliografia básica e complementar do PPC.", ""], ["Minha Biblioteca / Biblioteca Virtual", "Vários títulos da Érica, Pearson, Bookman e Grupo A estão disponíveis em texto integral pela assinatura institucional. Peça seu acesso na biblioteca.", ""], ["Portal de Periódicos CAPES", "Acesso a normas técnicas, livros eletrônicos e artigos por meio do acesso CAFe com a conta institucional.", "https://www.periodicos.capes.gov.br/"], ["SciELO Livros", "Livros acadêmicos brasileiros em acesso aberto, com títulos de Computação e Educação.", "https://books.scielo.org/"], ["Domínio Público", "Repositório do MEC com obras livres, incluindo materiais de cursos técnicos.", "http://www.dominiopublico.gov.br/"], ["Google Acadêmico", "Para localizar capítulos, artigos e versões abertas dos temas do catálogo.", "https://scholar.google.com.br/"]], "notas": ["Os dados bibliográficos dos 12 títulos marcados como Bibliografia do PPC foram extraídos diretamente da Resolução CS/IFS nº 216/2023; os ISBNs listados são os que constam no documento.", "Para os demais títulos, edição, editora e ano devem ser conferidos no acervo ou no site da editora antes de uso em plano de ensino, pois há reimpressões e novas edições.", "Links de acesso gratuito foram verificados em setembro de 2026. Materiais on-line podem mudar de endereço; em caso de link quebrado, busque pelo título e pelo autor.", "Indicação de nível: Iniciante (1º/2º ano do integrado e início do subsequente), Intermediário (2º/3º ano), Avançado (aprofundamento, docentes e continuidade em curso superior)."]}</script>
+<script>
+(function(){
+  var D = JSON.parse(document.getElementById('dados').textContent);
+  var TEMA = {}; D.temas.forEach(function(t){ TEMA[t[0]] = t[1]; });
+  var LIV = {}; D.livros.forEach(function(b){ LIV[b.id] = b; });
+  var esc = function(s){ return String(s||'').replace(/[&<>"]/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var isFree = function(b){ return b.acesso.indexOf('GRATUITO') === 0; };
+
+  var nFree = D.livros.filter(isFree).length;
+  var nPpc  = D.livros.filter(function(b){ return b.ppc; }).length;
+
+  document.getElementById('sub').textContent =
+    D.meta.organizador + ' · versão ' + D.meta.versao + ' · ' + D.meta.data;
+  document.getElementById('rodape').textContent =
+    'Base documental: ' + D.meta.base;
+
+  document.getElementById('stats').innerHTML = [
+    [D.livros.length, 'títulos'], [nPpc, 'da bibliografia do PPC'], [nFree, 'de acesso gratuito'],
+    [D.temas.length, 'temas'], [Object.keys(D.trilhas).length, 'trilhas']
+  ].map(function(s){ return '<span class="stat"><b>'+s[0]+'</b><span>'+s[1]+'</span></span>'; }).join('');
+
+  /* -------- abas -------- */
+  var ABAS = [['catalogo','Catálogo'],['trilhas','Trilhas de leitura'],
+              ['mapa','Mapa de aulas'],['onde','Onde conseguir']];
+  var tabs = document.getElementById('tabs');
+  tabs.innerHTML = ABAS.map(function(a,i){
+    return '<button class="tab" role="tab" id="tab-'+a[0]+'" data-p="'+a[0]+'" aria-selected="'+
+           (i===0)+'">'+a[1]+'</button>'; }).join('');
+  tabs.addEventListener('click', function(e){
+    var b = e.target.closest('.tab'); if(!b) return;
+    ABAS.forEach(function(a){
+      var on = a[0] === b.dataset.p;
+      document.getElementById('tab-'+a[0]).setAttribute('aria-selected', on);
+      document.getElementById('pane-'+a[0]).hidden = !on;
+    });
+    window.scrollTo({top:0, behavior:'instant'});
+  });
+
+  /* -------- filtros -------- */
+  var estado = { q:'', acesso:'todos', nivel:'todos', tema:'todos' };
+
+  function chips(el, opcoes, chave){
+    var box = document.getElementById(el);
+    opcoes.forEach(function(o){
+      var b = document.createElement('button');
+      b.className = 'chip'; b.type = 'button'; b.textContent = o[1];
+      b.setAttribute('aria-pressed', o[0] === estado[chave]);
+      b.addEventListener('click', function(){
+        estado[chave] = o[0];
+        Array.prototype.forEach.call(box.querySelectorAll('.chip'), function(c){
+          c.setAttribute('aria-pressed', c === b); });
+        render();
+      });
+      box.appendChild(b);
+    });
+  }
+  chips('f-acesso', [['todos','Tudo'],['gratis','Só gratuitos'],['ppc','Só bibliografia do PPC']], 'acesso');
+  chips('f-nivel', [['todos','Todos'],['Iniciante','Iniciante'],
+                    ['Intermediário','Intermediário'],['Avançado','Avançado']], 'nivel');
+  chips('f-tema', [['todos','Todos']].concat(D.temas.map(function(t){ return [t[0], t[1]]; })), 'tema');
+
+  document.getElementById('q').addEventListener('input', function(e){
+    estado.q = e.target.value.toLowerCase().trim(); render();
+  });
+
+  function passa(b){
+    if (estado.acesso === 'gratis' && !isFree(b)) return false;
+    if (estado.acesso === 'ppc' && !b.ppc) return false;
+    if (estado.nivel !== 'todos' && b.nivel !== estado.nivel) return false;
+    if (estado.tema !== 'todos' && b.tema !== estado.tema) return false;
+    if (estado.q){
+      var hay = [b.id,b.titulo,b.autores,b.editora,b.isbn,TEMA[b.tema],b.nivel,b.acesso,
+                 b.disciplina,b.aulas,b.porque].join(' ').toLowerCase();
+      if (hay.indexOf(estado.q) === -1) return false;
+    }
+    return true;
+  }
+
+  function cartao(b){
+    var badges = [];
+    if (b.ppc) badges.push('<span class="b ppc">PPC · '+esc(b.ppc)+'</span>');
+    if (isFree(b)) badges.push('<span class="b gratis">'+esc(b.acesso)+'</span>');
+    else badges.push('<span class="b">'+esc(b.acesso)+'</span>');
+    badges.push('<span class="b niv">'+esc(b.nivel)+'</span>');
+
+    var ficha = esc(b.autores)+'. '+esc(b.edicao)+' '+esc(b.editora)+', '+esc(b.ano)+'.';
+    if (b.isbn) ficha += ' ISBN '+esc(b.isbn)+'.';
+
+    var onde = '<b>Onde entra:</b> '+esc(b.disciplina)+' — '+esc(b.aulas)+'.';
+    if (b.link) onde += ' <a href="'+esc(b.link)+'" target="_blank" rel="noopener">'+esc(b.link)+'</a>';
+
+    return '<article class="item'+(isFree(b)?' free':'')+'">'+
+      '<div class="code">'+esc(b.id)+'</div><div>'+
+      '<h3 class="t">'+esc(b.titulo)+'</h3>'+
+      '<p class="ficha">'+ficha+'</p>'+
+      '<div class="badges">'+badges.join('')+'</div>'+
+      '<p class="why"><b>Por que ler:</b> '+esc(b.porque)+'</p>'+
+      '<p class="onde">'+onde+'</p>'+
+      '</div></article>';
+  }
+
+  function render(){
+    var vis = D.livros.filter(passa);
+    document.getElementById('count').textContent =
+      vis.length + (vis.length === 1 ? ' título encontrado' : ' títulos encontrados') +
+      ' de ' + D.livros.length;
+    if (!vis.length){
+      document.getElementById('lista').innerHTML =
+        '<p class="empty">Nenhum título com esses filtros. Tente limpar a busca ou escolher outro tema.</p>';
+      return;
+    }
+    var html = '';
+    D.temas.forEach(function(t){
+      var itens = vis.filter(function(b){ return b.tema === t[0]; });
+      if (!itens.length) return;
+      html += '<div class="temahead"><h2>'+esc(t[1])+'</h2><span class="n">'+itens.length+'</span></div>'+
+              '<div class="list">'+itens.map(cartao).join('')+'</div>';
+    });
+    document.getElementById('lista').innerHTML = html;
+  }
+  render();
+
+  /* -------- trilhas -------- */
+  var DESC = {
+    A:'Para quem está no 2º ano do integrado e cursa Banco de Dados e Engenharia de Software. '+
+      'Começa pelo que é gratuito e termina com hábitos de código.',
+    B:'Para o subsequente em Informática, que precisa de base sólida e empregabilidade rápida.',
+    C:'Para o professor: referências de ementa, artefatos, avaliação e fundamentação do plano de ensino.',
+    D:'Para o aluno que já entrega o projeto bem-feito e quer ir além do que a disciplina cobra.'
+  };
+  document.getElementById('trilhas').innerHTML = Object.keys(D.trilhas).map(function(k){
+    return '<div class="trilha"><h3>'+esc(D.trilhas[k])+'</h3>'+
+      '<p class="d">'+esc(DESC[k])+'</p><ol class="steps">'+
+      D.trilhaItens[k].map(function(id){
+        var b = LIV[id];
+        return '<li><div><div class="st">'+esc(b.titulo)+'</div>'+
+          '<div class="sa">'+esc(b.autores)+' · '+esc(b.acesso)+'</div></div></li>';
+      }).join('')+'</ol></div>';
+  }).join('');
+
+  /* -------- mapa -------- */
+  document.getElementById('mapa').innerHTML = D.mapa.map(function(m){
+    return '<tr><td class="aulas">'+esc(m[0])+'</td><td>'+esc(m[1])+
+           '</td><td class="ref">'+esc(m[2])+'</td></tr>'; }).join('');
+
+  /* -------- onde conseguir + notas -------- */
+  document.getElementById('onde').innerHTML = D.onde.map(function(o){
+    return '<div class="card"><h4>'+esc(o[0])+'</h4><p>'+esc(o[1])+'</p>'+
+      (o[2] ? '<a href="'+esc(o[2])+'" target="_blank" rel="noopener">'+esc(o[2])+'</a>' : '')+
+      '</div>'; }).join('');
+  document.getElementById('notas').innerHTML = D.notas.map(function(n){
+    return '<li>'+esc(n)+'</li>'; }).join('');
+})();
+</script>
+
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

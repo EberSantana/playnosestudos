@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronômetro de Aula - Ranking de Equipes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #163D28 0%, #2C8453 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .mode-btn {
+            background: #e0e0e0;
+            color: #333;
+            border: 2px solid transparent;
+        }
+
+        .mode-btn.active {
+            background: #2C8453;
+            color: white;
+            border-color: #2C8453;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .timer-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-display {
+            font-size: 5em;
+            font-weight: bold;
+            color: #2C8453;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            line-height: 1;
+            transition: color 0.3s ease;
+        }
+
+        .timer-display.warning {
+            color: #ff6b6b;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-start {
+            background: #348441;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+        }
+
+        .btn-start:hover {
+            background: #40c057;
+        }
+
+        .btn-pause {
+            background: #C41E3A;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+        }
+
+        .btn-pause:hover {
+            background: #A01828;
+        }
+
+        .btn-reset {
+            background: #c25151;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+        }
+
+        .btn-reset:hover {
+            background: #fa5252;
+        }
+
+        .teams-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .team-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .team-input input {
+            flex: 1;
+            min-width: 150px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .team-input input:focus {
+            outline: none;
+            border-color: #2C8453;
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+        }
+
+        .team-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .team-modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #2C8453;
+            padding-bottom: 10px;
+        }
+
+        .modal-field {
+            margin-bottom: 15px;
+        }
+
+        .modal-field label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .modal-field input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .modal-field input:focus {
+            outline: none;
+            border-color: #2C8453;
+            box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.1);
+        }
+
+        .members-list {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .member-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #2C8453;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin: 5px 5px 5px 0;
+            font-size: 0.9em;
+        }
+
+        .member-tag button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn-modal-save {
+            background: #2C8453;
+            color: white;
+            padding: 12px 25px;
+        }
+
+        .btn-modal-save:hover {
+            background: #1F5A35;
+        }
+
+        .btn-modal-cancel {
+            background: #ddd;
+            color: #333;
+            padding: 12px 25px;
+        }
+
+        .btn-modal-cancel:hover {
+            background: #ccc;
+        }
+
+        .btn-add-team {
+            background: #2C8453;
+            color: white;
+            padding: 12px 25px;
+        }
+
+        .btn-add-team:hover {
+            background: #1F5A35;
+        }
+
+        .teams-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .team-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            border-left: 4px solid #2C8453;
+            transition: all 0.3s ease;
+            gap: 15px;
+        }
+
+        .team-item.finished {
+            background: #d3f9d8;
+            border-left-color: #51cf66;
+        }
+
+        .team-info {
+            flex: 1;
+            cursor: pointer;
+            min-width: 0;
+        }
+
+        .team-info:hover {
+            opacity: 0.8;
+        }
+
+        .team-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .team-members {
+            font-size: 0.85em;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .team-finish-time {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .team-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-finish {
+            background: #51cf66;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .btn-finish:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .ranking-section {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .ranking-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #ddd;
+            font-size: 1.1em;
+        }
+
+        .ranking-position {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: white;
+        }
+
+        .position-1 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+            border-left-color: #ffd700;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .position-2 {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            color: #333;
+            border-left-color: #c0c0c0;
+            box-shadow: 0 4px 10px rgba(192, 192, 192, 0.3);
+        }
+
+        .position-3 {
+            background: linear-gradient(135deg, #cd7f32, #e8a76a);
+            color: white;
+            border-left-color: #cd7f32;
+            box-shadow: 0 4px 10px rgba(205, 127, 50, 0.3);
+        }
+
+        .position-other {
+            background: #2C8453;
+            border-left-color: #2C8453;
+        }
+
+        .ranking-item .ranking-position {
+            margin-right: 10px;
+        }
+
+        .ranking-name {
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .ranking-time {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .time-config {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .time-config label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .time-config input {
+            width: 100px;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .time-config input:focus {
+            outline: none;
+            border-color: #2C8453;
+        }
+
+        .quick-time-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .quick-time-btn {
+            background: #e0e0e0;
+            color: #333;
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .quick-time-btn:hover {
+            background: #c0c0c0;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #717171;
+            padding: 20px;
+            font-size: 1.1em;
+        }
+            @media (max-width: 600px) {
+            .container { padding: 18px !important; }
+            .timer-display { font-size: clamp(2.6em, 15vw, 5em); }
+            .timer-controls button { padding: 12px 18px; }
+        }
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+    <div class="team-modal" id="teamModal">
+        <div class="modal-content">
+            <div class="modal-header">👥 Editar Equipe</div>
+
+            <div class="modal-field">
+                <label for="modalTeamName">Nome da Equipe:</label>
+                <input type="text" id="modalTeamName" placeholder="Ex: Equipe A, Time dos Desenvolvedores...">
+            </div>
+
+            <div class="modal-field">
+                <label for="modalMemberName">Adicionar Membro:</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="modalMemberName" placeholder="Nome do membro..." onkeypress="if(event.key==='Enter') addMemberToEdit()">
+                    <button class="btn-add-team" onclick="addMemberToEdit()" style="padding: 10px 15px;">Adicionar</button>
+                </div>
+            </div>
+
+            <div class="members-list" id="modalMembersList">
+                <div style="color: #717171; padding: 10px; text-align: center;">Nenhum membro adicionado</div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-modal-cancel" onclick="closeTeamModal()">Cancelar</button>
+                <button class="btn-modal-save" onclick="saveTeamModal()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" role="main">
+        <div class="header">
+            <h1>⏱️ Cronômetro de Aula</h1>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="switchMode('custom')">Modo Personalizado</button>
+                <button class="mode-btn" onclick="switchMode('preset')">Modo Rápido</button>
+            </div>
+        </div>
+
+        <div id="customMode" class="mode-content">
+            <div class="time-config">
+                <label for="totalTime">Duração Total (minutos):</label>
+                <input type="number" id="totalTime" value="155" min="1" max="999">
+                <button class="btn-add-team" onclick="updateTotalTime()">Atualizar</button>
+            </div>
+            <div style="text-align: center; color: #666; font-size: 0.95em; margin-bottom: 15px;">
+                <span id="customExample">Exemplo: 50 + 50 + 50 + 5 = 155 minutos</span>
+            </div>
+        </div>
+
+        <div id="presetMode" class="mode-content" style="display: none;">
+            <div class="time-config">
+                <label>Selecione o tempo:</label>
+                <div class="quick-time-buttons">
+                    <button class="quick-time-btn" onclick="setQuickTime(5)">5 min</button>
+                    <button class="quick-time-btn" onclick="setQuickTime(10)">10 min</button>
+                    <button class="quick-time-btn" onclick="setQuickTime(20)">20 min</button>
+                    <button class="quick-time-btn" onclick="setQuickTime(30)">30 min</button>
+                    <button class="quick-time-btn" onclick="setQuickTime(40)">40 min</button>
+                    <button class="quick-time-btn" onclick="setQuickTime(50)">50 min</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="timer-section">
+                <h2>Tempo Restante</h2>
+                <div class="timer-display" id="timerDisplay">02:35:00</div>
+
+                <div class="timer-controls">
+                    <button class="btn-start" id="startBtn" onclick="startTimer()">▶️ Iniciar</button>
+                    <button class="btn-pause" id="pauseBtn" onclick="pauseTimer()" style="display: none;">⏸️ Pausar</button>
+                    <button class="btn-reset" onclick="resetTimer()">🔄 Reiniciar</button>
+                </div>
+
+                <div style="text-align: center; color: #717171; font-size: 0.9em; margin-top: 15px;">
+                    <span id="timerStatus">Pronto para iniciar</span>
+                </div>
+            </div>
+
+            <div class="teams-section">
+                <h2>Equipes</h2>
+
+                <div class="team-input">
+                    <input type="text" id="teamNameInput" placeholder="Nome da equipe..." onkeypress="if(event.key==='Enter') addTeam()">
+                    <button class="btn-add-team" onclick="addTeam()">➕ Adicionar</button>
+                </div>
+
+                <div class="teams-list" id="teamsList">
+                    <div class="empty-state">Nenhuma equipe adicionada ainda</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ranking-section">
+            <div class="ranking-title">🏆 Ranking de Conclusão</div>
+            <div class="ranking-list" id="rankingList">
+                <div class="empty-state">Equipes aparecerão aqui conforme terminarem</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let totalSeconds = 155 * 60; // 155 minutos em segundos
+        let currentSeconds = totalSeconds;
+        let timerInterval = null;
+        let isRunning = false;
+        let teams = [];
+        let finishedTeams = [];
+        let finishTimes = {};
+        let startTime = null;
+        let editingTeamId = null;
+        let editingMembers = [];
+
+        function switchMode(mode) {
+            document.getElementById('customMode').style.display = mode === 'custom' ? 'block' : 'none';
+            document.getElementById('presetMode').style.display = mode === 'preset' ? 'block' : 'none';
+
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function updateTotalTime() {
+            const input = document.getElementById('totalTime').value;
+            totalSeconds = parseInt(input) * 60;
+            currentSeconds = totalSeconds;
+            updateDisplay();
+            document.getElementById('timerStatus').textContent = 'Tempo atualizado';
+        }
+
+        function setQuickTime(minutes) {
+            totalSeconds = minutes * 60;
+            currentSeconds = totalSeconds;
+            updateDisplay();
+            document.getElementById('timerStatus').textContent = `Timer de ${minutes} minutos definido`;
+        }
+
+        function updateDisplay() {
+            const hours = Math.floor(currentSeconds / 3600);
+            const minutes = Math.floor((currentSeconds % 3600) / 60);
+            const seconds = currentSeconds % 60;
+
+            const display = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = display;
+
+            // Verificar se faltam 5 minutos (300 segundos)
+            if (currentSeconds <= 300 && currentSeconds > 0) {
+                document.getElementById('timerDisplay').classList.add('warning');
+            } else {
+                document.getElementById('timerDisplay').classList.remove('warning');
+            }
+
+            // Se terminou
+            if (currentSeconds === 0) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                document.getElementById('startBtn').style.display = 'block';
+                document.getElementById('pauseBtn').style.display = 'none';
+                document.getElementById('timerStatus').textContent = '⏹️ Tempo finalizado!';
+            }
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+
+            isRunning = true;
+            startTime = Date.now() - (totalSeconds - currentSeconds) * 1000;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('pauseBtn').style.display = 'block';
+            document.getElementById('timerStatus').textContent = '▶️ Cronômetro em andamento...';
+
+            timerInterval = setInterval(() => {
+                currentSeconds = Math.max(0, totalSeconds - Math.floor((Date.now() - startTime) / 1000));
+                updateDisplay();
+            }, 100);
+        }
+
+        function pauseTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            document.getElementById('timerStatus').textContent = '⏸️ Cronômetro pausado';
+        }
+
+        function resetTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            currentSeconds = totalSeconds;
+            updateDisplay();
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            document.getElementById('timerStatus').textContent = 'Pronto para iniciar';
+        }
+
+        function addTeam() {
+            const input = document.getElementById('teamNameInput');
+            const teamName = input.value.trim();
+
+            if (teamName === '') {
+                alert('Digite o nome da equipe');
+                return;
+            }
+
+            if (teams.some(t => t.name.toLowerCase() === teamName.toLowerCase())) {
+                alert('Esta equipe já foi adicionada');
+                return;
+            }
+
+            const team = {
+                id: Date.now(),
+                name: teamName,
+                members: [],
+                finished: false
+            };
+
+            teams.push(team);
+            input.value = '';
+            renderTeams();
+        }
+
+        function openTeamModal(teamId) {
+            const team = teams.find(t => t.id === teamId);
+            if (!team) return;
+
+            editingTeamId = teamId;
+            editingMembers = [...team.members];
+
+            document.getElementById('modalTeamName').value = team.name;
+            renderModalMembers();
+            document.getElementById('teamModal').classList.add('active');
+            document.getElementById('modalMemberName').focus();
+        }
+
+        function closeTeamModal() {
+            document.getElementById('teamModal').classList.remove('active');
+            editingTeamId = null;
+            editingMembers = [];
+            document.getElementById('modalMemberName').value = '';
+        }
+
+        function addMemberToEdit() {
+            const input = document.getElementById('modalMemberName');
+            const memberName = input.value.trim();
+
+            if (memberName === '') return;
+
+            if (editingMembers.includes(memberName)) {
+                alert('Este membro já foi adicionado');
+                return;
+            }
+
+            editingMembers.push(memberName);
+            input.value = '';
+            renderModalMembers();
+            input.focus();
+        }
+
+        function removeMemberFromEdit(memberName) {
+            editingMembers = editingMembers.filter(m => m !== memberName);
+            renderModalMembers();
+        }
+
+        function renderModalMembers() {
+            const container = document.getElementById('modalMembersList');
+
+            if (editingMembers.length === 0) {
+                container.innerHTML = '<div style="color: #717171; padding: 10px; text-align: center;">Nenhum membro adicionado</div>';
+                return;
+            }
+
+            let html = '';
+            editingMembers.forEach(member => {
+                html += `
+                    <span class="member-tag">
+                        ${member}
+                        <button onclick="removeMemberFromEdit('${member}')">✕</button>
+                    </span>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function saveTeamModal() {
+            const newTeamName = document.getElementById('modalTeamName').value.trim();
+
+            if (newTeamName === '') {
+                alert('Digite o nome da equipe');
+                return;
+            }
+
+            const team = teams.find(t => t.id === editingTeamId);
+            if (team) {
+                team.name = newTeamName;
+                team.members = editingMembers;
+            }
+
+            closeTeamModal();
+            renderTeams();
+        }
+
+        function finishTeam(teamId) {
+            const team = teams.find(t => t.id === teamId);
+            if (!team || team.finished) return;
+
+            team.finished = true;
+            const elapsedSeconds = totalSeconds - currentSeconds;
+            finishTimes[teamId] = elapsedSeconds;
+            finishedTeams.push(team);
+
+            renderTeams();
+            renderRanking();
+        }
+
+        function renderTeams() {
+            const teamsList = document.getElementById('teamsList');
+            const activeTeams = teams.filter(t => !t.finished);
+            const finishedTeamsList = teams.filter(t => t.finished);
+
+            if (teams.length === 0) {
+                teamsList.innerHTML = '<div class="empty-state">Nenhuma equipe adicionada ainda</div>';
+                return;
+            }
+
+            let html = '';
+
+            if (activeTeams.length > 0) {
+                html += '<div style="margin-bottom: 15px;"><strong style="color: #2C8453;">Em andamento:</strong></div>';
+                activeTeams.forEach(team => {
+                    const membersList = team.members && team.members.length > 0 ? team.members.join(', ') : 'Sem membros';
+                    html += `
+                        <div class="team-item">
+                            <div class="team-info" onclick="openTeamModal(${team.id})" title="Clique para editar">
+                                <div class="team-name">${team.name}</div>
+                                <div class="team-members">👥 ${membersList}</div>
+                            </div>
+                            <div class="team-actions">
+                                <button class="btn-finish" onclick="finishTeam(${team.id})">✓ Finalizar</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (finishedTeamsList.length > 0) {
+                html += '<div style="margin-top: 20px; margin-bottom: 15px;"><strong style="color: #51cf66;">Concluídas:</strong></div>';
+                finishedTeamsList.forEach((team, index) => {
+                    const elapsedTime = finishTimes[team.id];
+                    const hours = Math.floor(elapsedTime / 3600);
+                    const minutes = Math.floor((elapsedTime % 3600) / 60);
+                    const seconds = elapsedTime % 60;
+                    const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    const membersList = team.members && team.members.length > 0 ? team.members.join(', ') : 'Sem membros';
+
+                    html += `
+                        <div class="team-item finished">
+                            <div>
+                                <div class="team-name">#${index + 1} - ${team.name}</div>
+                                <div class="team-members">👥 ${membersList}</div>
+                                <div class="team-finish-time">Tempo: ${timeStr}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            teamsList.innerHTML = html;
+        }
+
+        function renderRanking() {
+            const rankingList = document.getElementById('rankingList');
+
+            if (finishedTeams.length === 0) {
+                rankingList.innerHTML = '<div class="empty-state">Equipes aparecerão aqui conforme terminarem</div>';
+                return;
+            }
+
+            let html = '';
+            finishedTeams.forEach((team, index) => {
+                const elapsedTime = finishTimes[team.id];
+                const hours = Math.floor(elapsedTime / 3600);
+                const minutes = Math.floor((elapsedTime % 3600) / 60);
+                const seconds = elapsedTime % 60;
+                const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                let positionClass = 'position-other';
+                let medal = '🥉';
+                if (index === 0) {
+                    positionClass = 'position-1';
+                    medal = '🥇';
+                } else if (index === 1) {
+                    positionClass = 'position-2';
+                    medal = '🥈';
+                } else if (index === 2) {
+                    positionClass = 'position-3';
+                    medal = '🥉';
+                }
+
+                html += `
+                    <div class="ranking-item ${positionClass}">
+                        <div class="ranking-position">${medal}</div>
+                        <div class="ranking-name">${team.name}</div>
+                        <div class="ranking-time">${timeStr}</div>
+                    </div>
+                `;
+            });
+
+            rankingList.innerHTML = html;
+        }
+
+        // Inicializar
+        updateDisplay();
+    </script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

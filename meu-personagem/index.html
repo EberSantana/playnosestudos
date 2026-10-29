@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="utf-8">
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&](professor|demo)\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meu personagem · Play nos Estudos</title>
+<meta name="description" content="O robô Bit evolui conforme você estuda. Veja seu nível, suas conquistas e personalize o seu personagem.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+:root{--bg:#EEF2F0;--panel:#fff;--ink:#16261C;--ink-2:#3F4F5B;--muted:#5B6871;--line:#D5DDDA;--accent:#1F5135;--accent-ink:#fff;--accent-soft:#E3EEE7;--side:#16261C;--side-ink:#DCE5EA;--ok:#25724A;--warn:#8A5A00}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0F171D;--panel:#16222B;--ink:#E4ECEF;--ink-2:#B8C6CD;--muted:#8699A4;--line:#2A3A45;--accent:#6BAA68;--accent-ink:#12241A;--accent-soft:#1A2D20;--side:#0B140E;--ok:#63C48F;--warn:#E6B450}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;font-size:17px;line-height:1.55}
+.disp{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;line-height:1.05}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+header{background:var(--side);color:var(--side-ink);padding:32px clamp(16px,5vw,64px) 30px}
+.wrap{max-width:1120px;margin:0 auto}
+.back{display:inline-block;color:#7FBF7A;text-decoration:none;font-size:15px;margin-bottom:12px}
+.back:hover{text-decoration:underline}
+.eyebrow{display:block;font:12px/1.4 "JetBrains Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:#7FBF7A}
+h1{font:700 clamp(36px,6vw,56px)/1.05 "Barlow Condensed","Arial Narrow",sans-serif;margin:6px 0 8px;color:#fff}
+header p{margin:0;max-width:62ch;color:#B8C6CD}
+main{padding:24px clamp(16px,5vw,64px) 72px}
+.aviso{background:var(--panel);border:1px dashed var(--accent);border-radius:12px;padding:12px 16px;margin:0 0 16px;color:var(--ink-2);font-size:15px}
+.aviso[hidden]{display:none}
+.topo{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:clamp(16px,3vw,24px)}
+h2{font:700 28px/1.1 "Barlow Condensed","Arial Narrow",sans-serif;margin:0 0 12px}
+h3{font:700 12px/1.3 "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+
+/* palco */
+.palco{text-align:center;position:relative;overflow:hidden}
+.palco::before{content:"";position:absolute;left:50%;top:26px;width:260px;height:260px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,var(--accent-soft) 0,transparent 70%);pointer-events:none}
+.palco .robo{position:relative;display:flex;justify-content:center;min-height:268px}
+.palco .robo svg{width:min(240px,64vw);height:auto}
+.nome{font:700 36px/1 "Barlow Condensed","Arial Narrow",sans-serif;margin:6px 0 2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:6px 0 14px}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 12px;font:600 14px/1.3 "Source Sans 3",sans-serif;background:var(--accent-soft);color:var(--ink)}
+.chip.forte{background:var(--accent);color:var(--accent-ink)}
+.xp{text-align:left}
+.xp-linha{display:flex;justify-content:space-between;gap:8px;font:13px/1.4 "JetBrains Mono",monospace;color:var(--muted)}
+.barra{height:12px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0}
+.barra i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),#7CC77A);transition:width .6s ease}
+.trilha{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.trilha li{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);line-height:1.2}
+.trilha svg{width:100%;max-width:58px;height:auto}
+.trilha li.off svg{filter:grayscale(1) brightness(.55);opacity:.45}
+.trilha li.atual{color:var(--ink);font-weight:600}
+.trilha li.atual svg{background:var(--accent-soft);border-radius:12px}
+.trilha small{font:11px/1.2 "JetBrains Mono",monospace}
+
+/* editor */
+.abas{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px;padding:0;border-bottom:1px solid var(--line)}
+.abas button{border:0;background:none;padding:10px 12px;margin-bottom:-1px;border-bottom:3px solid transparent;color:var(--ink-2);font:600 15px/1 "Source Sans 3",sans-serif;cursor:pointer}
+.abas button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+.abas button:focus-visible,.opc:focus-visible,.btn:focus-visible,input:focus-visible{outline:3px solid var(--a11y-focus,#0B6BCB);outline-offset:2px}
+.painel[hidden]{display:none}
+.opcoes{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:10px}
+.opc{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px 8px;border:2px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);font:600 14px/1.2 "Source Sans 3",sans-serif;cursor:pointer;text-align:center}
+.opc svg{width:64px;height:auto}
+.opc:hover{border-color:var(--accent)}
+.opc[aria-checked=true]{border-color:var(--accent);background:var(--accent-soft)}
+.opc[aria-checked=true]::after{content:"✓";position:absolute;top:6px;right:8px;font-size:14px;color:var(--accent)}
+.opc[aria-disabled=true]{cursor:not-allowed;color:var(--muted)}
+.opc[aria-disabled=true] svg{filter:grayscale(1);opacity:.4}
+.opc .tranca{font:11px/1.3 "JetBrains Mono",monospace;color:var(--muted)}
+.opc.nenhum svg{opacity:.75}
+.campo{display:grid;gap:6px;max-width:360px}
+.campo label{font-weight:600}
+.campo input{min-height:46px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:17px "Source Sans 3",sans-serif}
+.campo small{color:var(--muted);font-size:14px}
+.acoes{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.btn{min-height:44px;border-radius:10px;padding:0 18px;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:700 16px/1 "Source Sans 3",sans-serif;cursor:pointer}
+.btn.sec{background:transparent;color:var(--ink)}
+.btn[disabled]{opacity:.6;cursor:wait}
+.msg{font-size:15px;color:var(--muted)}.msg.ok{color:var(--ok)}.msg.erro{color:#B3261E}
+@media (prefers-color-scheme:dark){.msg.erro{color:#FF8174}}
+
+/* seções */
+.secao{margin-top:16px}
+.atributos{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.atr{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px}
+.atr .ico{grid-row:span 2;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--accent-soft);color:var(--accent)}
+.atr b{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.atr b span{font:13px/1.6 "JetBrains Mono",monospace;color:var(--muted);font-weight:400}
+.atr .barra{height:8px;margin:2px 0 0}
+.atr small{grid-column:2;color:var(--muted);font-size:13px}
+.conquistas{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;list-style:none;margin:0;padding:0}
+.conq{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:12px}
+.conq .sel{flex:none;display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:20px}
+.conq.off .sel{background:var(--line);color:var(--muted)}
+.conq b{display:block}.conq p{margin:2px 0 0;font-size:14px;color:var(--ink-2)}
+.conq .premio{display:block;margin-top:4px;font:12px/1.3 "JetBrains Mono",monospace;color:var(--muted)}
+.conq.off b{color:var(--ink-2)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:9px 8px;border-top:1px solid var(--line);vertical-align:middle}
+th{font:12px/1.3 "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-top:0}
+td.n{font-family:"JetBrains Mono",monospace;font-size:14px;white-space:nowrap;text-align:right}
+th.n{text-align:right}
+td .barra{height:6px;margin:4px 0 0;min-width:70px}
+.vazio{color:var(--muted);margin:0}
+.regras{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;list-style:none;margin:0;padding:0}
+.regras li{padding:12px 14px;border-radius:12px;background:var(--accent-soft)}
+.regras b{display:block;font:700 24px/1.1 "Barlow Condensed","Arial Narrow",sans-serif}
+.regras span{font-size:14px;color:var(--ink-2)}
+.nota{font-size:14px;color:var(--muted);margin:12px 0 0}
+footer{color:var(--muted);font-size:14px;margin-top:28px}
+@media (max-width:860px){.topo{grid-template-columns:1fr}}
+@media (max-width:420px){.opcoes{grid-template-columns:repeat(3,1fr)}.opc svg{width:52px}.trilha small{display:none}}
+</style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="back" href="../">← Disciplinas</a>
+  <span class="eyebrow">Play nos Estudos</span>
+  <h1>Meu personagem</h1>
+  <p>O seu robô evolui com você. Cada atividade feita nas disciplinas dá experiência (XP), sobe o nível e libera novas formas, cores e acessórios.</p>
+</div></header>
+<main id="conteudo"><div class="wrap">
+  <p class="aviso" id="aviso" hidden></p>
+
+  <div class="topo">
+    <section class="card palco" aria-labelledby="t-nome">
+      <div class="robo" id="robo"></div>
+      <p class="nome" id="t-nome">Bit</p>
+      <div class="chips"><span class="chip forte" id="c-nivel">Nível 1</span><span class="chip" id="c-cargo">Estagiário</span></div>
+      <div class="xp">
+        <div class="xp-linha"><span id="xp-total">0 XP</span><span id="xp-meta">próximo nível: 100 XP</span></div>
+        <div class="barra" role="progressbar" aria-labelledby="xp-falta" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="xp-barra"><i style="width:0"></i></div>
+        <div class="xp-linha"><span id="xp-falta">Faltam 100 XP para o nível 2</span></div>
+      </div>
+      <h3>Evolução do robô</h3>
+      <ol class="trilha" id="trilha" aria-label="Formas do robô por nível"></ol>
+    </section>
+
+    <section class="card" aria-labelledby="t-editor">
+      <h2 id="t-editor">Personalizar</h2>
+      <div class="abas" role="tablist" aria-label="O que personalizar" id="abas"></div>
+      <div id="paineis"></div>
+      <div class="acoes">
+        <button class="btn" type="button" id="salvar">Salvar personagem</button>
+        <button class="btn sec" type="button" id="desfazer">Desfazer mudanças</button>
+        <span class="msg" id="msg" role="status" aria-live="polite"></span>
+      </div>
+    </section>
+  </div>
+
+  <section class="card secao" aria-labelledby="t-atr">
+    <h2 id="t-atr">Atributos</h2>
+    <div class="atributos" id="atributos"></div>
+    <p class="nota">Cada disciplina treina um atributo do robô. Estude mais de uma área para ficar polivalente.</p>
+  </section>
+
+  <section class="card secao" aria-labelledby="t-conq">
+    <h2 id="t-conq">Conquistas <span class="mono" id="conq-cont" style="font-size:15px;color:var(--muted);font-weight:400"></span></h2>
+    <ul class="conquistas" id="conquistas"></ul>
+  </section>
+
+  <section class="card secao" aria-labelledby="t-mat">
+    <h2 id="t-mat">XP por material</h2>
+    <div id="materiais"></div>
+  </section>
+
+  <section class="card secao" aria-labelledby="t-regras">
+    <h2 id="t-regras">Como ganhar XP</h2>
+    <ul class="regras">
+      <li><b>+10 XP</b><span>por atividade feita: caderno, flashcard, verdadeiro ou falso, PBL ou laboratório.</span></li>
+      <li><b>+50 XP</b><span>quando você chega à metade de um material.</span></li>
+      <li><b>+100 XP</b><span>quando você conclui um material inteiro.</span></li>
+      <li><b>Sem perder</b><span>Ficar uns dias sem estudar não tira o seu nível. O robô espera por você.</span></li>
+    </ul>
+    <p class="nota">Tente responder antes de ver o gabarito: é assim que você aprende de verdade. O XP é para acompanhar o seu caminho e não vale nota.</p>
+  </section>
+
+  <footer>Play nos Estudos · Prof. Eber Santana · IFS Campus Tobias Barreto. O personagem é um robô desenhado no próprio site: nenhuma foto ou dado pessoal novo é coletado.</footer>
+</div></main>
+
+<script src="../config.js"></script>
+<script src="../progresso-turma.js"></script>
+<script src="../jogo/jogo.js"></script>
+<script>
+(function () {
+  "use strict";
+  var J = window.JOGO, $ = function (s) { return document.getElementById(s); };
+  if (!J) return;
+  var esc = J.esc, rascunho = J.escolhas(), salvo = J.escolhas(), abaAtual = "cor";
+  var ABAS = [["cor", "Cor"], ["cabeca", "Cabeça"], ["peito", "Peito"], ["extra", "Extra"], ["expressao", "Expressão"], ["nome", "Nome"]];
+
+  function mini(op, tam) {
+    var e = J.estado();
+    return J.desenhar(Object.assign({}, rascunho, { forma: e.forma }, op), { titulo: "", desc: " " }).replace("<svg ", '<svg aria-hidden="true" width="' + tam + '" ');
+  }
+  function fmt(n) { return Number(n).toLocaleString("pt-BR"); }
+  function nomeConq(id) { var c = J.CONQUISTAS.filter(function (x) { return x.id === id; })[0]; return c ? c.nome : id; }
+
+  function pintarPalco() {
+    var e = J.estado();
+    $("robo").innerHTML = J.desenhar(Object.assign({}, rascunho, { forma: e.forma }), { titulo: rascunho.nome + ", nível " + e.nivel + " (" + e.cargo + ")" });
+    $("robo").firstChild.classList.add("bit-vivo");
+    $("t-nome").textContent = rascunho.nome;
+    $("c-nivel").textContent = "Nível " + e.nivel;
+    $("c-cargo").textContent = e.cargo;
+    $("xp-total").textContent = fmt(e.xp) + " XP";
+    $("xp-meta").textContent = "nível " + (e.nivel + 1) + ": " + fmt(e.proximo) + " XP";
+    $("xp-falta").textContent = "Faltam " + fmt(e.proximo - e.xp) + " XP para o nível " + (e.nivel + 1);
+    var pct = Math.round(e.fracao * 100);
+    $("xp-barra").setAttribute("aria-valuenow", pct);
+    $("xp-barra").firstChild.style.width = pct + "%";
+    $("trilha").innerHTML = J.CARGOS.map(function (c) {
+      var cls = e.forma > c.forma ? "" : e.forma === c.forma ? "atual" : "off";
+      return '<li class="' + cls + '"' + (cls === "atual" ? ' aria-current="step"' : "") + ">" +
+        J.desenhar(Object.assign({}, rascunho, { forma: c.forma }), { titulo: c.nome + (cls === "off" ? ", liberado no nível " + c.de : ""), desc: " " }) +
+        "<span>" + esc(c.nome) + "</span><small>Nv " + c.de + "+</small></li>";
+    }).join("");
+  }
+
+  function pintarAbas() {
+    $("abas").innerHTML = ABAS.map(function (a) {
+      return '<button type="button" role="tab" id="aba-' + a[0] + '" aria-controls="p-' + a[0] + '" aria-selected="' + (a[0] === abaAtual) + '" tabindex="' + (a[0] === abaAtual ? 0 : -1) + '">' + a[1] + "</button>";
+    }).join("");
+  }
+
+  function opcoesDe(lugar) {
+    var e = J.estado(), d = J.desbloqueados(e);
+    if (lugar === "cor") return J.CORES.map(function (c) {
+      return { v: c.id, nome: c.nome, ok: d.cores.indexOf(c.id) >= 0, tranca: "Nível " + c.nivel, op: { cor: c.id } };
+    });
+    if (lugar === "expressao") return J.EXPRESSOES.map(function (x) { return { v: x.id, nome: x.nome, ok: true, op: { expressao: x.id } }; });
+    var lista = [{ v: "", nome: "Nenhum", ok: true, op: {}, nenhum: true }];
+    lista[0].op[lugar] = "";
+    J.ACESSORIOS.filter(function (a) { return a.lugar === lugar; }).forEach(function (a) {
+      var op = {}; op[lugar] = a.id;
+      lista.push({ v: a.id, nome: a.nome, ok: d.acessorios.indexOf(a.id) >= 0, tranca: nomeConq(a.conquista), op: op });
+    });
+    return lista;
+  }
+
+  function pintarPaineis() {
+    $("paineis").innerHTML = ABAS.map(function (a) {
+      var k = a[0], corpo;
+      if (k === "nome") {
+        corpo = '<div class="campo"><label for="f-nome">Nome do robô</label><input id="f-nome" maxlength="16" autocomplete="off" value="' + esc(rascunho.nome) + '"><small>Até 16 letras. Só você e o professor veem.</small></div>';
+      } else {
+        corpo = '<div class="opcoes" role="radiogroup" aria-label="' + a[1] + '">' + opcoesDe(k).map(function (o, i, arr) {
+          var sel = rascunho[k] === o.v;
+          var foco = sel || (!arr.some(function (x) { return rascunho[k] === x.v; }) && i === 0);
+          return '<button type="button" class="opc' + (o.nenhum ? " nenhum" : "") + '" role="radio" data-k="' + k + '" data-v="' + esc(o.v) + '" aria-checked="' + sel + '"' +
+            (o.ok ? "" : ' aria-disabled="true" aria-describedby="tr-' + k + "-" + i + '"') + ' tabindex="' + (foco ? 0 : -1) + '">' +
+            mini(o.op, 64) + "<span>" + esc(o.nome) + "</span>" +
+            (o.ok ? "" : '<span class="tranca" id="tr-' + k + "-" + i + '">🔒 ' + esc(o.tranca) + "</span>") + "</button>";
+        }).join("") + "</div>";
+        if (k === "cabeca" || k === "peito" || k === "extra") corpo += '<p class="nota">Acessórios são liberados por conquistas. Veja abaixo como ganhar cada uma.</p>';
+        if (k === "cor") corpo += '<p class="nota">Novas cores aparecem conforme você sobe de nível.</p>';
+      }
+      return '<div class="painel" role="tabpanel" id="p-' + k + '" aria-labelledby="aba-' + k + '"' + (k === abaAtual ? "" : " hidden") + ">" + corpo + "</div>";
+    }).join("");
+    var inp = $("f-nome");
+    inp.addEventListener("input", function () { rascunho.nome = J.limparNome(inp.value); pintarPalco(); sujo(); });
+  }
+
+  function pintarAtributos() {
+    var e = J.estado(), p = J.perfil(), pastas = [];
+    var cursos = window.PORTAL_ALUNO ? window.PORTAL_ALUNO.cursos : [];
+    cursos.forEach(function (c) { if (p && c.nome === p.curso) c.disciplinas.forEach(function (x) { pastas.push(x[1]); }); });
+    var lista = J.ATRIBUTOS.filter(function (a) {
+      return e.atributos[a.id] > 0 || a.id === "maker" || (!p ? a.id !== "geral" && a.id !== "criacao" && a.id !== "processo" : a.pastas.some(function (x) { return pastas.indexOf(x) >= 0; }));
+    });
+    var max = Math.max(2000, Math.max.apply(null, lista.map(function (a) { return e.atributos[a.id]; })));
+    $("atributos").innerHTML = lista.map(function (a) {
+      var v = e.atributos[a.id];
+      return '<div class="atr"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + a.icone + '"/></svg></span>' +
+        "<b>" + esc(a.nome) + "<span>" + fmt(v) + " XP</span></b>" +
+        '<div class="barra" role="progressbar" aria-label="' + esc(a.nome) + '" aria-valuemin="0" aria-valuemax="' + max + '" aria-valuenow="' + v + '"><i style="width:' + Math.round(v / max * 100) + '%"></i></div>' +
+        "<small>" + esc(a.area) + (v ? "" : " · ainda sem XP") + "</small></div>";
+    }).join("");
+  }
+
+  function pintarConquistas() {
+    var e = J.estado();
+    $("conq-cont").textContent = e.conquistas.length + " de " + J.CONQUISTAS.length;
+    $("conquistas").innerHTML = J.CONQUISTAS.map(function (c) {
+      var ok = e.conquistas.indexOf(c.id) >= 0, a = J.ACESSORIOS.filter(function (x) { return x.conquista === c.id; })[0];
+      return '<li class="conq' + (ok ? "" : " off") + '"><span class="sel" aria-hidden="true">' + (ok ? "★" : "🔒") + "</span><div><b>" + esc(c.nome) +
+        '<span class="sr" style="position:absolute;left:-9999px">' + (ok ? " (conquistada)" : " (bloqueada)") + "</span></b><p>" + esc(c.como) + "</p>" +
+        (a ? '<span class="premio">Libera: ' + esc(a.nome) + "</span>" : "") + "</div></li>";
+    }).join("");
+  }
+
+  function pintarMateriais() {
+    var e = J.estado();
+    if (!e.materiais.length) {
+      $("materiais").innerHTML = '<p class="vazio">Ainda não há atividades registradas. Abra uma disciplina e faça a primeira atividade: o robô ganha XP na hora.</p>';
+      return;
+    }
+    var nomeAt = function (id) { var a = J.ATRIBUTOS.filter(function (x) { return x.id === id; })[0]; return a ? a.nome : id; };
+    $("materiais").innerHTML = '<div style="overflow-x:auto"><table><thead><tr><th scope="col">Material</th><th scope="col">Atributo</th><th scope="col">Feito</th><th scope="col" class="n">XP</th></tr></thead><tbody>' +
+      e.materiais.map(function (m) {
+        var pct = Math.round(m.fracao * 100);
+        return "<tr><td>" + esc(m.nome) + "</td><td>" + esc(nomeAt(m.atributo)) + '</td><td><span class="mono" style="font-size:13px">' + m.feitas + "/" + m.total + " · " + pct + '%</span><div class="barra" aria-hidden="true"><i style="width:' + pct + '%"></i></div></td><td class="n">' + fmt(m.xp) + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+  }
+
+  function sujo() {
+    var mudou = JSON.stringify(J.validarEscolhas(rascunho, J.estado())) !== JSON.stringify(salvo);
+    $("desfazer").disabled = !mudou;
+    $("msg").className = "msg";
+    $("msg").textContent = mudou ? "Há mudanças não salvas." : "";
+  }
+
+  function tudo() {
+    rascunho = J.validarEscolhas(rascunho, J.estado());
+    pintarPalco(); pintarAbas(); pintarPaineis(); pintarAtributos(); pintarConquistas(); pintarMateriais(); sujo();
+  }
+
+  $("abas").addEventListener("click", function (ev) {
+    var b = ev.target.closest("[role=tab]"); if (!b) return;
+    abaAtual = b.id.slice(4); pintarAbas(); pintarPaineis(); $("aba-" + abaAtual).focus();
+  });
+  $("abas").addEventListener("keydown", function (ev) {
+    var i = ABAS.map(function (a) { return a[0]; }).indexOf(abaAtual), n = ABAS.length;
+    var j = ev.key === "ArrowRight" ? (i + 1) % n : ev.key === "ArrowLeft" ? (i - 1 + n) % n : ev.key === "Home" ? 0 : ev.key === "End" ? n - 1 : -1;
+    if (j < 0) return;
+    ev.preventDefault(); abaAtual = ABAS[j][0]; pintarAbas(); pintarPaineis(); $("aba-" + abaAtual).focus();
+  });
+  function escolher(b) {
+    if (b.getAttribute("aria-disabled") === "true") {
+      $("msg").className = "msg"; $("msg").textContent = "Bloqueado: " + b.querySelector(".tranca").textContent.replace("🔒 ", "") + ".";
+      return;
+    }
+    var k = b.getAttribute("data-k");
+    rascunho[k] = b.getAttribute("data-v");
+    pintarPalco(); pintarPaineis();
+    var nb = document.querySelector('.opc[data-k="' + k + '"][data-v="' + rascunho[k] + '"]'); if (nb) nb.focus();
+    sujo();
+  }
+  $("paineis").addEventListener("click", function (ev) { var b = ev.target.closest(".opc"); if (b) escolher(b); });
+  $("paineis").addEventListener("keydown", function (ev) {
+    var b = ev.target.closest(".opc"); if (!b) return;
+    var grupo = Array.prototype.slice.call(b.parentNode.querySelectorAll(".opc")), i = grupo.indexOf(b);
+    var j = ev.key === "ArrowRight" || ev.key === "ArrowDown" ? (i + 1) % grupo.length : ev.key === "ArrowLeft" || ev.key === "ArrowUp" ? (i - 1 + grupo.length) % grupo.length : -1;
+    if (j < 0) return;
+    ev.preventDefault();
+    grupo.forEach(function (x) { x.tabIndex = -1; }); grupo[j].tabIndex = 0; grupo[j].focus();
+  });
+  $("desfazer").addEventListener("click", function () { rascunho = Object.assign({}, salvo); tudo(); });
+  $("salvar").addEventListener("click", function () {
+    var b = $("salvar"); b.disabled = true; $("msg").className = "msg"; $("msg").textContent = "Salvando…";
+    J.salvar(rascunho).then(function (r) {
+      b.disabled = false;
+      salvo = J.escolhas(); rascunho = Object.assign({}, salvo);
+      tudo();
+      $("msg").className = "msg " + (r.ok ? "ok" : "erro");
+      $("msg").textContent = r.ok ? (r.demo ? "Salvo neste aparelho (modo demonstração)." : "Personagem salvo!") : "Salvo neste aparelho. " + (r.erro || "Não foi possível enviar ao professor.");
+    });
+  });
+
+  window.addEventListener("jogo:atualizado", function () {
+    var mudou = JSON.stringify(J.validarEscolhas(rascunho, J.estado())) !== JSON.stringify(salvo);
+    salvo = J.escolhas(); if (!mudou) rascunho = Object.assign({}, salvo);
+    tudo();
+  });
+
+  var aviso = $("aviso");
+  if (J.demo) { aviso.hidden = false; aviso.textContent = "Modo demonstração: dados de exemplo, nada é enviado ao professor."; }
+  else if (!J.perfil()) { aviso.hidden = false; aviso.innerHTML = "Você não entrou no portal. Para ver um exemplo, abra esta página com <b>?demo</b> no endereço."; }
+  else if (!J.temServidor()) { aviso.hidden = false; aviso.textContent = "O envio para o professor ainda não está ligado. O personagem fica salvo neste aparelho."; }
+  tudo();
+  J.carregar(true);
+})();
+</script>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dicionário de Dados - Engenharia de Software</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #1F5135 0%, #163D28 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .capa {
+            background: linear-gradient(135deg, #1F5135 0%, #163D28 100%);
+            color: white;
+            padding: 100px 40px;
+            text-align: center;
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .capa h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .capa h2 {
+            font-size: 2em;
+            margin-bottom: 50px;
+            font-weight: 400;
+            opacity: 0.95;
+        }
+
+        .instituicao {
+            font-size: 1.3em;
+            margin: 30px 0;
+            opacity: 0.9;
+        }
+
+        .autor {
+            font-size: 1.5em;
+            margin: 60px 0 30px 0;
+            font-weight: 600;
+        }
+
+        .autoria {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 60px;
+        }
+
+        .info-capa {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1F5135 0%, #163D28 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .info-header {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-bottom: 3px solid #1F5135;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .info-item {
+            padding: 10px 0;
+        }
+
+        .info-item strong {
+            color: #1F5135;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #1F5135;
+            border-bottom: 3px solid #1F5135;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '📋';
+            font-size: 1.5em;
+        }
+
+        .term {
+            background: #f8f9fa;
+            border-left: 5px solid #1F5135;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            page-break-inside: avoid;
+        }
+
+        .term-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #163D28;
+            margin-bottom: 8px;
+        }
+
+        .term-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .term-content.full {
+            grid-template-columns: 1fr;
+        }
+
+        .term-field {
+            margin-bottom: 10px;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #1F5135;
+            display: inline-block;
+            width: 120px;
+        }
+
+        .field-value {
+            color: #555;
+        }
+
+        .example {
+            background: #e8f4f8;
+            border-left: 4px solid #17a2b8;
+            padding: 12px 15px;
+            margin-top: 10px;
+            border-radius: 3px;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        .example::before {
+            content: '💡 Exemplo: ';
+            font-weight: bold;
+            font-style: normal;
+            color: #17a2b8;
+        }
+
+        .obs {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 15px;
+            margin-top: 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            color: #856404;
+        }
+
+        .obs::before {
+            content: '⚠️ Observação: ';
+            font-weight: bold;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #1F5135;
+        }
+
+        .toc h2 {
+            color: #1F5135;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .toc ul {
+            list-style: none;
+            padding-left: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .toc li {
+            padding: 8px 0;
+        }
+
+        .toc a {
+            color: #163D28;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .toc a:hover {
+            color: #1F5135;
+            text-decoration: underline;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 40px;
+            border-top: 3px solid #1F5135;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .page-break {
+            page-break-after: always;
+            height: 2px;
+            margin: 30px 0;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .apresentacao {
+            background: #f8f9fa;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            border-left: 5px solid #1F5135;
+        }
+
+        .apresentacao h2 {
+            color: #1F5135;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .apresentacao p {
+            text-align: justify;
+            margin-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .capa h1 {
+                font-size: 2em;
+            }
+            .capa h2 {
+                font-size: 1.3em;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            .term-content {
+                grid-template-columns: 1fr;
+            }
+            .toc ul {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+    <div class="container" role="main">
+        <!-- CAPA -->
+        <div class="capa">
+            <h1>📚 Dicionário de Dados</h1>
+            <h2>Engenharia de Software I</h2>
+
+            <div class="instituicao">
+                <strong>Instituto Federal de Sergipe</strong><br>
+                Campus Tobias Barreto
+            </div>
+
+            <div class="autor">Elaborado por:</div>
+            <div class="autoria">Prof. MSc. Eber da Silva de Santana</div>
+
+            <div class="info-capa">
+                <strong>Curso:</strong> Subsequente Noturno<br>
+                <strong>Ano:</strong> 2026
+            </div>
+        </div>
+
+        <!-- APRESENTAÇÃO -->
+        <div class="content">
+            <div class="apresentacao">
+                <h2>Sobre este Dicionário</h2>
+                <p>Este Dicionário de Dados foi elaborado como ferramenta pedagógica para a disciplina de Engenharia de Software I, ministrada no Curso Subsequente Noturno do Instituto Federal de Sergipe, Campus Tobias Barreto.</p>
+                <p>O objetivo é consolidar os principais conceitos, terminologias e definições utilizadas na área de Engenharia de Software, oferecendo aos alunos uma referência rápida e abrangente dos termos estudados ao longo do curso.</p>
+            </div>
+
+            <div class="toc">
+                <h2>📖 Índice de Seções</h2>
+                <ul>
+                    <li><a href="#fundamentais">1. Conceitos Fundamentais</a></li>
+                    <li><a href="#requisitos">2. Levantamento de Requisitos</a></li>
+                    <li><a href="#analise">3. Análise Orientada a Objetos</a></li>
+                    <li><a href="#projeto">4. Projeto Orientado a Objetos</a></li>
+                    <li><a href="#uml">5. UML e Modelagem</a></li>
+                    <li><a href="#padroes">6. Padrões de Projeto</a></li>
+                    <li><a href="#banco">7. Banco de Dados</a></li>
+                    <li><a href="#persistencia">8. Persistência</a></li>
+                </ul>
+            </div>
+
+            <div class="page-break"></div>
+
+            <!-- SEÇÃO 1: CONCEITOS FUNDAMENTAIS -->
+            <div class="section" id="fundamentais">
+                <h2 class="section-title">Conceitos Fundamentais</h2>
+
+                <div class="term">
+                    <div class="term-title">Software</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Conjunto de programas + arquivos de configuração + documentação do sistema + documentação do usuário</span>
+                        </div>
+                        <div class="example">Sistema de gestão de vendas com documentação e manuais de usuário</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Engenharia de Software (ES)</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Disciplina que compreende todos os aspectos da produção de software, desde especificação até manutenção</span>
+                        </div>
+                        <div class="obs">A ES abrange mais que apenas programação</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Sistema</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Conjunto integrado de componentes de software que trabalham juntos para fornecer funcionalidades específicas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <!-- SEÇÃO 2: LEVANTAMENTO DE REQUISITOS -->
+            <div class="section" id="requisitos">
+                <h2 class="section-title">Levantamento de Requisitos</h2>
+
+                <div class="term">
+                    <div class="term-title">Requisitos</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Descrição das necessidades e características que um sistema deve possuir</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Requisitos Funcionais</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Descrevem as funcionalidades e comportamentos que o sistema deve executar</span>
+                        </div>
+                        <div class="example">O sistema deve permitir que o usuário faça login com email e senha</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Requisitos Não-Funcionais</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Restrições sobre serviços ofertados pelo sistema. Definem qualidades gerais do sistema</span>
+                        </div>
+                        <div class="example">O sistema deve responder em menos de 2 segundos (Performance)</div>
+                        <div class="obs">Requisitos funcionais podem ser sacrificados para atender não-funcionais</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Caso de Uso</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Técnica para entender e descrever os requisitos funcionais de um sistema</span>
+                        </div>
+                        <div class="example">Caso de Uso: Fazer Login | Ator: Usuário | Ações: Inserir email, senha, clicar login</div>
+                        <div class="obs">Casos de uso são textos, não diagramas</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Ator</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Entidade externa que interage com o sistema para realizar tarefas</span>
+                        </div>
+                        <div class="example">Usuário, Administrador, Sistema de Pagamento</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Visão</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Descrição de alto nível dos objetivos e escopo do projeto</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Glossário</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Dicionário de termos específicos do domínio do negócio</span>
+                        </div>
+                        <div class="example">Termo: Nota Fiscal | Significado: Documento fiscal que registra venda</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <!-- SEÇÃO 3: ANÁLISE ORIENTADA A OBJETOS -->
+            <div class="section" id="analise">
+                <h2 class="section-title">Análise Orientada a Objetos</h2>
+
+                <div class="term">
+                    <div class="term-title">Classe</div>
+                    <div class="term-content">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Descrição abstrata de um conjunto de objetos com características similares</span>
+                        </div>
+                    </div>
+                    <div class="example">Classe: Produto | Atributos: nome, preço | Operações: calcularDesconto()</div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Objeto</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Instância de uma classe. Entidade concreta que possui estado e comportamento</span>
+                        </div>
+                        <div class="example">Objeto: Notebook Dell Inspiron com preço R$ 2500,00</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Atributo</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Propriedade ou característica de uma classe que descreve seu estado</span>
+                        </div>
+                        <div class="example">Classe Cliente: CPF, nome, email, telefone</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Associação</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Relacionamento entre duas ou mais classes que indica como elas se conectam</span>
+                        </div>
+                        <div class="example">Empresa trabalha com Pessoa | Multiplicidade: 1 empresa - * funcionários</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Herança</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Mecanismo que permite que uma classe herde atributos e operações de outra classe</span>
+                        </div>
+                        <div class="example">Classe Veículo (pai) → Carro, Moto, Caminhão (filhas)</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Encapsulamento</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Princípio que oculta os detalhes internos de uma classe, expondo apenas uma interface pública</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Modificadores:</span>
+                            <span class="field-value">public, private, protected</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Polimorfismo</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Capacidade de um objeto responder a mensagens de diferentes formas</span>
+                        </div>
+                        <div class="example">Método calcularArea() em Quadrado, Triângulo, Círculo</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <!-- SEÇÃO 4: PROJETO ORIENTADO A OBJETOS -->
+            <div class="section" id="projeto">
+                <h2 class="section-title">Projeto Orientado a Objetos</h2>
+
+                <div class="term">
+                    <div class="term-title">Operação</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Implementação de uma responsabilidade de uma classe</span>
+                        </div>
+                        <div class="example">Operação: calcularDesconto(percentual: float): float</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Responsabilidade</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Obrigação de um objeto de fazer algo ou conhecer algo</span>
+                        </div>
+                        <div class="example">Classe Pagamento: responsável por fazer o pagamento e conhecer o valor</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Princípio de Baixo Acoplamento</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Princípio de design que promove independência entre classes</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Benefício:</span>
+                            <span class="field-value">Facilita manutenção, teste e reutilização de código</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Princípio de Alta Coesão</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Princípio que promove que elementos de uma classe sejam altamente relacionados</span>
+                        </div>
+                        <div class="example">Classe Produto agrupa todos atributos e operações relacionados a produto</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <!-- SEÇÃO 5: UML E MODELAGEM -->
+            <div class="section" id="uml">
+                <h2 class="section-title">UML e Modelagem</h2>
+
+                <div class="term">
+                    <div class="term-title">UML (Unified Modeling Language)</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Linguagem padronizada para modelagem visual de sistemas orientados a objetos</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Objetivo:</span>
+                            <span class="field-value">Comunicação clara entre analistas, designers e desenvolvedores</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Diagrama de Casos de Uso</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Diagrama que mostra atores, casos de uso e suas interações com o sistema</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Propósito:</span>
+                            <span class="field-value">Visualizar funcionalidades de alto nível do sistema</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Diagrama de Classes</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Diagrama que mostra as classes, seus atributos, operações e relacionamentos</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Uso:</span>
+                            <span class="field-value">Análise e Projeto orientado a objetos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Diagrama de Sequência</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Diagrama que mostra a ordem temporal das mensagens entre objetos</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Propósito:</span>
+                            <span class="field-value">Descrever como um caso de uso é realizado através de interações entre objetos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Multiplicidade</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Notação que indica quantas instâncias de uma classe se relacionam com outra</span>
+                        </div>
+                        <div class="example">Empresa 1 ---- * Departamento (Uma empresa tem muitos departamentos)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <!-- SEÇÃO 6: PADRÕES DE PROJETO -->
+            <div class="section" id="padroes">
+                <h2 class="section-title">Padrões de Projeto (Design Patterns)</h2>
+
+                <div class="term">
+                    <div class="term-title">Padrão de Projeto</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Descrição de um problema e sua solução que pode ser aplicada em muitas situações</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Propósito:</span>
+                            <span class="field-value">Facilitar discussão de ideias complexas entre arquitetos e designers</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Strategy (Estratégia)</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Padrão comportamental que define uma família de algoritmos intercambiáveis</div>
+                        </div>
+                        <div class="example">Diferentes estratégias de cálculo de imposto conforme a região</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Singleton</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Padrão criacional que garante que uma classe tenha apenas uma instância</span>
+                        </div>
+                        <div class="example">Pool de conexões, Logger, Configurações da aplicação</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Factory (Fábrica)</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Padrão criacional que encapsula a criação de objetos</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Vantagens:</span>
+                            <span class="field-value">Desacoplamento, flexibilidade na mudança de tipos criados</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Observer (Observador)</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Padrão comportamental que define dependência um-para-muitos entre objetos</span>
+                        </div>
+                        <div class="example">Quando preço muda, todos os observadores são notificados</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <!-- SEÇÃO 7: BANCO DE DADOS -->
+            <div class="section" id="banco">
+                <h2 class="section-title">Banco de Dados</h2>
+
+                <div class="term">
+                    <div class="term-title">Banco de Dados</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Coleção organizada de dados relacionados, armazenados e acessíveis de forma persistente</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Objetivo:</span>
+                            <span class="field-value">Armazenar, organizar e recuperar dados de forma eficiente</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Tabela</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Estrutura de banco de dados composta por linhas (registros) e colunas (campos/atributos)</span>
+                        </div>
+                        <div class="example">Tabela Produto: idProduto, nome, preço, estoque</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Chave Primária</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Identificador único de cada registro em uma tabela</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Características:</span>
+                            <span class="field-value">Não pode ser nula, deve ser única, imutável</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Chave Estrangeira</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Campo que referencia a chave primária de outra tabela</span>
+                        </div>
+                        <div class="example">idProduto em Pedido referencia idProduto em Produto</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">SQL (Structured Query Language)</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Linguagem padrão para consulta, inserção, atualização e exclusão de dados</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Comandos principais:</span>
+                            <span class="field-value">SELECT, INSERT, UPDATE, DELETE, CREATE, DROP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-break"></div>
+
+            <!-- SEÇÃO 8: PERSISTÊNCIA -->
+            <div class="section" id="persistencia">
+                <h2 class="section-title">Persistência</h2>
+
+                <div class="term">
+                    <div class="term-title">Persistência</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Mecanismo que permite que dados de objetos sejam armazenados permanentemente</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Meios:</span>
+                            <span class="field-value">Banco de dados, arquivos, XML, JSON</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">ORM (Object-Relational Mapping)</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Técnica que mapeia objetos para registros em banco de dados relacional</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Exemplos:</span>
+                            <span class="field-value">Hibernate, EclipseLink, SQLAlchemy, Doctrine</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">DAO (Data Access Object)</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Padrão de design que encapsula acesso aos dados</span>
+                        </div>
+                        <div class="example">ProdutoDAO com métodos: salvar(), buscar(), atualizar(), deletar()</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Transação</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Sequência de operações executadas atomicamente (tudo ou nada)</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Propriedades ACID:</span>
+                            <span class="field-value">Atomicidade, Consistência, Isolamento, Durabilidade</span>
+                        </div>
+                        <div class="obs">Se algo falhar, toda a transação é revertida</div>
+                    </div>
+                </div>
+
+                <div class="term">
+                    <div class="term-title">Serialização</div>
+                    <div class="term-content full">
+                        <div class="term-field">
+                            <span class="field-label">Definição:</span>
+                            <span class="field-value">Processo de converter um objeto em formato que pode ser armazenado ou transmitido</span>
+                        </div>
+                        <div class="term-field">
+                            <span class="field-label">Formatos comuns:</span>
+                            <span class="field-value">XML, JSON, Binário</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RODAPÉ -->
+        <div class="footer" role="contentinfo">
+            <p><strong>Dicionário de Dados - Engenharia de Software I</strong></p>
+            <p>Elaborado por: Prof. MSc. Eber da Silva de Santana</p>
+            <p>Instituto Federal de Sergipe - Campus Tobias Barreto</p>
+            <p>Curso Subsequente Noturno | 2026</p>
+        </div>
+    </div>
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>

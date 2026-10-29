@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="pt-BR" data-a11y-cores>
+<head>
+<meta charset="utf-8">
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&]professor\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play nos Estudos · Disciplinas do Prof. Eber</title>
+<meta name="description" content="Escolha a sua disciplina. Os materiais são interativos e funcionam no computador e no celular.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>:root{--bg:#EEF2F0;--panel:#fff;--ink:#16261C;--ink-2:#3F4F5B;--muted:#5B6871;--line:#D5DDDA;--accent:#1F5135;--side:#16261C;--side-ink:#DCE5EA}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0F171D;--panel:#16222B;--ink:#E4ECEF;--ink-2:#B8C6CD;--muted:#8699A4;--line:#2A3A45;--accent:#6BAA68;--side:#0B140E}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3","Segoe UI",system-ui,sans-serif;font-size:17px;line-height:1.55}
+header{background:var(--side);color:var(--side-ink);padding-inline:clamp(16px,5vw,64px);padding-block:40px 36px}
+.wrap{max-width:1040px;margin:0 auto}
+.back{display:inline-block;color:var(--accent);text-decoration:none;font-size:15px;margin-bottom:14px}
+.back:hover{text-decoration:underline}
+.eyebrow{display:block;font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+header .eyebrow,header .back{color:#7FBF7A}
+h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:clamp(36px,6vw,58px);line-height:1.05;margin:8px 0 10px;color:#fff;text-wrap:balance}
+header p{margin:0;max-width:62ch;color:#B8C6CD}
+main{padding-inline:clamp(16px,5vw,64px);padding-block:28px 64px}
+h2.sec{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:28px;margin:18px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+a.card{display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;text-decoration:none;color:inherit;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+a.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+a.card:focus-visible{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(31,81,53,.28)}
+a.card h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:28px;margin:0;line-height:1.1;text-wrap:balance}
+a.card p{margin:0;color:var(--ink-2);font-size:15.5px}
+a.card .go{margin-top:auto;padding-top:6px;font-weight:600;color:var(--accent);display:flex;align-items:center;gap:4px}
+a.card:hover .go svg{transform:translateX(3px)}
+.go svg{transition:transform .15s ease}
+.meta{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+footer{color:var(--muted);font-size:14px;margin-top:32px}
+.entrar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;background:var(--panel);border:1px solid var(--accent);border-radius:12px;padding:16px 20px;margin:8px 0 6px}
+.entrar[hidden],section[hidden]{display:none}
+.entrar p{margin:0;color:var(--ink-2)}
+.entrar button{border:0;border-radius:8px;background:var(--accent);color:#fff;font:600 15px/1 "Source Sans 3","Segoe UI",system-ui,sans-serif;padding:11px 18px;cursor:pointer;transition:background .15s ease}
+.entrar button:hover{background:#163D28}
+.entrar button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (prefers-color-scheme:dark){.entrar button{color:#0B140E}.entrar button:hover{background:#8CC98A}}
+.bit-banner{display:flex;align-items:center;gap:18px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 20px;margin:0 0 18px;position:relative;overflow:hidden}
+.bit-banner[hidden]{display:none}
+.bit-banner::before{content:"";position:absolute;left:-40px;top:50%;width:200px;height:200px;transform:translateY(-50%);border-radius:50%;background:radial-gradient(circle,var(--accent-soft,#E3EEE7) 0,transparent 70%);pointer-events:none}
+.bit-av{position:relative;flex:none;width:96px}.bit-av svg{display:block;width:96px;height:auto}
+.bit-info{flex:1;min-width:0;position:relative}
+.bit-info h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:30px;line-height:1.05;margin:2px 0 0}
+.bit-info .meta{margin:0}
+.bit-barra{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0 4px;max-width:420px}
+.bit-barra i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--accent),#7CC77A)}
+.bit-ir{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 18px;border-radius:10px;background:var(--accent);color:var(--accent-ink,#fff);font-weight:600;text-decoration:none;position:relative}
+.bit-ir:hover svg{transform:translateX(3px)}.bit-ir svg{transition:transform .15s ease}
+.bit-ir:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (prefers-color-scheme:dark){.bit-ir{color:#0B140E}}
+@media (max-width:560px){.bit-banner{flex-wrap:wrap;gap:12px}.bit-av,.bit-av svg{width:72px}.bit-ir{width:100%;justify-content:center}}
+</style>
+<script src="aparencia.js"></script>
+</head>
+<body>
+<header><div class="wrap">
+  <span class="eyebrow">Prof. Eber Santana · IFS</span>
+  <h1>Play nos Estudos</h1>
+  <p>Escolha a sua disciplina. A cada atividade, o seu robô Bit ganha experiência, sobe de nível e evolui.</p>
+</div></header>
+<main><div class="wrap">
+  <section class="bit-banner" id="bit-banner" aria-labelledby="bit-nome" hidden>
+    <div class="bit-av" id="bit-av"></div>
+    <div class="bit-info">
+      <span class="eyebrow">Seu personagem</span>
+      <h2 id="bit-nome">Bit</h2>
+      <p class="meta" id="bit-linha"></p>
+      <div class="bit-barra" role="progressbar" aria-labelledby="bit-falta" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="bit-barra"><i></i></div>
+      <p class="meta" id="bit-falta"></p>
+    </div>
+    <a class="bit-ir" href="meu-personagem/" id="bit-ir">Meu personagem<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  </section>
+  <section id="meu-curso" hidden>
+    <h2 class="sec" style="margin-bottom:2px">Suas disciplinas</h2>
+    <p class="meta" id="meu-curso-titulo" style="margin:0 0 12px"></p>
+    <div class="grid" id="meu-curso-grid"></div>
+  </section>
+  <div class="entrar" id="entrar-aviso" hidden>
+    <p><b>Entre no portal</b> para ver as disciplinas do seu curso e salvar o seu progresso.</p>
+    <button type="button" id="entrar-btn">Entrar</button>
+  </div>
+  <h2 class="sec" id="todas-titulo">Disciplinas</h2>
+  <div class="grid" id="todas-grid">
+    <a class="card" href="redes-de-computadores/" aria-label="Abrir Redes de Computadores">
+      <span class="meta">Técnico em Informática · 3 materiais</span>
+      <h2>Redes de Computadores</h2>
+      <p>Da ARPANET ao cabo crimpado, seguindo as camadas do modelo TCP/IP.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="card" href="projeto-de-redes/" aria-label="Abrir Projeto de Redes">
+      <span class="meta">Técnico em Informática · 1 material</span>
+      <h2>Projeto de Redes</h2>
+      <p>Metodologia Top-Down: das metas do negócio ao teste e à documentação da rede.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="card" href="informatica-basica/" aria-label="Abrir Informática Básica">
+      <span class="meta">Subsequente em Informática · 4 materiais</span>
+      <h2>Informática Básica</h2>
+      <p>Primeiros passos no computador, na internet e no pensamento computacional.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="card" href="engenharia-de-software/" aria-label="Abrir Engenharia de Software">
+      <span class="meta">Subsequente em Informática · 6 materiais</span>
+      <h2>Engenharia de Software</h2>
+      <p>Processos, requisitos e modelagem de software.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="card" href="banco-de-dados/" aria-label="Abrir Banco de Dados">
+      <span class="meta">Integrado em Desenvolvimento de Sistemas · 2º ano · 2 materiais</span>
+      <h2>Banco de Dados</h2>
+      <p>Modelagem, SQL e integração de sistemas com banco de dados.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="card" href="construcao-de-sites-1/" aria-label="Abrir Construção de Sites 1">
+      <span class="meta">Integrado em Desenvolvimento de Sistemas · 1º ano · 1 material</span>
+      <h2>Construção de Sites 1</h2>
+      <p>HTML e CSS do bloco de notas ao site publicado.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+    <a class="card" href="seguranca-da-informacao/" aria-label="Abrir Segurança da Informação">
+      <span class="meta">Técnico em Informática · 1 material</span>
+      <h2>Segurança da Informação</h2>
+      <p>Princípios, ameaças, controles e boas práticas de proteção da informação.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+  </div>
+  <h2 class="sec">Recursos de aula</h2>
+  <div class="grid">
+    <a class="card" href="recursos-de-aula/" aria-label="Abrir Recursos de aula">
+      <span class="meta">3 recursos</span>
+      <h2>Recursos de aula</h2>
+      <p>Cronômetro com ranking de equipes, Linha do Tempo Tecnológica e códigos para aprender com IA.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+  </div>
+  <h2 class="sec">Laboratório 3D <span style="font-weight:600;color:var(--muted)">(Vamos praticar?)</span></h2>
+  <div class="grid">
+    <a class="card" href="laboratorio-3d/" aria-label="Abrir Laboratório 3D">
+      <span class="meta">3 laboratórios</span>
+      <h2>Laboratório 3D</h2>
+      <p>ESP32, micro:bit e Arduino em 3D: gire a placa, monte o circuito e programe direto no navegador.</p>
+      <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    </a>
+  </div>
+  <footer>Play nos Estudos · Prof. Eber Santana · IFS Campus Tobias Barreto. O progresso fica salvo no aparelho e é enviado ao professor quando você entra no portal.</footer>
+</div></main>
+<script src="config.js"></script>
+<script src="progresso-turma.js"></script>
+<script src="jogo/jogo.js"></script>
+<script>
+(function () {
+  var J = window.JOGO; if (!J) return;
+  var $ = function (s) { return document.getElementById(s); };
+  function pintar() {
+    var e = J.estado(), x = J.escolhas(), on = !!(J.perfil() || J.demo);
+    $("bit-banner").hidden = !on;
+    if (!on) return;
+    $("bit-av").innerHTML = J.svg(96);
+    $("bit-av").firstChild.classList.add("bit-vivo");
+    $("bit-nome").textContent = x.nome + " · Nível " + e.nivel;
+    $("bit-linha").textContent = e.cargo + " · " + e.xp.toLocaleString("pt-BR") + " XP · " + e.conquistas.length + " de " + J.CONQUISTAS.length + " conquistas";
+    var pct = Math.round(e.fracao * 100);
+    $("bit-barra").setAttribute("aria-valuenow", pct);
+    $("bit-barra").firstChild.style.width = pct + "%";
+    $("bit-falta").textContent = "Faltam " + (e.proximo - e.xp).toLocaleString("pt-BR") + " XP para o nível " + (e.nivel + 1);
+    if (J.demo) $("bit-ir").setAttribute("href", "meu-personagem/?demo");
+  }
+  window.addEventListener("jogo:atualizado", pintar);
+  window.addEventListener("perfil:mudou", pintar);
+  pintar();
+})();
+</script>
+<script>
+(function () {
+  var P = window.PORTAL_ALUNO; if (!P) return;
+  var todas = document.getElementById("todas-grid"), meu = document.getElementById("meu-curso"),
+      meuGrid = document.getElementById("meu-curso-grid"), aviso = document.getElementById("entrar-aviso");
+  var cards = Array.prototype.slice.call(todas.querySelectorAll("a.card"));
+  function pasta(a) { return a.getAttribute("href").replace(/\/$/, ""); }
+  function render() {
+    var p = P.perfil(), curso = null;
+    if (p) P.cursos.forEach(function (c) { if (c.nome === p.curso) curso = c; });
+    cards.forEach(function (a) { todas.appendChild(a); });
+    if (!curso) { meu.hidden = true; aviso.hidden = false; document.getElementById("todas-titulo").textContent = "Disciplinas"; return; }
+    var minhas = curso.disciplinas.map(function (d) { return d[1]; });
+    minhas.forEach(function (f) { cards.forEach(function (a) { if (pasta(a) === f) meuGrid.appendChild(a); }); });
+    document.getElementById("meu-curso-titulo").textContent = curso.nome + " · " + p.turma + " · " + p.turno;
+    document.getElementById("todas-titulo").textContent = "Outras disciplinas";
+    meu.hidden = false; aviso.hidden = true;
+  }
+  document.getElementById("entrar-btn").onclick = P.entrar;
+  window.addEventListener("perfil:mudou", render);
+  render();
+})();
+</script>
+<script src="acessibilidade.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,3490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engenharia de Software Interativa</title>
+<script src="../aparencia.js"></script>
+</head>
+<body>
+<title>Engenharia de Software Interativa</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&family=Open+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ============================================================
+   Tokens — derivados do design system Sanok (demo 9)
+   ============================================================ */
+:root{
+  --paper:#ffffff;
+  --paper-2:#f7f7f8;
+  --ink:#101010;
+  --ink-soft:#3d3d42;
+  --muted:#6d6d74;
+  --line:#e4e4e8;
+  --line-soft:#efeff2;
+  --panel:#101010;
+  --panel-2:#191919;
+  --panel-line:rgba(255,255,255,.10);
+  --panel-text:#f2f2f2;
+  --panel-muted:#a9a9b0;
+  --grad:linear-gradient(to right,#163D28 0%,#1F5135 50%,#2E8B57 100%);
+  --c1:#163D28; --c2:#1F5135; --c3:#2E8B57;
+  --ok:#2E8B57; --warn:#e0a33a; --bad:#e2685f;
+  --font-display:'Poppins',system-ui,sans-serif;
+  --font-body:'Open Sans','Poppins',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sidebar-w:302px;
+  --radius:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0c0c0d; --paper-2:#141416; --ink:#f2f2f4; --ink-soft:#c9c9cf;
+    --muted:#8b8b93; --line:#26262b; --line-soft:#1c1c20;
+    --panel:#141416; --panel-2:#1c1c20; --panel-line:rgba(255,255,255,.09);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0c0c0d; --paper-2:#141416; --ink:#f2f2f4; --ink-soft:#c9c9cf;
+  --muted:#8b8b93; --line:#26262b; --line-soft:#1c1c20;
+  --panel:#141416; --panel-2:#1c1c20; --panel-line:rgba(255,255,255,.09);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--font-body);font-weight:300;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--c2);outline-offset:3px}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+
+/* ============================================================
+   Layout base
+   ============================================================ */
+.shell{display:flex;min-height:100vh}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  position:fixed;inset:0 auto 0 0;width:var(--sidebar-w);
+  background:var(--paper);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;z-index:60;
+}
+.sidebar-head{padding:30px 26px 20px;border-bottom:1px solid var(--line-soft)}
+.brand-eyebrow{
+  font-family:var(--font-display);font-size:10px;font-weight:600;
+  letter-spacing:3.2px;text-transform:uppercase;color:var(--muted);margin:0 0 10px;
+}
+.brand-title{
+  font-family:var(--font-display);font-size:23px;font-weight:300;
+  line-height:1.2;letter-spacing:-.4px;margin:0;
+}
+.brand-title b{font-weight:500;background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.brand-author{
+  font-family:var(--font-body);font-size:12.5px;line-height:1.5;
+  color:var(--ink-soft);margin:12px 0 0;
+}
+.brand-author span{
+  display:block;font-family:var(--font-display);font-size:9.5px;font-weight:600;
+  letter-spacing:2.4px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;
+}
+.brand-author b{font-weight:500;color:var(--ink)}
+
+.progress-wrap{padding:18px 26px 16px;border-bottom:1px solid var(--line-soft);display:flex;flex-direction:column;gap:8px}
+.progress-meta{display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;color:var(--muted)}
+.progress-meta strong{color:var(--ink);font-size:12px;font-variant-numeric:tabular-nums}
+.progress-track{height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.progress-bar{height:100%;width:0;background:var(--grad);transition:width .5s cubic-bezier(.4,0,.2,1)}
+
+.nav{flex:1;overflow-y:auto;padding:18px 14px 30px}
+.nav-group{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--muted);padding:14px 12px 8px;margin:0;
+}
+.nav-item{
+  display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+  padding:10px 12px;border:none;border-radius:var(--radius);background:transparent;
+  color:var(--ink-soft);cursor:pointer;transition:background .2s ease,color .2s ease;
+  font-family:var(--font-display);font-size:13.5px;font-weight:400;line-height:1.35;
+}
+.nav-item:hover{background:var(--paper-2);color:var(--ink)}
+.nav-item.active{background:var(--ink);color:var(--paper)}
+.nav-item.active .nav-num{color:var(--paper);opacity:.65}
+.nav-num{
+  flex:0 0 26px;font-family:var(--font-mono);font-size:11px;color:var(--muted);
+  padding-top:2px;font-variant-numeric:tabular-nums;
+}
+.nav-label{flex:1}
+.nav-check{
+  flex:0 0 14px;height:14px;width:14px;margin-top:3px;border-radius:50%;
+  border:1.5px solid var(--line);position:relative;transition:all .3s ease;
+}
+.nav-item.active .nav-check{border-color:rgba(255,255,255,.35)}
+.nav-item.done .nav-check{background:var(--c3);border-color:var(--c3)}
+.nav-item.done .nav-check::after{
+  content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
+  border:solid #06281f;border-width:0 1.6px 1.6px 0;transform:rotate(45deg);
+}
+.sidebar-foot{padding:14px 26px 20px;border-top:1px solid var(--line-soft);display:flex;gap:10px;align-items:center;justify-content:space-between}
+.foot-note{font-size:11px;color:var(--muted);letter-spacing:.4px;margin:0}
+.reset-btn{
+  background:none;border:1px solid var(--line);color:var(--muted);border-radius:20px;
+  font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 12px;cursor:pointer;
+  font-family:var(--font-display);font-weight:600;transition:all .25s ease;
+}
+.reset-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+/* ---------- Topbar (mobile) ---------- */
+.topbar{
+  display:none;position:fixed;top:0;left:0;right:0;z-index:70;
+  background:var(--paper);border-bottom:1px solid var(--line);
+  padding:12px 16px;align-items:center;gap:14px;
+}
+.burger{
+  background:none;border:1px solid var(--line);border-radius:var(--radius);
+  width:38px;height:38px;display:flex;flex-direction:column;gap:4px;
+  align-items:center;justify-content:center;cursor:pointer;color:var(--ink);
+}
+.burger span{display:block;width:16px;height:1.5px;background:currentColor}
+.topbar-title{font-family:var(--font-display);font-size:14px;font-weight:500;margin:0}
+
+/* ---------- Main ---------- */
+.main{margin-left:var(--sidebar-w);flex:1;min-width:0;padding:0 0 90px}
+.topic{display:none;animation:fade .45s ease both}
+.topic.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.topic-head{
+  padding:74px 8vw 46px;border-bottom:1px solid var(--line-soft);
+  max-width:1180px;
+}
+.eyebrow{
+  font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:3.4px;
+  text-transform:uppercase;color:var(--muted);margin:0 0 16px;display:flex;align-items:center;gap:12px;
+}
+.eyebrow::after{content:"";height:1px;width:46px;background:var(--grad)}
+.topic-title{
+  font-family:var(--font-display);font-size:clamp(30px,4.4vw,50px);font-weight:200;
+  line-height:1.08;letter-spacing:-1.2px;margin:0 0 22px;text-wrap:balance;max-width:16ch;
+}
+.topic-lead{
+  font-size:17px;line-height:1.75;color:var(--ink-soft);margin:0;max-width:62ch;font-weight:300;
+}
+.topic-body{padding:46px 8vw 0;max-width:1180px}
+
+/* ---------- Blocos de conteúdo ---------- */
+.concept-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:22px;margin:0 0 44px}
+.concept{
+  border:1px solid var(--line);border-radius:var(--radius);padding:24px 22px;background:var(--paper);
+  transition:border-color .3s ease,transform .3s ease;
+}
+.concept:hover{border-color:var(--ink);transform:translateY(-2px)}
+.concept h3{
+  font-family:var(--font-display);font-size:12px;font-weight:600;letter-spacing:2.2px;
+  text-transform:uppercase;margin:0 0 12px;color:var(--ink);
+}
+.concept p{margin:0;font-size:14.5px;line-height:1.75;color:var(--ink-soft)}
+.concept .kicker{
+  display:inline-block;font-family:var(--font-mono);font-size:11px;color:var(--muted);
+  margin-bottom:10px;letter-spacing:.5px;
+}
+
+.callout{
+  border-left:2px solid transparent;border-image:var(--grad) 1;
+  padding:6px 0 6px 22px;margin:0 0 44px;max-width:64ch;
+}
+.callout p{margin:0;font-family:var(--font-display);font-size:17px;font-weight:300;line-height:1.6;color:var(--ink)}
+
+/* ---------- Laboratório interativo ---------- */
+.lab{
+  background:var(--panel);color:var(--panel-text);border:1px solid var(--panel-line);
+  border-radius:8px;padding:34px 32px 36px;margin:0 0 46px;position:relative;overflow:hidden;
+}
+.lab::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.lab-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.lab-tag{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0;
+}
+.lab h3{font-family:var(--font-display);font-size:23px;font-weight:300;margin:0 0 6px;color:#fff;letter-spacing:-.3px}
+.lab-hint{font-size:13.5px;color:var(--panel-muted);margin:0 0 26px;max-width:70ch}
+.lab-stage{background:var(--panel-2);border:1px solid var(--panel-line);border-radius:var(--radius);padding:24px}
+.lab-readout{
+  margin-top:20px;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;
+  color:var(--panel-muted);border-top:1px solid var(--panel-line);padding-top:16px;
+}
+.lab-readout b{color:#fff;font-weight:500}
+.lab-readout .ok{color:var(--ok)}
+.lab-readout .warn{color:var(--warn)}
+.lab-readout .bad{color:var(--bad)}
+
+/* controles genéricos dentro do lab */
+.ctrl-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:20px}
+.btn{
+  font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:1.8px;
+  text-transform:uppercase;padding:10px 22px;border-radius:24px;cursor:pointer;
+  border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;transition:all .25s ease;
+}
+.btn:hover{background:#fff;color:var(--panel)}
+.btn.solid{background:#fff;color:#111;border-color:#fff}
+.btn.solid:hover{background:var(--c3);border-color:var(--c3);color:#06281f}
+.btn.on{background:var(--grad);border-color:transparent;color:#fff}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-sm{padding:7px 16px;font-size:10px;letter-spacing:1.4px}
+
+.slider-block{display:flex;flex-direction:column;gap:9px;min-width:230px;flex:1}
+.slider-label{
+  display:flex;justify-content:space-between;font-family:var(--font-display);
+  font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--panel-muted);
+}
+.slider-label b{color:#fff;font-variant-numeric:tabular-nums}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:3px;
+  background:rgba(255,255,255,.2);outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;
+  background:#fff;border:3px solid var(--c2);cursor:pointer;transition:transform .2s ease;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.18)}
+input[type=range]::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--c2);cursor:pointer;
+}
+.text-input{
+  background:rgba(255,255,255,.05);border:1px solid var(--panel-line);border-radius:4px;
+  color:#fff;font-family:var(--font-mono);font-size:12.5px;padding:9px 12px;width:100%;
+}
+.text-input:focus{border-color:var(--c2);outline:none}
+
+/* chips arrastáveis */
+.chip{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 15px;border-radius:24px;
+  border:1px dashed rgba(255,255,255,.3);background:rgba(255,255,255,.04);color:#fff;
+  font-family:var(--font-display);font-size:12.5px;font-weight:400;cursor:grab;
+  transition:all .22s ease;user-select:none;
+}
+.chip:hover{border-color:#fff;transform:translateY(-2px)}
+.chip.placed{border-style:solid;border-color:var(--c3);background:rgba(44,201,157,.12)}
+.chip.wrong{border-color:var(--bad);background:rgba(226,104,95,.14)}
+.chip.dragging{opacity:.45}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:var(--c2)}
+.zone{
+  border:1px dashed rgba(255,255,255,.22);border-radius:var(--radius);padding:18px;
+  min-height:104px;display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start;
+  transition:border-color .25s ease,background .25s ease;
+}
+.zone.over{border-color:var(--c3);background:rgba(44,201,157,.06)}
+.zone-title{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:2.4px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0 0 12px;
+}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media(max-width:820px){.two-col{grid-template-columns:1fr}}
+
+/* ---------- Quiz ---------- */
+.quiz{border:1px solid var(--line);border-radius:8px;padding:30px 30px 26px;margin:0 0 46px}
+.quiz-tag{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--muted);margin:0 0 20px;
+}
+.q{margin:0 0 26px;padding:0 0 24px;border-bottom:1px solid var(--line-soft)}
+.q:last-of-type{border-bottom:none;padding-bottom:6px;margin-bottom:10px}
+.q-text{font-family:var(--font-display);font-size:16px;font-weight:400;margin:0 0 16px;line-height:1.5}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{
+  text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+  padding:13px 16px;font-family:var(--font-body);font-size:14.5px;font-weight:300;color:var(--ink);
+  cursor:pointer;transition:all .2s ease;line-height:1.5;
+}
+.opt:hover{border-color:var(--ink)}
+.opt.correct{border-color:var(--ok);background:rgba(44,201,157,.10)}
+.opt.incorrect{border-color:var(--bad);background:rgba(226,104,95,.09)}
+.opt.locked{cursor:default}
+.feedback{
+  margin:14px 0 0;font-size:14px;line-height:1.7;color:var(--ink-soft);
+  padding-left:16px;border-left:2px solid var(--line);display:none;
+}
+.feedback.show{display:block}
+.feedback.good{border-color:var(--ok)}
+.feedback.bad{border-color:var(--bad)}
+
+/* ---------- Navegação inferior ---------- */
+.topic-nav{
+  display:flex;justify-content:space-between;gap:16px;padding:0 8vw 60px;max-width:1180px;flex-wrap:wrap;
+}
+.nav-btn{
+  display:flex;flex-direction:column;gap:4px;background:none;border:1px solid var(--line);
+  border-radius:var(--radius);padding:16px 24px;cursor:pointer;color:var(--ink);text-align:left;
+  transition:all .25s ease;min-width:200px;
+}
+.nav-btn:hover{border-color:var(--ink);transform:translateY(-2px)}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.nav-btn span{font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:2.4px;text-transform:uppercase;color:var(--muted)}
+.nav-btn b{font-family:var(--font-display);font-size:14.5px;font-weight:400}
+.nav-btn.next{text-align:right;align-items:flex-end;margin-left:auto}
+
+/* ---------- Glossário ---------- */
+.search-input{
+  width:100%;max-width:420px;background:var(--paper);border:1px solid var(--line);
+  border-radius:24px;padding:13px 20px;font-family:var(--font-body);font-size:14.5px;
+  color:var(--ink);margin-bottom:34px;
+}
+.search-input:focus{border-color:var(--ink);outline:none}
+.gloss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:18px;margin-bottom:50px}
+.gloss-card{border:1px solid var(--line);border-radius:var(--radius);padding:20px 20px 18px;transition:all .25s ease}
+.gloss-card:hover{border-color:var(--ink);transform:translateY(-2px)}
+.gloss-card h3{font-family:var(--font-display);font-size:15px;font-weight:500;margin:0 0 4px}
+.gloss-card .from{font-family:var(--font-mono);font-size:10.5px;color:var(--muted);display:block;margin-bottom:10px}
+.gloss-card p{margin:0;font-size:13.5px;line-height:1.7;color:var(--ink-soft)}
+.empty-msg{color:var(--muted);font-size:14px;margin:0 0 40px}
+
+/* ---------- Responsivo ---------- */
+@media(max-width:1000px){
+  .topbar{display:flex}
+  .sidebar{transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);width:290px;box-shadow:0 0 40px rgba(0,0,0,.18);top:63px;bottom:0}
+  .sidebar-head{padding:22px 24px 16px}
+  .sidebar.open{transform:none}
+  .main{margin-left:0;padding-top:63px}
+  .topic-head{padding:40px 24px 32px}
+  .topic-body{padding:34px 24px 0}
+  .topic-nav{padding:0 24px 50px}
+  .lab{padding:26px 20px 28px}
+  .lab-stage{padding:18px}
+  .quiz{padding:24px 20px}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:55;display:none}
+  .scrim.show{display:block}
+}
+</style>
+<style>
+/* ============================================================
+   Componentes específicos dos laboratórios (dentro do painel escuro)
+   ============================================================ */
+.mono{font-family:var(--font-mono)}
+.panel-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--panel-line);
+  border-radius:var(--radius);padding:16px 18px;
+}
+.panel-card h4{
+  font-family:var(--font-display);font-size:13px;font-weight:500;margin:0 0 8px;color:#fff;
+}
+.panel-card p{margin:0;font-size:13.5px;line-height:1.7;color:var(--panel-muted)}
+.tag-pill{
+  display:inline-block;font-family:var(--font-display);font-size:9.5px;font-weight:600;
+  letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:20px;
+  border:1px solid var(--panel-line);color:var(--panel-muted);
+}
+.tag-pill.ok{color:var(--ok);border-color:rgba(44,201,157,.45)}
+.tag-pill.bad{color:var(--bad);border-color:rgba(226,104,95,.45)}
+.tag-pill.warn{color:var(--warn);border-color:rgba(224,163,58,.45)}
+
+/* barras / métricas */
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.bar-name{flex:0 0 128px;font-family:var(--font-display);font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--panel-muted)}
+.bar-track{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;width:0;border-radius:6px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.bar-val{flex:0 0 78px;text-align:right;font-family:var(--font-mono);font-size:12px;color:#fff;font-variant-numeric:tabular-nums}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.metric{background:rgba(255,255,255,.04);border:1px solid var(--panel-line);border-radius:var(--radius);padding:14px 16px}
+.metric span{display:block;font-family:var(--font-display);font-size:9.5px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--panel-muted);margin-bottom:6px}
+.metric b{font-family:var(--font-display);font-size:24px;font-weight:300;color:#fff;letter-spacing:-.5px}
+.metric small{display:block;font-size:11.5px;color:var(--panel-muted);margin-top:4px}
+
+/* timeline de sprints/fases */
+.timeline{display:flex;gap:5px;align-items:flex-end;height:80px;margin-bottom:8px}
+.tl-block{flex:1;border-radius:3px 3px 0 0;background:rgba(255,255,255,.14);transition:height .5s ease,background .4s ease;position:relative}
+.tl-axis{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10.5px;color:var(--panel-muted)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;font-size:11.5px;color:var(--panel-muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+
+/* preview de interface (1.4) */
+.ui-preview{background:#fff;border-radius:6px;padding:18px;color:#101010;transition:all .35s ease}
+.ui-preview .ui-title{font-family:var(--font-display);font-weight:500;margin:0 0 14px;color:#101010}
+.ui-field{border:1px solid #dcdce2;border-radius:4px;padding:9px 12px;margin-bottom:9px;color:#5a5a63;background:#fafafb}
+.ui-field b{color:#101010;font-weight:500}
+.ui-help{color:#7a7a84;font-style:italic;margin:2px 0 12px}
+.ui-actions{display:flex;gap:8px;flex-wrap:wrap}
+.ui-btn{border-radius:4px;padding:8px 14px;background:#101010;color:#fff;font-family:var(--font-display);font-weight:500;border:none}
+.ui-btn.ghost{background:#fff;color:#101010;border:1px solid #dcdce2}
+.ui-shortcut{font-family:var(--font-mono);font-size:11px;color:#7a7a84;border:1px solid #dcdce2;border-radius:3px;padding:2px 6px}
+
+/* linhas clicáveis (matching, requisitos, docs, backlog) */
+.pick{
+  display:flex;gap:12px;align-items:center;justify-content:space-between;
+  border:1px solid var(--panel-line);border-radius:var(--radius);padding:12px 15px;
+  background:rgba(255,255,255,.03);cursor:pointer;transition:all .22s ease;text-align:left;
+  color:#fff;font-family:var(--font-body);font-size:13.5px;font-weight:300;width:100%;line-height:1.55;
+}
+.pick:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.06)}
+.pick.sel{border-color:var(--c2);background:rgba(41,137,216,.14)}
+.pick.ok{border-color:var(--ok);background:rgba(44,201,157,.12)}
+.pick.bad{border-color:var(--bad);background:rgba(226,104,95,.12)}
+.pick .lead{flex:1}
+.pick .side{flex:0 0 auto;display:flex;gap:8px;align-items:center}
+.mini-btn{
+  border:1px solid var(--panel-line);background:transparent;color:var(--panel-muted);
+  border-radius:20px;padding:5px 12px;font-family:var(--font-display);font-size:10px;
+  font-weight:600;letter-spacing:1.4px;text-transform:uppercase;cursor:pointer;transition:all .2s ease;
+}
+.mini-btn:hover{border-color:#fff;color:#fff}
+.mini-btn.on{background:#fff;color:#111;border-color:#fff}
+.mini-btn.ok{background:var(--ok);border-color:var(--ok);color:#06281f}
+.mini-btn.bad{background:var(--bad);border-color:var(--bad);color:#3b100c}
+
+/* código */
+.code{
+  background:#0a0a0b;border:1px solid var(--panel-line);border-radius:var(--radius);
+  padding:16px 18px;font-family:var(--font-mono);font-size:12.5px;line-height:1.85;
+  color:#d7d7de;overflow-x:auto;white-space:pre;
+}
+.code .kw{color:#c792ea}
+.code .fn{color:#82aaff}
+.code .st{color:#c3e88d}
+.code .cm{color:#6c6c78}
+.code .hl{background:rgba(224,163,58,.16);display:inline-block;width:100%}
+
+/* objetos (1.10) */
+.obj-card{
+  background:rgba(255,255,255,.04);border:1px solid var(--panel-line);border-radius:var(--radius);
+  padding:14px 16px;animation:pop .35s ease both;
+}
+@keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+.obj-card h5{font-family:var(--font-mono);font-size:12px;margin:0 0 10px;color:#fff;font-weight:500}
+.obj-attr{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11.5px;color:var(--panel-muted);padding:2px 0}
+.obj-attr b{color:#fff;font-weight:400}
+.speed-track{height:5px;background:rgba(255,255,255,.1);border-radius:4px;margin:10px 0 12px;overflow:hidden}
+.speed-fill{height:100%;width:0;background:var(--grad);transition:width .45s ease}
+
+/* UML */
+.uml-wrap{overflow-x:auto;padding-bottom:6px}
+svg.uml{display:block;min-width:520px;max-width:100%;height:auto;font-family:var(--font-display)}
+svg.uml text{fill:#e9e9ef;font-size:12px}
+svg.uml text.sm{font-size:10.5px;fill:#a9a9b0}
+svg.uml text.mono{font-family:var(--font-mono);font-size:10.5px;fill:#a9a9b0}
+svg.uml .box{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.28)}
+svg.uml .box.on{fill:rgba(41,137,216,.18);stroke:#1F5135}
+svg.uml .uc{fill:rgba(255,255,255,.05);stroke:rgba(255,255,255,.3);cursor:pointer;transition:all .25s ease}
+svg.uml .uc:hover{fill:rgba(255,255,255,.12)}
+svg.uml .uc.linked{fill:rgba(44,201,157,.16);stroke:#2E8B57}
+svg.uml .actor{stroke:#e9e9ef;stroke-width:1.6;fill:none;cursor:pointer}
+svg.uml .actor.sel{stroke:#2E8B57}
+svg.uml .link{stroke:#2E8B57;stroke-width:1.4}
+svg.uml .rel{stroke:rgba(255,255,255,.35);stroke-width:1.2}
+svg.uml .lifeline{stroke:rgba(255,255,255,.25);stroke-dasharray:4 4}
+svg.uml .msg{stroke:#1F5135;stroke-width:1.6;opacity:0;transition:opacity .35s ease}
+svg.uml .msg.on{opacity:1}
+svg.uml .msg-lbl{opacity:0;transition:opacity .35s ease}
+svg.uml .msg-lbl.on{opacity:1}
+svg.uml .msg.ret{stroke:#2E8B57;stroke-dasharray:5 4}
+</style>
+
+<style>
+/* ============================================================
+   Painel de abertura de módulo — camadas (SVG) + linha do tempo
+   ============================================================ */
+.pan{
+  background:var(--panel);color:var(--panel-text);border:1px solid var(--panel-line);
+  border-radius:8px;padding:34px 32px 30px;margin:0 0 46px;position:relative;overflow:hidden;
+}
+.pan::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.pan-tag{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0 0 10px;
+}
+.pan h3{font-family:var(--font-display);font-size:23px;font-weight:300;margin:0 0 8px;color:#fff;letter-spacing:-.3px}
+.pan-intro{font-size:14px;line-height:1.75;color:var(--panel-muted);margin:0 0 26px;max-width:72ch}
+.pan-sec{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:2.6px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0 0 4px;
+}
+.pan-sub{font-size:13px;line-height:1.7;color:var(--panel-muted);margin:0 0 18px;max-width:70ch}
+.pan-rule{height:1px;background:var(--panel-line);margin:34px 0 28px;border:0}
+
+/* ---- bloco camadas ---- */
+.pan-layers{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:24px;align-items:start}
+@media (max-width:900px){ .pan-layers{grid-template-columns:1fr} }
+.pan-svg{width:100%;height:auto;display:block;overflow:visible}
+.pan-svg text{font-family:var(--font-display);fill:#fff}
+.pan-svg .cam-t{font-size:13.5px;font-weight:500}
+.pan-svg .cam-s{font-size:11px;fill:rgba(255,255,255,.72);font-weight:300}
+.pan-svg .cam-n{font-family:var(--font-mono);font-size:10.5px;fill:var(--panel-muted)}
+.pan-svg .rail{font-family:var(--font-mono);font-size:10px;fill:var(--panel-muted);letter-spacing:.09em}
+.pan-svg g.cam{cursor:pointer}
+.pan-svg g.cam rect{transition:opacity .22s ease, stroke-opacity .22s ease}
+.pan-svg g.cam:hover rect.base{opacity:.92}
+.pan-svg g.cam:focus{outline:none}
+.pan-svg g.cam:focus-visible rect.base{stroke:#fff;stroke-width:2;stroke-opacity:1}
+
+/* ---- cartão de detalhe ---- */
+.pan-det{
+  background:rgba(255,255,255,.04);border:1px solid var(--panel-line);
+  border-radius:var(--radius);padding:20px 22px;min-height:230px;
+}
+.pan-det .kick{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--panel-muted);margin:0 0 8px;display:flex;align-items:center;gap:9px;
+}
+.pan-det .kick i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:0 0 auto}
+.pan-det h4{font-family:var(--font-display);font-size:18px;font-weight:400;color:#fff;margin:0 0 12px;letter-spacing:-.2px}
+.pan-det p{margin:0 0 14px;font-size:14px;line-height:1.75;color:var(--panel-muted)}
+.pan-det p:last-child{margin-bottom:0}
+.pan-det b{color:#fff;font-weight:500}
+.pan-det .ex{
+  font-family:var(--font-mono);font-size:12px;line-height:1.75;color:#d7d7de;
+  background:#0a0a0b;border:1px solid var(--panel-line);border-radius:var(--radius);
+  padding:11px 14px;overflow-x:auto;white-space:pre-wrap;overflow-wrap:anywhere;margin:0;
+}
+.pan-det .ex-lbl{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--panel-muted);margin:14px 0 6px;
+}
+
+/* ---- linha do tempo ---- */
+.pan-tl-wrap{overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.pan-tl{display:block;height:auto}
+.pan-tl text{font-family:var(--font-display)}
+.pan-tl .ano{font-family:var(--font-mono);font-size:12px;fill:#fff;font-weight:500}
+.pan-tl .ano.off{fill:var(--panel-muted);font-weight:400}
+.pan-tl .rot{font-size:11.5px;fill:var(--panel-muted);font-weight:300}
+.pan-tl .rot.on{fill:#fff;font-weight:400}
+.pan-tl g.marco{cursor:pointer}
+.pan-tl g.marco:focus{outline:none}
+.pan-tl g.marco:focus-visible circle.hit{stroke:#fff;stroke-width:2}
+.pan-tl .eixo{stroke:rgba(255,255,255,.18);stroke-width:1.5}
+.pan-tl .feito{stroke:url(#panGrad);stroke-width:2.5;transition:stroke-dashoffset .5s ease}
+
+.pan-ctrl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.pan-read{
+  margin-top:20px;font-family:var(--font-mono);font-size:12.5px;line-height:1.8;
+  color:var(--panel-muted);border-top:1px solid var(--panel-line);padding-top:16px;
+}
+.pan-read b{color:#fff;font-weight:500}
+.pan-read .ok{color:var(--ok)}
+.pan-conta{font-family:var(--font-mono);font-size:11.5px;color:var(--panel-muted)}
+</style>
+
+<div class="topbar">
+  <button class="burger" id="burger" aria-label="Abrir menu de tópicos"><span></span><span></span><span></span></button>
+  <p class="topbar-title" id="topbarTitle">Engenharia de Software</p>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <p class="brand-eyebrow">IFSE — Tobias Barreto</p>
+      <h1 class="brand-title">Engenharia de <b>Software</b></h1>
+      <p class="brand-author"><span>Elaborado por</span><b>Professor Eber Santana</b></p>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-meta"><span>Progresso</span><strong id="progressLabel">0 / 11</strong></div>
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Tópicos da aula"></nav>
+    <div class="sidebar-foot">
+      <p class="foot-note">Apostila interativa</p>
+      <button class="reset-btn" id="resetBtn">Zerar</button>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTEÚDO ===================== -->
+  <main class="main" id="main">
+  <!-- painel pe1 -->
+  <section class="topic" data-id="pe1">
+    <div class="topic-head">
+      <p class="eyebrow">Unidade 1 · Panorama</p>
+      <h2 class="topic-title">As camadas da engenharia de software</h2>
+      <p class="topic-lead">Ferramentas, métodos, processo e foco na qualidade: a formulação clássica de Pressman, em quatro camadas que se apoiam umas nas outras. Com a linha do tempo da disciplina, da conferência da OTAN em 1968 ao DevOps.</p>
+    </div>
+    <div class="topic-body"><div data-painel="es-p1"></div></div>
+  </section>
+
+  <!-- painel pe2 -->
+  <section class="topic" data-id="pe2">
+    <div class="topic-head">
+      <p class="eyebrow">Unidade 2 · Panorama</p>
+      <h2 class="topic-title">Quatro perguntas, quatro diagramas</h2>
+      <p class="topic-lead">Contexto, casos de uso, classes, sequência e implantação: cada diagrama responde a uma pergunta diferente sobre o mesmo sistema, para um leitor diferente. Com a trajetória que vai do Simula 67 à UML 2.0.</p>
+    </div>
+    <div class="topic-body"><div data-painel="es-p2"></div></div>
+  </section>
+
+
+  <!-- ---------- 1.1 ---------- -->
+  <section class="topic active" data-id="1.1">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.1</p>
+      <h2 class="topic-title">Introdução e Análise de Sistemas</h2>
+      <p class="topic-lead">Um sistema é um conjunto de componentes que trabalham juntos para atingir um objetivo comum — aplicativos, sites e softwares de gestão. Antes de construir qualquer coisa nova, o engenheiro de software precisa entender o sistema que já existe: como ele funciona, onde acerta e onde falha.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">01</span><h3>Componentes</h3><p>Partes que executam funções específicas: entrada, processamento, armazenamento e saída. Isoladas, não resolvem nada.</p></div>
+        <div class="concept"><span class="kicker">02</span><h3>Relações</h3><p>Um componente alimenta o outro. É o encadeamento que transforma peças soltas em sistema.</p></div>
+        <div class="concept"><span class="kicker">03</span><h3>Objetivo comum</h3><p>O critério que decide o que entra e o que fica de fora da fronteira do sistema.</p></div>
+      </div>
+      <div class="callout"><p>Entender o sistema atual é o primeiro passo para criar algo melhor. Analisar o que existe revela pontos fortes a preservar e fraquezas a corrigir.</p></div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Monte a fronteira do sistema</h3>
+        <p class="lab-hint">Arraste (ou clique) os componentes para dentro da fronteira. O objetivo é: <b>registrar as vendas de uma loja e gerar relatórios para o gerente</b>. Nem tudo que está no ambiente pertence ao sistema.</p>
+        <div class="lab-stage">
+          <div class="two-col">
+            <div>
+              <p class="zone-title">Ambiente — componentes disponíveis</p>
+              <div class="zone" id="s1-pool" data-zone="pool"></div>
+            </div>
+            <div>
+              <p class="zone-title">Fronteira do sistema de vendas</p>
+              <div class="zone" id="s1-sys" data-zone="sys"></div>
+            </div>
+          </div>
+          <div class="ctrl-row" style="margin:20px 0 0"><button class="btn btn-sm" id="s1-reset">Recomeçar</button></div>
+        </div>
+        <div class="lab-readout" id="s1-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.1"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.2 ---------- -->
+  <section class="topic" data-id="1.2">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.2</p>
+      <h2 class="topic-title">Fases de um Software</h2>
+      <p class="topic-lead">Todo projeto percorre etapas bem definidas: planejamento, análise, desenvolvimento, testes e implantação. Cada fase entrega algo que a seguinte consome — e o custo de consertar um erro cresce a cada fase que ele atravessa sem ser percebido.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Antes de codar</span><h3>Planejamento e análise</h3><p>Define objetivos, requisitos e viabilidade técnica e financeira. Sem isso, até bons desenvolvedores ficam perdidos.</p></div>
+        <div class="concept"><span class="kicker">Construção</span><h3>Desenvolvimento e testes</h3><p>Codificação do software e verificação sistemática de qualidade e correção de erros.</p></div>
+        <div class="concept"><span class="kicker">Depois do deploy</span><h3>Implantação e suporte</h3><p>Lançamento, acompanhamento do uso real e assistência contínua ao usuário.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>A régua do custo do erro</h3>
+        <p class="lab-hint">Mova o cursor pela linha do tempo do projeto. Veja o que acontece em cada fase e quanto custa corrigir, ali, um requisito que foi mal entendido lá no começo.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row">
+            <div class="slider-block">
+              <div class="slider-label"><span>Fase do projeto</span><b id="s2-name">Planejamento</b></div>
+              <input type="range" id="s2-range" min="0" max="4" value="0" step="1" aria-label="Fase do projeto">
+            </div>
+          </div>
+          <div id="s2-phase" style="min-height:96px"></div>
+          <div id="s2-cost" style="margin-top:18px"></div>
+        </div>
+        <div class="lab-readout" id="s2-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.2"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.3 ---------- -->
+  <section class="topic" data-id="1.3">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.3</p>
+      <h2 class="topic-title">Ciclo de Vida do Desenvolvimento</h2>
+      <p class="topic-lead">O SDLC organiza a criação do software em fases gerenciáveis. Dois modelos dominam a discussão: o Waterfall, sequencial e previsível, e o Ágil, iterativo e adaptável. Nenhum dos dois é sempre melhor — o que decide é a estabilidade dos requisitos.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Modelo</span><h3>Waterfall</h3><p>Fases sequenciais e lineares. Ideal quando os requisitos são bem definidos e mudam pouco: contratos fechados, sistemas regulados.</p></div>
+        <div class="concept"><span class="kicker">Modelo</span><h3>Ágil</h3><p>Iterações curtas e feedback contínuo. Ideal para projetos dinâmicos, onde o cliente descobre o que quer usando o produto.</p></div>
+        <div class="concept"><span class="kicker">Depois da entrega</span><h3>Manutenção</h3><p>Correção de bugs, atualizações conforme as necessidades evoluem e suporte contínuo — a fase mais longa do ciclo de vida.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Simulador Waterfall × Ágil</h3>
+        <p class="lab-hint">Escolha o modelo e diga quantas vezes o cliente vai mudar de ideia ao longo de 24 semanas. Compare quando o cliente vê software funcionando pela primeira vez e quanto trabalho é jogado fora.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row">
+            <button class="btn btn-sm on" id="s3-wf">Waterfall</button>
+            <button class="btn btn-sm" id="s3-ag">Ágil</button>
+            <div class="slider-block">
+              <div class="slider-label"><span>Mudanças de requisito</span><b id="s3-chgLabel">3</b></div>
+              <input type="range" id="s3-chg" min="0" max="10" value="3" step="1" aria-label="Número de mudanças de requisito">
+            </div>
+          </div>
+          <div id="s3-track"></div>
+          <div id="s3-metrics" style="margin-top:20px"></div>
+        </div>
+        <div class="lab-readout" id="s3-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.3"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.4 ---------- -->
+  <section class="topic" data-id="1.4">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.4</p>
+      <h2 class="topic-title">Identificação de Usuários</h2>
+      <p class="topic-lead">Usuários são as pessoas que vão conviver com o software todo dia. Eles avaliam a usabilidade na prática e têm perfis muito diferentes — do iniciante ao especialista. Projetar sem conhecer esse perfil é o caminho mais rápido para o fracasso.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Perfil</span><h3>Diversidade técnica</h3><p>O mesmo sistema atende quem nunca usou um computador e quem quer atalhos de teclado para tudo.</p></div>
+        <div class="concept"><span class="kicker">Método</span><h3>Feedback contínuo</h3><p>Entrevistas, pesquisas e observação para entender o que o usuário realmente precisa — e não o que supomos que ele precisa.</p></div>
+        <div class="concept"><span class="kicker">Consequência</span><h3>Interface adaptada</h3><p>Design e funcionalidades ajustados ao nível de conhecimento e às preferências do público-alvo.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Ajuste a interface ao perfil do usuário</h3>
+        <p class="lab-hint">Mexa nos controles e observe a mesma tela de <b>lançamento de pedidos</b> se transformar. Não existe interface neutra: cada decisão favorece um perfil e prejudica outro.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row">
+            <div class="slider-block">
+              <div class="slider-label"><span>Domínio técnico</span><b id="s4-skillLabel">Intermediário</b></div>
+              <input type="range" id="s4-skill" min="0" max="100" value="50" aria-label="Domínio técnico do usuário">
+            </div>
+            <div class="slider-block">
+              <div class="slider-label"><span>Frequência de uso</span><b id="s4-freqLabel">Semanal</b></div>
+              <input type="range" id="s4-freq" min="0" max="100" value="50" aria-label="Frequência de uso">
+            </div>
+          </div>
+          <div id="s4-screen"></div>
+        </div>
+        <div class="lab-readout" id="s4-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.4"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.5 ---------- -->
+  <section class="topic" data-id="1.5">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.5</p>
+      <h2 class="topic-title">Entrevistas e Coleta de Dados</h2>
+      <p class="topic-lead">Compreender as necessidades do usuário exige investigação. Entrevistas exploram dores e expectativas em profundidade; questionários quantificam; a observação revela o que as pessoas fazem — que costuma ser diferente do que elas dizem que fazem.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Pergunta aberta</span><h3>Explorar</h3><p>"Como você faz isso hoje?" — gera insights profundos, respostas ricas e caminhos que ninguém tinha previsto.</p></div>
+        <div class="concept"><span class="kicker">Pergunta fechada</span><h3>Validar</h3><p>"Você emite nota fiscal nesse momento? Sim ou não." — confirma hipóteses e permite quantificar.</p></div>
+        <div class="concept"><span class="kicker">Documentos</span><h3>Reconstituir</h3><p>Planilhas, formulários e manuais existentes carregam as regras de negócio que ninguém lembra de contar.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Qual técnica para qual objetivo?</h3>
+        <p class="lab-hint">Clique em uma técnica e depois no objetivo que ela atende melhor. Cada técnica é usada uma única vez.</p>
+        <div class="lab-stage">
+          <div class="two-col">
+            <div>
+              <p class="zone-title">Técnicas</p>
+              <div class="zone" id="s5-tech" style="flex-direction:column;flex-wrap:nowrap"></div>
+            </div>
+            <div>
+              <p class="zone-title">Objetivos da investigação</p>
+              <div id="s5-goals" style="display:flex;flex-direction:column;gap:10px"></div>
+            </div>
+          </div>
+          <div class="ctrl-row" style="margin:20px 0 0">
+            <button class="btn btn-sm solid" id="s5-check">Verificar</button>
+            <button class="btn btn-sm" id="s5-reset">Recomeçar</button>
+          </div>
+        </div>
+        <div class="lab-readout" id="s5-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.5"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.6 ---------- -->
+  <section class="topic" data-id="1.6">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.6</p>
+      <h2 class="topic-title">Levantamento e Negociação de Requisitos</h2>
+      <p class="topic-lead">Requisitos são as especificações do que o sistema deve fazer e de como deve se comportar. Os funcionais descrevem ações ("permitir login"); os não-funcionais descrevem qualidades e restrições (desempenho, segurança, usabilidade). Depois de levantados, eles precisam ser negociados: nunca cabe tudo.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">RF</span><h3>Funcional</h3><p>Uma ação que o software realiza. Se você consegue escrever "o sistema deve permitir/gerar/calcular…", é funcional.</p></div>
+        <div class="concept"><span class="kicker">RNF</span><h3>Não-funcional</h3><p>Uma qualidade do sistema: tempo de resposta, criptografia, escalabilidade, facilidade de aprendizado.</p></div>
+        <div class="concept"><span class="kicker">Negociação</span><h3>Priorizar</h3><p>Discutir opções com os stakeholders para concentrar o desenvolvimento no que é mais valioso dentro dos recursos reais.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo — parte 1</p></div>
+        <h3>Classifique os requisitos</h3>
+        <p class="lab-hint">Para cada requisito levantado com o cliente, decida: é uma <b>ação</b> do sistema (RF) ou uma <b>qualidade</b> do sistema (RNF)?</p>
+        <div class="lab-stage">
+          <div id="s6-cards" style="display:flex;flex-direction:column;gap:12px"></div>
+          <div class="ctrl-row" style="margin:20px 0 0"><button class="btn btn-sm" id="s6-reset">Recomeçar</button></div>
+        </div>
+        <div class="lab-readout" id="s6-out"></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo — parte 2</p></div>
+        <h3>Mesa de negociação</h3>
+        <p class="lab-hint">A equipe entrega <b id="s7-capLabel">40</b> pontos por release. Selecione os requisitos que entram na primeira entrega. O cliente quer valor cedo; a equipe tem capacidade finita.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row">
+            <div class="slider-block">
+              <div class="slider-label"><span>Capacidade da equipe (pontos)</span><b id="s7-capNum">40</b></div>
+              <input type="range" id="s7-cap" min="20" max="80" value="40" step="5" aria-label="Capacidade da equipe">
+            </div>
+          </div>
+          <div id="s7-backlog" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div id="s7-summary" style="margin-top:18px"></div>
+        </div>
+        <div class="lab-readout" id="s7-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.6"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.7 ---------- -->
+  <section class="topic" data-id="1.7">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.7</p>
+      <h2 class="topic-title">Especificação, Validação e Verificação</h2>
+      <p class="topic-lead">Duas perguntas parecidas, respostas muito diferentes. <b>Verificação</b>: estamos construindo o produto corretamente, conforme a especificação? <b>Validação</b>: estamos construindo o produto certo, o que o usuário realmente precisa? Um software pode passar em uma e falhar na outra.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Verificação</span><h3>Produto corretamente</h3><p>Compara o código com a especificação técnica. Testes unitários, revisão de código, análise estática.</p></div>
+        <div class="concept"><span class="kicker">Validação</span><h3>Produto certo</h3><p>Compara o produto com a necessidade real do usuário. Testes de aceitação, protótipos, homologação.</p></div>
+        <div class="concept"><span class="kicker">Modelagem</span><h3>Ideias em diagramas</h3><p>A modelagem transforma o abstrato em representações visuais — a base sobre a qual V&amp;V trabalham.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Detector de falhas: V &amp; V</h3>
+        <p class="lab-hint">Injete defeitos na cadeia <b>necessidade → especificação → código</b> e rode cada tipo de teste. Descubra por que passar em todos os testes técnicos não garante um produto útil.</p>
+        <div class="lab-stage">
+          <div id="s8-chain"></div>
+          <div class="ctrl-row" style="margin:22px 0 18px">
+            <button class="btn btn-sm" id="s8-bug1">Erro de tradução<br>(necessidade → spec)</button>
+            <button class="btn btn-sm" id="s8-bug2">Erro de implementação<br>(spec → código)</button>
+          </div>
+          <div class="ctrl-row">
+            <button class="btn btn-sm solid" id="s8-verif">Rodar verificação</button>
+            <button class="btn btn-sm solid" id="s8-valid">Rodar validação</button>
+            <button class="btn btn-sm" id="s8-reset">Limpar</button>
+          </div>
+          <div id="s8-result" style="margin-top:18px"></div>
+        </div>
+        <div class="lab-readout" id="s8-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.7"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.8 ---------- -->
+  <section class="topic" data-id="1.8">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.8</p>
+      <h2 class="topic-title">Modelagem de Sistemas de Software</h2>
+      <p class="topic-lead">A modelagem é a ponte entre a concepção e a implementação. Ela transforma ideias abstratas em representações visuais que comunicam arquitetura, comportamento e interações — garantindo que todos os stakeholders entendam o mesmo sistema.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Por quê</span><h3>Reduzir ambiguidade</h3><p>Texto corrido se interpreta de dez formas. Um diagrama força decisões explícitas.</p></div>
+        <div class="concept"><span class="kicker">Como</span><h3>Nível de abstração</h3><p>Cada modelo esconde detalhes de propósito. O truque é escolher o nível certo para cada interlocutor.</p></div>
+        <div class="concept"><span class="kicker">Para quem</span><h3>Público do modelo</h3><p>Diretoria, analista e programador precisam de vistas diferentes do mesmo sistema.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Zoom de abstração</h3>
+        <p class="lab-hint">O mesmo sistema de loja online, em quatro níveis de detalhe. Deslize e veja o que cada nível mostra, o que ele esconde e para quem ele serve.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row">
+            <div class="slider-block">
+              <div class="slider-label"><span>Nível de abstração</span><b id="s9-levelName">Contexto</b></div>
+              <input type="range" id="s9-level" min="0" max="3" value="0" step="1" aria-label="Nível de abstração">
+            </div>
+          </div>
+          <div id="s9-view" style="min-height:210px"></div>
+        </div>
+        <div class="lab-readout" id="s9-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.8"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.9 ---------- -->
+  <section class="topic" data-id="1.9">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.9</p>
+      <h2 class="topic-title">Documentação e o Paradigma Orientado a Objetos</h2>
+      <p class="topic-lead">A documentação de design registra decisões arquiteturais, alinha stakeholders e sustenta a manutenção por equipes que não participaram do início. Já a Orientação a Objetos estrutura o software em torno de objetos — dados e comportamento juntos — em vez de ações soltas sobre dados.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Vantagem OO</span><h3>Reutilização</h3><p>Herança e polimorfismo permitem componentes genéricos estendidos em vários pontos do sistema.</p></div>
+        <div class="concept"><span class="kicker">Vantagem OO</span><h3>Organização</h3><p>Modularidade e encapsulamento tornam o código autônomo, mais fácil de depurar e de dividir entre pessoas.</p></div>
+        <div class="concept"><span class="kicker">Vantagem OO</span><h3>Mundo real</h3><p>Entidades do domínio viram objetos: o software fica mais próximo do vocabulário do negócio.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo — parte 1</p></div>
+        <h3>Procedural × Orientado a Objetos</h3>
+        <p class="lab-hint">O sistema calcula o frete de três tipos de entrega. Alterne os paradigmas e depois clique em <b>“Chegou um novo tipo”</b> para ver onde cada abordagem precisa ser modificada.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row">
+            <button class="btn btn-sm on" id="s10-proc">Procedural</button>
+            <button class="btn btn-sm" id="s10-oo">Orientado a objetos</button>
+            <button class="btn btn-sm solid" id="s10-add">Chegou um novo tipo</button>
+            <button class="btn btn-sm" id="s10-reset">Limpar</button>
+          </div>
+          <div id="s10-code"></div>
+        </div>
+        <div class="lab-readout" id="s10-out"></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo — parte 2</p></div>
+        <h3>Quanto custa entrar num projeto sem documentação</h3>
+        <p class="lab-hint">Marque os artefatos que o projeto possui e acompanhe o tempo estimado para uma pessoa nova conseguir entregar sua primeira funcionalidade com segurança.</p>
+        <div class="lab-stage">
+          <div id="s11-docs" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div id="s11-meter" style="margin-top:22px"></div>
+        </div>
+        <div class="lab-readout" id="s11-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.9"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.10 ---------- -->
+  <section class="topic" data-id="1.10">
+    <div class="topic-head">
+      <p class="eyebrow">Tópico 1.10</p>
+      <h2 class="topic-title">Classes e Objetos</h2>
+      <p class="topic-lead">A classe é o molde: define atributos (características) e métodos (ações), mas não guarda dados de nenhum item específico. O objeto é a instância concreta desse molde — com seus próprios valores e vida independente dos demais.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Classe</span><h3>Atributos</h3><p>Características do objeto. Em <span style="font-family:var(--font-mono);font-size:13px">Carro</span>: cor, marca, modelo, velocidade atual.</p></div>
+        <div class="concept"><span class="kicker">Classe</span><h3>Métodos</h3><p>Ações que o objeto realiza: <span style="font-family:var(--font-mono);font-size:13px">acelerar()</span>, <span style="font-family:var(--font-mono);font-size:13px">frear()</span>, <span style="font-family:var(--font-mono);font-size:13px">ligarMotor()</span>.</p></div>
+        <div class="concept"><span class="kicker">Objeto</span><h3>Instanciação</h3><p>Criar um objeto a partir da classe. Cada instância é independente, mesmo compartilhando a estrutura.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Fábrica de objetos</h3>
+        <p class="lab-hint">Preencha o molde e instancie quantos carros quiser. Depois acelere e freie cada um: eles compartilham a mesma classe, mas cada objeto guarda o próprio estado.</p>
+        <div class="lab-stage">
+          <div class="two-col">
+            <div>
+              <p class="zone-title">Classe Carro — o molde</p>
+              <div id="s12-class"></div>
+            </div>
+            <div>
+              <p class="zone-title">Instanciar novo objeto</p>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <input class="text-input" id="s12-cor" value="vermelho" aria-label="Cor" placeholder="cor">
+                <input class="text-input" id="s12-marca" value="Ford" aria-label="Marca" placeholder="marca">
+                <input class="text-input" id="s12-modelo" value="Mustang" aria-label="Modelo" placeholder="modelo">
+                <div class="ctrl-row" style="margin:4px 0 0">
+                  <button class="btn btn-sm solid" id="s12-new">new Carro()</button>
+                  <button class="btn btn-sm" id="s12-clear">Destruir objetos</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="zone-title" style="margin-top:24px">Objetos em memória</p>
+          <div id="s12-objs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:14px"></div>
+        </div>
+        <div class="lab-readout" id="s12-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.10"></div>
+    </div>
+  </section>
+
+  <!-- ---------- 1.11 ---------- -->
+  <section class="topic" data-id="1.11">
+    <div class="topic-head">
+      <p class="eyebrow">Unidade 2 — Tópico 1.11</p>
+      <h2 class="topic-title">UML na Prática</h2>
+      <p class="topic-lead">A UML é o padrão gráfico para especificar, visualizar, construir e documentar sistemas. Ela transforma descrições textuais em representações precisas: casos de uso mostram o que o sistema faz para cada ator, diagramas de classes mostram a estrutura e diagramas de sequência mostram a ordem das mensagens no tempo.</p>
+    </div>
+    <div class="topic-body">
+      <div class="concept-grid">
+        <div class="concept"><span class="kicker">Benefício</span><h3>Clareza</h3><p>Stakeholders técnicos e não técnicos leem o mesmo desenho e entendem a mesma coisa.</p></div>
+        <div class="concept"><span class="kicker">Benefício</span><h3>Detecção de conflitos</h3><p>Inconsistências e redundâncias aparecem no papel, antes de custarem código.</p></div>
+        <div class="concept"><span class="kicker">Ferramentas CASE</span><h3>Automação</h3><p>Astah, Visual Paradigm, StarUML e afins: modelagem visual, geração de código e documentação centralizada.</p></div>
+      </div>
+
+      <div class="lab">
+        <div class="lab-head"><p class="lab-tag">Laboratório interativo</p></div>
+        <h3>Bancada de diagramas UML</h3>
+        <p class="lab-hint">Três vistas do mesmo e-commerce. Construa o diagrama de casos de uso ligando ator e funcionalidades, explore a estrutura das classes e rode a animação da sequência de mensagens.</p>
+        <div class="lab-stage">
+          <div class="ctrl-row">
+            <button class="btn btn-sm on" data-uml="uc">Casos de uso</button>
+            <button class="btn btn-sm" data-uml="cls">Classes</button>
+            <button class="btn btn-sm" data-uml="seq">Sequência</button>
+          </div>
+
+          <div id="uml-uc" class="uml-pane">
+            <p class="lab-hint" style="margin-bottom:14px">Clique no ator <b>Cliente</b> e depois em cada funcionalidade que ele executa no sistema.</p>
+            <div id="s13-uc"></div>
+            <div class="ctrl-row" style="margin:16px 0 0"><button class="btn btn-sm" id="s13-reset">Refazer ligações</button></div>
+          </div>
+
+          <div id="uml-cls" class="uml-pane" style="display:none">
+            <p class="lab-hint" style="margin-bottom:14px">Clique em uma classe para abrir seus atributos e métodos. Repare nas multiplicidades entre elas.</p>
+            <div id="s14-cls"></div>
+          </div>
+
+          <div id="uml-seq" class="uml-pane" style="display:none">
+            <p class="lab-hint" style="margin-bottom:14px">Execute a finalização de compra passo a passo e acompanhe as mensagens trocadas entre os objetos.</p>
+            <div id="s15-seq"></div>
+            <div class="ctrl-row" style="margin:16px 0 0">
+              <button class="btn btn-sm solid" id="s15-play">Executar</button>
+              <button class="btn btn-sm" id="s15-step">Passo a passo</button>
+              <button class="btn btn-sm" id="s15-reset">Reiniciar</button>
+            </div>
+          </div>
+        </div>
+        <div class="lab-readout" id="s13-out"></div>
+      </div>
+
+      <div class="quiz" data-quiz="1.11"></div>
+    </div>
+  </section>
+
+  <!-- ---------- Glossário ---------- -->
+
+  <!-- ---------- atividades por módulo ---------- -->
+  <section class="topic" data-id="u1">
+    <div class="topic-head">
+      <p class="eyebrow">Atividade avaliativa · Módulo 1</p>
+      <h2 class="topic-title">Avaliação: Fundamentos</h2>
+      <p class="topic-lead">Dez questões sobre os tópicos 1.1 a 1.10 — sistemas, fases do software, ciclo de vida, usuários, coleta de dados, requisitos, verificação e validação, modelagem, documentação e orientação a objetos. Cada resposta traz o comentário explicando o porquê; ao final vêm a nota e a revisão dos erros. Questões e alternativas são embaralhadas a cada tentativa.</p>
+    </div>
+    <div class="topic-body"><div data-atividade="ap-m1"></div></div>
+  </section>
+
+  <section class="topic" data-id="u2">
+    <div class="topic-head">
+      <p class="eyebrow">Atividade avaliativa · Módulo 2</p>
+      <h2 class="topic-title">Avaliação: UML e Visão Integrada</h2>
+      <p class="topic-lead">Dez questões sobre o tópico 1.11 e a articulação com os demais — diagramas de casos de uso, classes e sequência, ferramentas CASE, orientação a objetos e níveis de modelagem.</p>
+    </div>
+    <div class="topic-body"><div data-atividade="ap-m2"></div></div>
+  </section>
+
+  <section class="topic" data-id="gloss">
+    <div class="topic-head">
+      <p class="eyebrow">Referência</p>
+      <h2 class="topic-title">Glossário da Disciplina</h2>
+      <p class="topic-lead">Os termos que aparecem nas provas, nos projetos e nas reuniões reais. Busque por palavra ou pelo tópico de origem.</p>
+    </div>
+    <div class="topic-body">
+      <input class="search-input" id="glossSearch" type="search" placeholder="Buscar termo, ex.: requisito, instância, UML…" aria-label="Buscar no glossário">
+      <div class="gloss-grid" id="glossGrid"></div>
+      <p class="empty-msg" id="glossEmpty" style="display:none">Nenhum termo encontrado para essa busca.</p>
+    </div>
+  </section>
+
+  </main>
+</div>
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   Núcleo: navegação, progresso, quiz e glossário
+   ============================================================ */
+var TOPICS = [
+  {id:"pe1", num:"◆", label:"Panorama — As camadas da disciplina", unit:"Unidade 1 — Fundamentos"},
+  {id:"1.1",  label:"Introdução e Análise de Sistemas", unit:"Unidade 1 — Fundamentos"},
+  {id:"1.2",  label:"Fases de um Software",             unit:"Unidade 1 — Fundamentos"},
+  {id:"1.3",  label:"Ciclo de Vida do Desenvolvimento", unit:"Unidade 1 — Fundamentos"},
+  {id:"1.4",  label:"Identificação de Usuários",        unit:"Unidade 1 — Fundamentos"},
+  {id:"1.5",  label:"Entrevistas e Coleta de Dados",    unit:"Unidade 1 — Fundamentos"},
+  {id:"1.6",  label:"Levantamento e Negociação de Requisitos", unit:"Unidade 1 — Fundamentos"},
+  {id:"1.7",  label:"Especificação, Validação e Verificação",  unit:"Unidade 1 — Fundamentos"},
+  {id:"1.8",  label:"Modelagem de Sistemas de Software", unit:"Unidade 1 — Fundamentos"},
+  {id:"1.9",  label:"Documentação e Paradigma OO",       unit:"Unidade 1 — Fundamentos"},
+  {id:"1.10", label:"Classes e Objetos",                 unit:"Unidade 1 — Fundamentos"},
+  {id:"pe2", num:"◆", label:"Panorama — Quatro perguntas, quatro diagramas", unit:"Unidade 2 — UML"},
+  {id:"1.11", label:"UML na Prática",                    unit:"Unidade 2 — UML"},
+  {id:"u1",   label:"Atividade do Módulo 1",             unit:"Atividades avaliativas", num:"★"},
+  {id:"u2",   label:"Atividade do Módulo 2",             unit:"Atividades avaliativas", num:"★"},
+  {id:"gloss",label:"Glossário",                         unit:"Referência", num:"—"}
+];
+
+var STORE_KEY = "apostila-eng-soft-v1";
+var done = {};
+try{
+  var raw = localStorage.getItem(STORE_KEY);
+  if(raw){ done = JSON.parse(raw) || {}; }
+}catch(e){ done = {}; }
+
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(done)); }catch(e){}
+}
+
+var nav = document.getElementById("nav");
+var sections = {};
+Array.prototype.forEach.call(document.querySelectorAll(".topic"), function(sec){
+  sections[sec.getAttribute("data-id")] = sec;
+});
+
+/* ---------- sidebar ---------- */
+var lastUnit = null;
+TOPICS.forEach(function(t){
+  if(t.unit !== lastUnit){
+    var h = document.createElement("p");
+    h.className = "nav-group";
+    h.textContent = t.unit;
+    nav.appendChild(h);
+    lastUnit = t.unit;
+  }
+  var b = document.createElement("button");
+  b.className = "nav-item";
+  b.type = "button";
+  b.setAttribute("data-goto", t.id);
+  b.innerHTML = '<span class="nav-num">' + (t.num || t.id) + '</span>' +
+                '<span class="nav-label">' + t.label + '</span>' +
+                '<span class="nav-check" aria-hidden="true"></span>';
+  b.addEventListener("click", function(){ show(t.id); });
+  nav.appendChild(b);
+});
+
+var sidebar = document.getElementById("sidebar");
+var scrim   = document.getElementById("scrim");
+var burger  = document.getElementById("burger");
+function closeMenu(){ sidebar.classList.remove("open"); scrim.classList.remove("show"); }
+burger.addEventListener("click", function(){
+  sidebar.classList.toggle("open");
+  scrim.classList.toggle("show", sidebar.classList.contains("open"));
+});
+scrim.addEventListener("click", closeMenu);
+
+var current = "1.1";
+function show(id){
+  if(!sections[id]) return;
+  current = id;
+  Object.keys(sections).forEach(function(k){ sections[k].classList.toggle("active", k === id); });
+  Array.prototype.forEach.call(nav.querySelectorAll(".nav-item"), function(b){
+    b.classList.toggle("active", b.getAttribute("data-goto") === id);
+  });
+  var t = TOPICS.filter(function(x){ return x.id === id; })[0];
+  document.getElementById("topbarTitle").textContent = t ? t.label : "Engenharia de Software";
+  window.scrollTo({top:0, behavior:"auto"});
+  closeMenu();
+}
+
+function refreshProgress(){
+  var total = TOPICS.length - 1;
+  var n = 0;
+  TOPICS.forEach(function(t){
+    if(t.id === "gloss") return;
+    var b = nav.querySelector('[data-goto="' + t.id + '"]');
+    var isDone = !!done[t.id];
+    if(isDone) n++;
+    if(b) b.classList.toggle("done", isDone);
+  });
+  document.getElementById("progressLabel").textContent = n + " / " + total;
+  document.getElementById("progressBar").style.width = (n / total * 100) + "%";
+}
+
+document.getElementById("resetBtn").addEventListener("click", function(){
+  done = {}; save(); refreshProgress();
+  Array.prototype.forEach.call(document.querySelectorAll(".opt"), function(o){
+    o.classList.remove("correct","incorrect","locked");
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".feedback"), function(f){
+    f.className = "feedback";
+  });
+  answered = {};
+});
+
+/* ---------- navegação inferior ---------- */
+TOPICS.forEach(function(t, i){
+  var sec = sections[t.id];
+  if(!sec) return;
+  var prev = TOPICS[i-1], next = TOPICS[i+1];
+  var wrap = document.createElement("div");
+  wrap.className = "topic-nav";
+  if(prev){
+    var pb = document.createElement("button");
+    pb.className = "nav-btn"; pb.type = "button";
+    pb.innerHTML = '<span>Anterior</span><b>' + prev.label + '</b>';
+    pb.addEventListener("click", function(){ show(prev.id); });
+    wrap.appendChild(pb);
+  }
+  if(next){
+    var nb = document.createElement("button");
+    nb.className = "nav-btn next"; nb.type = "button";
+    nb.innerHTML = '<span>Próximo</span><b>' + next.label + '</b>';
+    nb.addEventListener("click", function(){ show(next.id); });
+    wrap.appendChild(nb);
+  }
+  sec.appendChild(wrap);
+});
+
+/* ============================================================
+   Quiz
+   ============================================================ */
+var QUIZ = {
+  "1.1":[
+    {q:"Uma padaria quer um sistema para controlar encomendas. O que NÃO faz parte da fronteira desse sistema?",
+     o:["O cadastro de clientes","A tela de registro de encomendas","O forno industrial da padaria","O relatório de encomendas do dia"],
+     a:2,
+     good:"Isso. O forno é parte do ambiente: importante para o negócio, mas não é um componente do software.",
+     bad:"Reveja: a fronteira do sistema inclui apenas os componentes de software que colaboram para o objetivo — o forno pertence ao ambiente."},
+    {q:"Por que analisar o sistema existente antes de propor um novo?",
+     o:["Para copiar exatamente o que já existe","Para identificar pontos fortes a preservar e fraquezas a corrigir","Porque a lei exige documentação prévia","Para descartar a opinião dos usuários atuais"],
+     a:1,
+     good:"Exato. O sistema atual é a melhor fonte de regras de negócio reais e de problemas concretos.",
+     bad:"Na verdade, a análise serve para entender o que funciona e o que falha hoje — base sólida para as melhorias."}
+  ],
+  "1.2":[
+    {q:"Um requisito foi mal entendido no planejamento e o erro só apareceu depois da implantação. O que se pode afirmar?",
+     o:["O custo de correção é semelhante ao de corrigir no planejamento","O custo cresce muito, pois envolve código, testes, dados e usuários em produção","Basta corrigir na próxima versão sem custo adicional","O erro deixa de ser um problema após o lançamento"],
+     a:1,
+     good:"Isso mesmo. Quanto mais tarde o erro é descoberto, mais artefatos precisam ser refeitos.",
+     bad:"Reveja a régua de custo: em produção, a correção envolve código, testes, dados migrados e usuários já treinados."},
+    {q:"Qual é o entregável típico da fase de planejamento e análise?",
+     o:["O código-fonte da aplicação","O documento de requisitos e o estudo de viabilidade","O relatório de bugs de produção","O manual de operação do servidor"],
+     a:1,
+     good:"Correto. É nessa fase que objetivos, requisitos e viabilidade técnica e financeira são definidos.",
+     bad:"Cuidado: código vem no desenvolvimento. O planejamento entrega requisitos e análise de viabilidade."}
+  ],
+  "1.3":[
+    {q:"Um órgão público contratou um sistema com escopo fechado em edital, requisitos estáveis e auditoria formal por fase. Qual modelo tende a se ajustar melhor?",
+     o:["Waterfall","Ágil sem nenhuma documentação","Nenhum modelo é aplicável","Sempre o Ágil, em qualquer contexto"],
+     a:0,
+     good:"Isso. Com requisitos estáveis e exigência de formalidade por fase, a sequência do Waterfall se ajusta bem.",
+     bad:"Reveja o simulador: com requisitos estáveis e auditoria formal, o modelo sequencial tem vantagem."},
+    {q:"Qual é a principal vantagem do modelo Ágil quando o cliente muda de ideia com frequência?",
+     o:["Eliminar completamente a necessidade de testes","Entregar software funcionando cedo e absorver mudanças a cada iteração","Impedir que o cliente altere requisitos","Reduzir o número de desenvolvedores"],
+     a:1,
+     good:"Exato. Iterações curtas transformam mudança em ajuste de rota, não em retrabalho acumulado.",
+     bad:"O Ágil não elimina testes nem proíbe mudanças — ele reduz o custo delas entregando em iterações curtas."}
+  ],
+  "1.4":[
+    {q:"Um sistema será usado diariamente por operadores experientes de um call center. O que faz mais sentido?",
+     o:["Muitas telas com assistente passo a passo obrigatório","Atalhos de teclado, densidade maior de informação e menos confirmações","Esconder funcionalidades avançadas","Textos explicativos longos em cada campo"],
+     a:1,
+     good:"Isso. Para uso intenso e usuário experiente, velocidade vence tutela.",
+     bad:"Reveja o laboratório: assistentes e textos longos ajudam iniciantes, mas atrapalham quem usa o sistema o dia inteiro."},
+    {q:"Por que levantar o perfil dos usuários antes de projetar a interface?",
+     o:["Porque a interface deve agradar ao programador","Porque o nível técnico e a frequência de uso mudam as decisões de design","Porque isso define a linguagem de programação","Porque reduz o custo do servidor"],
+     a:1,
+     good:"Correto. O mesmo requisito funcional gera interfaces diferentes conforme o público.",
+     bad:"O perfil do usuário não define linguagem nem servidor — ele define densidade, vocabulário e nível de assistência da interface."}
+  ],
+  "1.5":[
+    {q:"Você precisa descobrir os passos reais que o funcionário executa, incluindo os atalhos informais que ele não admite em reunião. Qual técnica escolher?",
+     o:["Questionário online","Observação do trabalho atual","Análise de documentação","Reunião de kick-off com a diretoria"],
+     a:1,
+     good:"Isso. A observação revela o processo praticado, que quase sempre difere do processo declarado.",
+     bad:"Reveja: questionários e documentos capturam o processo oficial. Só a observação mostra o que de fato acontece."},
+    {q:"Qual é o papel das perguntas fechadas em uma entrevista?",
+     o:["Explorar dores desconhecidas","Validar e quantificar hipóteses já levantadas","Substituir a análise de requisitos","Evitar contato com o usuário"],
+     a:1,
+     good:"Exato. Abertas exploram; fechadas confirmam e permitem medir.",
+     bad:"Perguntas fechadas não exploram o desconhecido — elas confirmam hipóteses que já existem."}
+  ],
+  "1.6":[
+    {q:'"O sistema deve responder a qualquer consulta em até 2 segundos" é um requisito:',
+     o:["Funcional, porque descreve uma consulta","Não-funcional, porque define uma qualidade (desempenho)","Regra de negócio","Caso de uso"],
+     a:1,
+     good:"Correto. Desempenho é qualidade do sistema, portanto requisito não-funcional.",
+     bad:"Atenção: o requisito não descreve uma nova ação, e sim com que qualidade a ação acontece — logo, não-funcional."},
+    {q:"Na negociação de requisitos com capacidade limitada, o critério mais defensável é:",
+     o:["Implementar primeiro o que é tecnicamente mais divertido","Priorizar por valor entregue ao usuário e ao negócio em relação ao custo","Aceitar tudo o que o cliente pedir na primeira release","Deixar o cliente fora da decisão"],
+     a:1,
+     good:"Isso. Priorizar por valor/custo concentra recursos no que é mais crítico.",
+     bad:"Reveja a mesa de negociação: a priorização se sustenta na relação entre valor entregue e custo, com o cliente presente na decisão."}
+  ],
+  "1.7":[
+    {q:"O software passou em todos os testes técnicos e atende exatamente à especificação, mas o cliente diz que não resolve o problema dele. O que falhou?",
+     o:["A verificação","A validação","O deploy","O controle de versão"],
+     a:1,
+     good:"Exato. Construímos o produto corretamente, mas não o produto certo — falha de validação.",
+     bad:"Reveja o detector: se o código segue a especificação, a verificação passou. O que falhou foi a validação da necessidade real."},
+    {q:"Qual atividade responde à pergunta “estamos construindo o produto corretamente?”",
+     o:["Validação","Verificação","Negociação","Implantação"],
+     a:1,
+     good:"Correto. Verificação compara o produto com a especificação técnica.",
+     bad:"Cuidado com a troca: verificação = conforme a especificação; validação = conforme a necessidade real."}
+  ],
+  "1.8":[
+    {q:"Para apresentar o sistema à diretoria em 5 minutos, qual nível de modelo é mais adequado?",
+     o:["Diagrama de contexto, mostrando o sistema e seus atores externos","Diagrama de classes com todos os atributos","O código-fonte comentado","O script de criação do banco"],
+     a:0,
+     good:"Isso. Cada nível serve a um público — para a diretoria, contexto e valor.",
+     bad:"Reveja o zoom de abstração: detalhes de classes e código servem à equipe técnica, não à apresentação executiva."},
+    {q:"Modelar um sistema serve principalmente para:",
+     o:["Substituir a programação","Reduzir ambiguidade e alinhar o entendimento entre os envolvidos","Cumprir uma exigência burocrática","Aumentar o número de documentos do projeto"],
+     a:1,
+     good:"Correto. Modelo é ferramenta de comunicação e de decisão, não papelada.",
+     bad:"O modelo não substitui o código nem existe para inflar documentação — ele reduz ambiguidade antes do código existir."}
+  ],
+  "1.9":[
+    {q:"No exemplo do cálculo de frete, por que a versão orientada a objetos absorve melhor um novo tipo de entrega?",
+     o:["Porque usa menos linhas de código","Porque basta criar uma nova classe, sem alterar o código que já funciona","Porque dispensa testes","Porque o compilador é mais rápido"],
+     a:1,
+     good:"Isso. Estender sem modificar reduz o risco de quebrar o que já estava correto.",
+     bad:"Reveja o comparativo: na versão procedural é preciso abrir e alterar o condicional existente; na OO, basta acrescentar uma classe."},
+    {q:"Qual é a principal função da documentação de design?",
+     o:["Registrar decisões arquiteturais e apoiar manutenção e comunicação","Impressionar o cliente com volume de páginas","Substituir as reuniões da equipe","Servir apenas para auditoria"],
+     a:0,
+     good:"Correto. Ela é fonte comum de verdade para quem chega depois.",
+     bad:"Documentação não é volume nem formalidade: seu valor é registrar decisões e dar contexto a quem mantém o sistema."}
+  ],
+  "1.10":[
+    {q:"Dois objetos foram instanciados a partir da classe Carro. Você acelera apenas o primeiro. O que acontece?",
+     o:["Ambos aceleram, pois compartilham a classe","Apenas o primeiro muda de velocidade; cada objeto tem seu próprio estado","A classe passa a ter velocidade 20","O segundo objeto é destruído"],
+     a:1,
+     good:"Exato. A classe define a estrutura; o estado pertence a cada instância.",
+     bad:"Reveja a fábrica de objetos: os objetos compartilham a estrutura definida pela classe, mas cada um guarda seus próprios valores."},
+    {q:"Atributos e métodos são, respectivamente:",
+     o:["Ações e características","Características e ações","Classes e objetos","Entradas e saídas"],
+     a:1,
+     good:"Correto. Atributos descrevem; métodos agem.",
+     bad:"Inverteu: atributos são as características (cor, marca); métodos são as ações (acelerar, frear)."}
+  ],
+  "1.11":[
+    {q:"Qual diagrama UML mostra a ordem cronológica das mensagens trocadas entre objetos?",
+     o:["Diagrama de classes","Diagrama de casos de uso","Diagrama de sequência","Diagrama de implantação"],
+     a:2,
+     good:"Isso. A sequência enfatiza tempo e ordem das chamadas entre linhas de vida.",
+     bad:"Reveja a bancada: classes mostram estrutura, casos de uso mostram funcionalidades por ator, sequência mostra a ordem no tempo."},
+    {q:"O que um diagrama de casos de uso comunica melhor?",
+     o:["A estrutura interna das classes","O que o sistema oferece a cada ator externo","O tempo de resposta do banco de dados","A topologia dos servidores"],
+     a:1,
+     good:"Correto. Ele é a vista funcional do sistema do ponto de vista de quem o usa.",
+     bad:"Casos de uso não descrevem estrutura interna nem infraestrutura — eles mostram funcionalidades sob a ótica dos atores."}
+  ]
+};
+
+var answered = {};
+Object.keys(QUIZ).forEach(function(tid){
+  var host = document.querySelector('[data-quiz="' + tid + '"]');
+  if(!host) return;
+  var head = document.createElement("p");
+  head.className = "quiz-tag";
+  head.textContent = "Fixação — tópico " + tid;
+  host.appendChild(head);
+
+  QUIZ[tid].forEach(function(item, qi){
+    var q = document.createElement("div");
+    q.className = "q";
+    var txt = document.createElement("p");
+    txt.className = "q-text";
+    txt.textContent = (qi + 1) + ". " + item.q;
+    q.appendChild(txt);
+
+    var opts = document.createElement("div");
+    opts.className = "opts";
+    item.o.forEach(function(o, oi){
+      var btn = document.createElement("button");
+      btn.className = "opt"; btn.type = "button"; btn.textContent = o;
+      btn.addEventListener("click", function(){
+        var key = tid + "-" + qi;
+        if(answered[key]) return;
+        answered[key] = true;
+        var correct = (oi === item.a);
+        btn.classList.add(correct ? "correct" : "incorrect");
+        Array.prototype.forEach.call(opts.children, function(c, ci){
+          c.classList.add("locked");
+          if(ci === item.a) c.classList.add("correct");
+        });
+        fb.textContent = correct ? item.good : item.bad;
+        fb.className = "feedback show " + (correct ? "good" : "bad");
+        var all = QUIZ[tid].every(function(_, i){ return answered[tid + "-" + i]; });
+        if(all){ done[tid] = true; save(); refreshProgress(); }
+      });
+      opts.appendChild(btn);
+    });
+    q.appendChild(opts);
+    var fb = document.createElement("p");
+    fb.className = "feedback";
+    q.appendChild(fb);
+    host.appendChild(q);
+  });
+});
+
+/* ============================================================
+   Glossário
+   ============================================================ */
+var GLOSS = [
+  ["Sistema","1.1","Conjunto de componentes inter-relacionados que trabalham juntos para atingir um objetivo comum."],
+  ["Fronteira do sistema","1.1","Linha que separa o que o software controla do que pertence ao ambiente ao redor dele."],
+  ["Análise de sistemas","1.1","Estudo do sistema existente para identificar pontos fortes, fraquezas e oportunidades de melhoria."],
+  ["Viabilidade","1.2","Avaliação técnica e financeira que indica se o projeto pode e deve ser realizado."],
+  ["Implantação","1.2","Fase de lançamento do software no ambiente real, com suporte e acompanhamento dos usuários."],
+  ["SDLC","1.3","Ciclo de vida de desenvolvimento de software: organização do processo em fases claras e gerenciáveis."],
+  ["Waterfall","1.3","Modelo sequencial em que cada fase começa após a conclusão da anterior."],
+  ["Ágil","1.3","Modelo iterativo e incremental, com entregas curtas e feedback contínuo do cliente."],
+  ["Manutenção","1.3","Correção de defeitos, atualizações e suporte após a entrega — a fase mais longa do ciclo de vida."],
+  ["Stakeholder","1.4","Qualquer parte interessada no sistema: usuários, gestores, clientes, órgãos reguladores."],
+  ["Persona","1.4","Representação de um perfil típico de usuário, usada para orientar decisões de projeto."],
+  ["Usabilidade","1.4","Facilidade com que um usuário específico realiza suas tarefas no sistema."],
+  ["Entrevista","1.5","Conversa estruturada com usuários para explorar perspectivas, dores e expectativas."],
+  ["Pergunta aberta","1.5","Pergunta que estimula respostas livres e revela informações não previstas."],
+  ["Observação","1.5","Acompanhamento do trabalho real do usuário, revelando o processo praticado."],
+  ["Requisito funcional","1.6","Ação ou tarefa que o software deve realizar. Ex.: permitir login, gerar relatório."],
+  ["Requisito não-funcional","1.6","Qualidade ou restrição do sistema: desempenho, segurança, usabilidade, escalabilidade."],
+  ["Priorização","1.6","Ordenação dos requisitos por valor e custo para definir o escopo de cada entrega."],
+  ["Verificação","1.7","“Estamos construindo o produto corretamente?” Conformidade com a especificação técnica."],
+  ["Validação","1.7","“Estamos construindo o produto certo?” Aderência à necessidade real do usuário."],
+  ["Especificação","1.7","Documento que traduz necessidades em descrições precisas do comportamento esperado."],
+  ["Modelagem","1.8","Criação de representações visuais da estrutura, do comportamento e das interações do sistema."],
+  ["Abstração","1.8","Omissão deliberada de detalhes para destacar o que importa a um determinado público."],
+  ["Documentação de design","1.9","Registro das decisões arquiteturais que sustenta comunicação, manutenção e evolução."],
+  ["Paradigma OO","1.9","Organização do software em torno de objetos que reúnem dados e comportamento."],
+  ["Encapsulamento","1.9","Ocultação dos detalhes internos do objeto, expostos apenas por meio de seus métodos."],
+  ["Herança","1.9","Mecanismo pelo qual uma classe reaproveita e especializa a estrutura de outra."],
+  ["Polimorfismo","1.9","Capacidade de tratar objetos diferentes pela mesma interface, cada um respondendo à sua maneira."],
+  ["Classe","1.10","Molde que define os atributos e métodos que seus objetos terão."],
+  ["Objeto","1.10","Instância concreta de uma classe, com valores próprios e estado independente."],
+  ["Atributo","1.10","Característica ou dado que um objeto possui, como cor, marca ou velocidade."],
+  ["Método","1.10","Ação ou comportamento que um objeto pode executar, como acelerar() ou frear()."],
+  ["Instanciação","1.10","Processo de criar um objeto a partir de uma classe."],
+  ["UML","1.11","Linguagem de Modelagem Unificada: padrão gráfico para especificar e documentar sistemas."],
+  ["Caso de uso","1.11","Interação completa entre um ator e o sistema que entrega valor ao ator."],
+  ["Ator","1.11","Usuário ou sistema externo que interage com o software."],
+  ["Diagrama de classes","1.11","Vista estática da estrutura: classes, atributos, métodos e relacionamentos."],
+  ["Diagrama de sequência","1.11","Vista dinâmica: ordem cronológica das mensagens trocadas entre objetos."],
+  ["Linha de vida","1.11","Linha vertical que representa a existência de um objeto ao longo do tempo."],
+  ["Multiplicidade","1.11","Quantidade de instâncias que participam de um relacionamento, como 1..*."],
+  ["Ferramenta CASE","1.11","Software que apoia modelagem, geração de código e documentação do projeto."]
+];
+
+var grid = document.getElementById("glossGrid");
+var empty = document.getElementById("glossEmpty");
+function renderGloss(filter){
+  var f = (filter || "").toLowerCase().trim();
+  grid.innerHTML = "";
+  var n = 0;
+  GLOSS.forEach(function(g){
+    if(f && (g[0] + " " + g[1] + " " + g[2]).toLowerCase().indexOf(f) === -1) return;
+    n++;
+    var c = document.createElement("div");
+    c.className = "gloss-card";
+    var h = document.createElement("h3"); h.textContent = g[0];
+    var s = document.createElement("span"); s.className = "from"; s.textContent = "tópico " + g[1];
+    var p = document.createElement("p"); p.textContent = g[2];
+    c.appendChild(h); c.appendChild(s); c.appendChild(p);
+    grid.appendChild(c);
+  });
+  empty.style.display = n ? "none" : "block";
+}
+document.getElementById("glossSearch").addEventListener("input", function(e){ renderGloss(e.target.value); });
+renderGloss("");
+
+refreshProgress();
+show("1.1");
+window.__apostila = {show:show, markDone:function(id){ done[id]=true; save(); refreshProgress(); }};
+})();
+</script>
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+
+/* ============================================================
+   1.1 — Fronteira do sistema (arrastar / clicar)
+   ============================================================ */
+(function(){
+  var pool = $("s1-pool"), sys = $("s1-sys"), out = $("s1-out");
+  if(!pool) return;
+  var ITEMS = [
+    {id:"c1", t:"Tela de registro da venda", core:true,  why:"É por onde os dados entram no sistema."},
+    {id:"c2", t:"Cálculo de total e desconto", core:true, why:"É o processamento que transforma entrada em resultado."},
+    {id:"c3", t:"Banco de dados de vendas", core:true,   why:"Armazena o histórico que alimenta os relatórios."},
+    {id:"c4", t:"Relatório para o gerente", core:true,   why:"É a saída exigida pelo objetivo do sistema."},
+    {id:"c5", t:"Confirmação na tela do vendedor", core:false, extra:true, why:"Feedback: melhora o uso, mas o sistema funciona sem ele."},
+    {id:"c6", t:"Cafeteira da copa", core:false, why:"Faz parte do ambiente da loja, não do sistema de vendas."},
+    {id:"c7", t:"Motoboy que faz a entrega", core:false, why:"É um ator externo: interage com a loja, mas não é componente do software."}
+  ];
+  var state = {};
+
+  function chip(item){
+    var c = el("button","chip");
+    c.type = "button";
+    c.setAttribute("draggable","true");
+    c.setAttribute("data-id", item.id);
+    c.innerHTML = '<span class="dot"></span>' + item.t;
+    c.addEventListener("click", function(){
+      state[item.id] = (state[item.id] === "sys") ? "pool" : "sys";
+      render();
+    });
+    c.addEventListener("dragstart", function(e){
+      c.classList.add("dragging");
+      try{ e.dataTransfer.setData("text/plain", item.id); }catch(err){}
+    });
+    c.addEventListener("dragend", function(){ c.classList.remove("dragging"); });
+    return c;
+  }
+
+  [pool, sys].forEach(function(z){
+    z.addEventListener("dragover", function(e){ e.preventDefault(); z.classList.add("over"); });
+    z.addEventListener("dragleave", function(){ z.classList.remove("over"); });
+    z.addEventListener("drop", function(e){
+      e.preventDefault(); z.classList.remove("over");
+      var id = "";
+      try{ id = e.dataTransfer.getData("text/plain"); }catch(err){}
+      if(!id) return;
+      state[id] = (z === sys) ? "sys" : "pool";
+      render();
+    });
+  });
+
+  function render(){
+    pool.innerHTML = ""; sys.innerHTML = "";
+    ITEMS.forEach(function(it){
+      var c = chip(it);
+      if(state[it.id] === "sys"){
+        c.classList.add(it.core || it.extra ? "placed" : "wrong");
+        sys.appendChild(c);
+      }else{
+        pool.appendChild(c);
+      }
+    });
+    report();
+  }
+
+  function report(){
+    var core = ITEMS.filter(function(i){ return i.core; });
+    var inCore = core.filter(function(i){ return state[i.id] === "sys"; }).length;
+    var wrong = ITEMS.filter(function(i){ return !i.core && !i.extra && state[i.id] === "sys"; });
+    var extra = ITEMS.filter(function(i){ return i.extra && state[i.id] === "sys"; }).length;
+    var html = "<b>Componentes essenciais dentro da fronteira:</b> " + inCore + " / " + core.length + "<br>";
+    if(wrong.length){
+      html += '<span class="bad">Fora de escopo:</span> ' + wrong.map(function(w){ return w.t + " — " + w.why; }).join("; ") + "<br>";
+    }
+    if(inCore === core.length && !wrong.length){
+      html += '<span class="ok">Sistema completo.</span> Entrada, processamento, armazenamento e saída encadeados pelo mesmo objetivo: registrar vendas e informar o gerente.';
+      if(extra) html += " O feedback ao vendedor não é essencial, mas melhora a usabilidade.";
+      if(window.__apostila) window.__apostila.markDone("1.1");
+    }else if(inCore < core.length){
+      html += '<span class="warn">Ainda falta encadeamento.</span> Sem entrada, processamento, armazenamento e saída o conjunto não atinge o objetivo comum.';
+    }
+    out.innerHTML = html;
+  }
+
+  ITEMS.forEach(function(i){ state[i.id] = "pool"; });
+  $("s1-reset").addEventListener("click", function(){
+    ITEMS.forEach(function(i){ state[i.id] = "pool"; });
+    render();
+  });
+  render();
+})();
+
+/* ============================================================
+   1.2 — Régua do custo do erro
+   ============================================================ */
+(function(){
+  var range = $("s2-range");
+  if(!range) return;
+  var name = $("s2-name"), box = $("s2-phase"), costBox = $("s2-cost"), out = $("s2-out");
+  var PHASES = [
+    {n:"Planejamento", d:"Definição de objetivos, escopo e requisitos; estudo de viabilidade técnica e financeira.",
+     e:"Documento de requisitos e estudo de viabilidade", c:1,
+     fix:"Corrigir aqui custa uma conversa e a atualização de um documento."},
+    {n:"Análise e projeto", d:"Detalhamento dos requisitos e desenho da solução: modelos, arquitetura e interfaces.",
+     e:"Modelos, diagramas e arquitetura", c:3,
+     fix:"Corrigir aqui exige refazer modelos, mas nenhum código foi escrito ainda."},
+    {n:"Desenvolvimento", d:"Codificação e construção do software conforme a especificação aprovada.",
+     e:"Código-fonte funcional", c:10,
+     fix:"Corrigir aqui significa reescrever código já pronto e revisar dependências."},
+    {n:"Testes", d:"Verificação sistemática de qualidade, correção de erros e homologação.",
+     e:"Relatório de testes e correções", c:30,
+     fix:"Corrigir aqui reabre o ciclo: código, testes de regressão e nova homologação."},
+    {n:"Implantação", d:"Lançamento em produção, treinamento e suporte contínuo ao usuário.",
+     e:"Sistema em produção", c:100,
+     fix:"Corrigir aqui envolve dados reais migrados, usuários treinados e janela de indisponibilidade."}
+  ];
+
+  function draw(){
+    var i = +range.value, p = PHASES[i];
+    name.textContent = p.n;
+    box.innerHTML = "";
+    var card = el("div","panel-card");
+    card.innerHTML = '<h4>' + (i+1) + '. ' + p.n + '</h4><p>' + p.d + '</p>' +
+      '<p style="margin-top:10px"><span class="tag-pill">Entrega: ' + p.e + '</span></p>';
+    box.appendChild(card);
+
+    costBox.innerHTML = "";
+    PHASES.forEach(function(ph, k){
+      var row = el("div","bar-row");
+      var pct = (Math.log10(ph.c) + 0.25) / 2.25 * 100;
+      row.innerHTML = '<span class="bar-name">' + ph.n + '</span>' +
+        '<span class="bar-track"><span class="bar-fill" style="width:' + pct + '%;background:' +
+        (k === i ? "linear-gradient(to right,#163D28,#1F5135,#2E8B57)" : "rgba(255,255,255,.18)") + '"></span></span>' +
+        '<span class="bar-val">' + ph.c + '×</span>';
+      costBox.appendChild(row);
+    });
+
+    out.innerHTML = '<b>Custo de corrigir, nesta fase, um requisito mal entendido no início: ' + p.c +
+      '× o custo original.</b><br>' + p.fix +
+      (i === 4 ? '<br><span class="warn">É por isso que planejar não é burocracia: é o ponto mais barato de errar.</span>' : "");
+    if(i === 4 && window.__apostila) window.__apostila.markDone("1.2");
+  }
+  range.addEventListener("input", draw);
+  draw();
+})();
+
+/* ============================================================
+   1.3 — Waterfall × Ágil
+   ============================================================ */
+(function(){
+  var chg = $("s3-chg");
+  if(!chg) return;
+  var track = $("s3-track"), metrics = $("s3-metrics"), out = $("s3-out"), label = $("s3-chgLabel");
+  var bWf = $("s3-wf"), bAg = $("s3-ag");
+  var model = "wf";
+
+  function calc(){
+    var c = +chg.value;
+    if(model === "wf"){
+      return {
+        first: 22,
+        rework: Math.round(c * 1.9 * 10) / 10,
+        risk: Math.min(96, 18 + c * 8),
+        fit: Math.max(10, 100 - c * 8),
+        releases: 1
+      };
+    }
+    return {
+      first: 3,
+      rework: Math.round(c * 0.5 * 10) / 10,
+      risk: Math.max(12, 34 - c * 1.2),
+      fit: Math.min(94, 74 + c * 2),
+      releases: 8
+    };
+  }
+
+  function draw(){
+    label.textContent = chg.value;
+    bWf.classList.toggle("on", model === "wf");
+    bAg.classList.toggle("on", model === "ag");
+    var m = calc();
+
+    track.innerHTML = "";
+    var tl = el("div","timeline");
+    for(var w = 1; w <= 24; w++){
+      var b = el("div","tl-block");
+      var h = 34, color = "rgba(255,255,255,.14)";
+      if(model === "wf"){
+        if(w <= 4){ color = "rgba(147,87,204,.65)"; h = 46; }
+        else if(w <= 8){ color = "rgba(147,87,204,.4)"; h = 52; }
+        else if(w <= 18){ color = "rgba(41,137,216,.55)"; h = 66; }
+        else if(w <= 22){ color = "rgba(224,163,58,.6)"; h = 58; }
+        else { color = "#2E8B57"; h = 92; }
+      }else{
+        if(w % 3 === 0){ color = "#2E8B57"; h = 92; }
+        else { color = "rgba(41,137,216,.5)"; h = 58; }
+      }
+      b.style.height = h + "%";
+      b.style.background = color;
+      b.title = "Semana " + w;
+      tl.appendChild(b);
+    }
+    track.appendChild(tl);
+    var axis = el("div","tl-axis","<span>semana 1</span><span>semana 12</span><span>semana 24</span>");
+    track.appendChild(axis);
+    var lg = el("div","legend",
+      model === "wf"
+        ? '<span><i style="background:rgba(147,87,204,.65)"></i>requisitos e projeto</span><span><i style="background:rgba(41,137,216,.55)"></i>desenvolvimento</span><span><i style="background:rgba(224,163,58,.6)"></i>testes</span><span><i style="background:#2E8B57"></i>entrega ao cliente</span>'
+        : '<span><i style="background:rgba(41,137,216,.5)"></i>iteração em andamento</span><span><i style="background:#2E8B57"></i>entrega funcional a cada 3 semanas</span>');
+    track.appendChild(lg);
+
+    metrics.innerHTML = "";
+    var g = el("div","metric-grid");
+    [["Primeira entrega", "semana " + m.first, "cliente vê software rodando"],
+     ["Retrabalho", m.rework + " sem.", "trabalho refeito por mudanças"],
+     ["Risco de surpresa", Math.round(m.risk) + "%", "descobrir tarde que errou"],
+     ["Aderência final", Math.round(m.fit) + "%", "quanto atende ao que o cliente quer no fim"]
+    ].forEach(function(x){
+      var d = el("div","metric","<span>" + x[0] + "</span><b>" + x[1] + "</b><small>" + x[2] + "</small>");
+      g.appendChild(d);
+    });
+    metrics.appendChild(g);
+
+    var c = +chg.value;
+    var verdict;
+    if(c <= 2){
+      verdict = model === "wf"
+        ? '<span class="ok">Cenário favorável ao Waterfall.</span> Com requisitos estáveis, a sequência evita a sobrecarga de replanejar a cada iteração.'
+        : '<span class="warn">O Ágil funciona, mas paga cerimônias que este cenário não exigia.</span> Com requisitos estáveis, o modelo sequencial entrega com menos overhead.';
+    }else if(c >= 6){
+      verdict = model === "wf"
+        ? '<span class="bad">Cenário hostil ao Waterfall.</span> As mudanças chegam depois que o projeto já foi congelado: retrabalho alto e descoberta tardia.'
+        : '<span class="ok">Cenário favorável ao Ágil.</span> Cada mudança entra na próxima iteração, e o cliente corrige o rumo a cada 3 semanas.';
+    }else{
+      verdict = "Zona intermediária: a escolha passa a depender de contrato, cultura da equipe e exigências de auditoria.";
+    }
+    out.innerHTML = "<b>Modelo: " + (model === "wf" ? "Waterfall" : "Ágil") + " · " + c + " mudança(s) de requisito</b><br>" + verdict;
+    if(c >= 6 && window.__apostila) window.__apostila.markDone("1.3");
+  }
+
+  bWf.addEventListener("click", function(){ model = "wf"; draw(); });
+  bAg.addEventListener("click", function(){ model = "ag"; draw(); });
+  chg.addEventListener("input", draw);
+  draw();
+})();
+
+/* ============================================================
+   1.4 — Interface × perfil do usuário
+   ============================================================ */
+(function(){
+  var skill = $("s4-skill");
+  if(!skill) return;
+  var freq = $("s4-freq"), screen = $("s4-screen"), out = $("s4-out");
+  var sl = $("s4-skillLabel"), fl = $("s4-freqLabel");
+
+  function draw(){
+    var s = +skill.value, f = +freq.value;
+    sl.textContent = s < 34 ? "Iniciante" : (s < 67 ? "Intermediário" : "Especialista");
+    fl.textContent = f < 34 ? "Esporádica" : (f < 67 ? "Semanal" : "Diária (o dia todo)");
+
+    var dense = f > 60;
+    var expert = s > 60;
+    var novice = s < 35;
+
+    var ui = el("div","ui-preview");
+    ui.style.fontSize = novice ? "15px" : (dense ? "13px" : "14px");
+    ui.style.lineHeight = dense ? "1.4" : "1.7";
+
+    var h = '<p class="ui-title" style="font-size:' + (novice ? "18px" : "15px") + '">' +
+      (novice ? "Passo 2 de 4 — Informe o pedido" : "Lançamento de pedido") + "</p>";
+
+    if(novice){
+      h += '<div class="ui-field">Cliente <b>&nbsp;</b></div><p class="ui-help">Digite o nome ou o CPF do cliente. Se não encontrar, clique em “Novo cliente”.</p>';
+      h += '<div class="ui-field">Produto <b>&nbsp;</b></div><p class="ui-help">Escolha o produto na lista. Os preços já incluem impostos.</p>';
+      h += '<div class="ui-field">Quantidade <b>&nbsp;</b></div><p class="ui-help">Informe quantas unidades o cliente deseja.</p>';
+    }else if(expert){
+      h += '<div class="ui-field" style="padding:6px 10px"><b>cliente</b> &nbsp;·&nbsp; <b>produto</b> &nbsp;·&nbsp; <b>qtd</b> &nbsp;·&nbsp; <b>desconto</b> &nbsp;·&nbsp; <b>cond. pgto</b> &nbsp;·&nbsp; <b>transportadora</b></div>';
+      h += '<div class="ui-field" style="padding:6px 10px">últimos 5 pedidos do cliente carregados automaticamente</div>';
+    }else{
+      h += '<div class="ui-field">Cliente <b>&nbsp;</b></div>';
+      h += '<div class="ui-field">Produto <b>&nbsp;</b></div>';
+      h += '<div class="ui-field">Quantidade &nbsp;·&nbsp; Desconto</div>';
+    }
+
+    h += '<div class="ui-actions">';
+    h += '<button class="ui-btn" type="button">' + (novice ? "Continuar" : "Gravar") + "</button>";
+    if(!novice) h += '<button class="ui-btn ghost" type="button">Duplicar último</button>';
+    if(expert && dense) h += '<span class="ui-shortcut">F2 gravar</span><span class="ui-shortcut">F4 buscar</span><span class="ui-shortcut">Ctrl+D duplicar</span>';
+    if(novice) h += '<button class="ui-btn ghost" type="button">Voltar</button>';
+    h += "</div>";
+    ui.innerHTML = h;
+    screen.innerHTML = "";
+    screen.appendChild(ui);
+
+    var msg;
+    if(novice && !dense){
+      msg = '<span class="ok">Assistente passo a passo, campos grandes e ajuda contextual.</span> Ideal para quem usa o sistema poucas vezes e não tem familiaridade técnica.';
+    }else if(expert && dense){
+      msg = '<span class="ok">Densidade alta, atalhos de teclado e menos confirmações.</span> Quem opera o dia inteiro ganha velocidade — e um iniciante se perderia aqui.';
+    }else if(novice && dense){
+      msg = '<span class="warn">Tensão de projeto:</span> usa muito, mas domina pouco. Aposte em treinamento, rótulos claros e ações reversíveis (desfazer) em vez de atalhos crípticos.';
+    }else{
+      msg = "Perfil equilibrado: rótulos explícitos, sem tutorial obrigatório e com atalhos opcionais para quem quiser avançar.";
+    }
+    out.innerHTML = "<b>Perfil: " + sl.textContent.toLowerCase() + ", uso " + fl.textContent.toLowerCase() + ".</b><br>" + msg +
+      "<br>Mesma funcionalidade, decisões de interface diferentes: é isso que a identificação de usuários define.";
+    if((novice && !dense) || (expert && dense)){ if(window.__apostila) window.__apostila.markDone("1.4"); }
+  }
+  skill.addEventListener("input", draw);
+  freq.addEventListener("input", draw);
+  draw();
+})();
+})();
+</script>
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+
+/* ============================================================
+   1.5 — Técnica × objetivo
+   ============================================================ */
+(function(){
+  var techBox = $("s5-tech");
+  if(!techBox) return;
+  var goalBox = $("s5-goals"), out = $("s5-out");
+  var TECH = [
+    {id:"ent", t:"Entrevista em profundidade"},
+    {id:"que", t:"Questionário em larga escala"},
+    {id:"obs", t:"Observação do trabalho atual"},
+    {id:"doc", t:"Análise da documentação existente"}
+  ];
+  var GOALS = [
+    {id:"g1", t:"Entender por que os vendedores abandonam o sistema no fechamento do mês", a:"ent",
+     why:"Motivação e frustração exigem conversa aberta, com espaço para o entrevistado contar o contexto."},
+    {id:"g2", t:"Medir, entre 800 usuários, quais funcionalidades são realmente usadas", a:"que",
+     why:"Quantificar em larga escala é justamente o que o questionário faz bem."},
+    {id:"g3", t:"Mapear os passos reais da rotina, incluindo atalhos informais não declarados", a:"obs",
+     why:"O processo praticado só aparece observando; em reunião, todos descrevem o processo oficial."},
+    {id:"g4", t:"Recuperar as regras de cálculo de comissão que ninguém na equipe sabe explicar", a:"doc",
+     why:"Planilhas, contratos e manuais guardam regras de negócio que se perderam da memória coletiva."}
+  ];
+  var sel = null, assign = {}, checked = false;
+
+  function render(){
+    techBox.innerHTML = ""; goalBox.innerHTML = "";
+    TECH.forEach(function(t){
+      var used = Object.keys(assign).some(function(g){ return assign[g] === t.id; });
+      var b = el("button","pick" + (sel === t.id ? " sel" : ""));
+      b.type = "button";
+      b.style.opacity = used ? ".42" : "1";
+      b.innerHTML = '<span class="lead">' + t.t + "</span>" +
+        '<span class="side">' + (used ? '<span class="tag-pill">usada</span>' : "") + "</span>";
+      b.addEventListener("click", function(){
+        if(used) return;
+        sel = (sel === t.id) ? null : t.id;
+        render();
+      });
+      techBox.appendChild(b);
+    });
+    GOALS.forEach(function(g){
+      var got = assign[g.id];
+      var name = got ? TECH.filter(function(t){ return t.id === got; })[0].t : "clique para associar";
+      var cls = "pick";
+      if(checked && got) cls += (got === g.a) ? " ok" : " bad";
+      var b = el("button", cls);
+      b.type = "button";
+      b.innerHTML = '<span class="lead">' + g.t + '<br><span class="mono" style="font-size:11.5px;color:var(--panel-muted)">→ ' + name + "</span></span>";
+      b.addEventListener("click", function(){
+        checked = false;
+        if(got){ delete assign[g.id]; }
+        else if(sel){ assign[g.id] = sel; sel = null; }
+        render();
+      });
+      goalBox.appendChild(b);
+    });
+    if(!checked){
+      var n = Object.keys(assign).length;
+      out.innerHTML = n < 4
+        ? "Selecione uma técnica e depois o objetivo correspondente. <b>" + n + " / 4</b> associações feitas."
+        : "Quatro associações feitas. Clique em <b>Verificar</b>.";
+    }
+  }
+
+  $("s5-check").addEventListener("click", function(){
+    if(Object.keys(assign).length < 4){
+      out.innerHTML = '<span class="warn">Associe as quatro técnicas antes de verificar.</span>';
+      return;
+    }
+    checked = true; render();
+    var hits = GOALS.filter(function(g){ return assign[g.id] === g.a; });
+    var html = "<b>Acertos: " + hits.length + " / 4</b><br>";
+    GOALS.forEach(function(g){
+      var ok = assign[g.id] === g.a;
+      html += '<span class="' + (ok ? "ok" : "bad") + '">' + (ok ? "✓" : "✗") + "</span> " +
+        TECH.filter(function(t){ return t.id === g.a; })[0].t + " — " + g.why + "<br>";
+    });
+    out.innerHTML = html;
+    if(hits.length === 4 && window.__apostila) window.__apostila.markDone("1.5");
+  });
+  $("s5-reset").addEventListener("click", function(){ assign = {}; sel = null; checked = false; render(); });
+  render();
+})();
+
+/* ============================================================
+   1.6 — parte 1: classificar requisitos
+   ============================================================ */
+(function(){
+  var box = $("s6-cards");
+  if(!box) return;
+  var out = $("s6-out");
+  var REQS = [
+    {t:"O sistema deve permitir o login do usuário", a:"RF", why:"descreve uma ação executada pelo sistema"},
+    {t:"As senhas devem ser armazenadas com criptografia", a:"RNF", why:"é uma restrição de segurança sobre como o sistema opera"},
+    {t:"O sistema deve gerar relatórios de vendas por período", a:"RF", why:"é uma funcionalidade entregue ao usuário"},
+    {t:"Qualquer consulta deve responder em até 2 segundos", a:"RNF", why:"define desempenho, uma qualidade do sistema"},
+    {t:"O sistema deve emitir nota fiscal eletrônica", a:"RF", why:"é uma tarefa concreta que o software realiza"},
+    {t:"Um operador novo deve aprender a lançar pedidos em até 1 hora", a:"RNF", why:"trata de usabilidade e facilidade de aprendizado"}
+  ];
+  var ans = {};
+
+  function render(){
+    box.innerHTML = "";
+    REQS.forEach(function(r, i){
+      var row = el("div","pick");
+      row.style.cursor = "default";
+      var given = ans[i];
+      if(given) row.className = "pick " + (given === r.a ? "ok" : "bad");
+      var side = '<span class="side">' +
+        '<button class="mini-btn' + (given === "RF" ? (r.a === "RF" ? " ok" : " bad") : "") + '" data-i="' + i + '" data-v="RF" type="button">RF</button>' +
+        '<button class="mini-btn' + (given === "RNF" ? (r.a === "RNF" ? " ok" : " bad") : "") + '" data-i="' + i + '" data-v="RNF" type="button">RNF</button>' +
+        "</span>";
+      row.innerHTML = '<span class="lead">' + r.t + (given ? '<br><span class="mono" style="font-size:11.5px;color:var(--panel-muted)">' +
+        r.a + " — " + r.why + "</span>" : "") + "</span>" + side;
+      box.appendChild(row);
+    });
+    Array.prototype.forEach.call(box.querySelectorAll(".mini-btn"), function(b){
+      b.addEventListener("click", function(){
+        var i = +b.getAttribute("data-i");
+        if(ans[i]) return;
+        ans[i] = b.getAttribute("data-v");
+        render();
+      });
+    });
+    var keys = Object.keys(ans);
+    var hits = keys.filter(function(k){ return ans[k] === REQS[k].a; }).length;
+    if(keys.length < REQS.length){
+      out.innerHTML = "Classificados: <b>" + keys.length + " / " + REQS.length + "</b> · acertos até aqui: " + hits;
+    }else{
+      out.innerHTML = "<b>Resultado: " + hits + " / " + REQS.length + " acertos.</b><br>" +
+        (hits === REQS.length
+          ? '<span class="ok">Critério consolidado:</span> se a frase descreve algo que o sistema <b>faz</b>, é funcional; se descreve <b>com que qualidade</b> ou sob que restrição ele faz, é não-funcional.'
+          : '<span class="warn">Dica:</span> pergunte “isso é uma ação nova ou uma exigência de qualidade sobre ações que já existem?”.');
+      if(hits === REQS.length && window.__apostila) window.__apostila.markDone("1.6");
+    }
+  }
+  $("s6-reset").addEventListener("click", function(){ ans = {}; render(); });
+  render();
+})();
+
+/* ============================================================
+   1.6 — parte 2: mesa de negociação
+   ============================================================ */
+(function(){
+  var cap = $("s7-cap");
+  if(!cap) return;
+  var backlog = $("s7-backlog"), summary = $("s7-summary"), out = $("s7-out");
+  var ITEMS = [
+    {t:"Login e cadastro de usuários", c:8,  v:9,  base:true},
+    {t:"Registro de pedidos", c:12, v:10, base:true},
+    {t:"Criptografia das senhas", c:6, v:9, base:true, rnf:true},
+    {t:"Emissão de nota fiscal eletrônica", c:14, v:8, legal:true},
+    {t:"Relatório gerencial de vendas", c:10, v:7},
+    {t:"Aplicativo mobile com uso offline", c:20, v:5},
+    {t:"Tema escuro na interface", c:4, v:2}
+  ];
+  var on = {0:true, 1:true};
+
+  function render(){
+    $("s7-capNum").textContent = cap.value;
+    $("s7-capLabel").textContent = cap.value;
+    backlog.innerHTML = "";
+    ITEMS.forEach(function(it, i){
+      var b = el("button","pick" + (on[i] ? " sel" : ""));
+      b.type = "button";
+      b.innerHTML = '<span class="lead">' + it.t +
+        (it.rnf ? ' <span class="tag-pill">RNF</span>' : "") +
+        (it.legal ? ' <span class="tag-pill warn">obrigação legal</span>' : "") + "</span>" +
+        '<span class="side"><span class="mono" style="font-size:11.5px;color:var(--panel-muted)">valor ' + it.v +
+        " · custo " + it.c + "</span></span>";
+      b.addEventListener("click", function(){ on[i] = !on[i]; render(); });
+      backlog.appendChild(b);
+    });
+
+    var used = 0, val = 0;
+    ITEMS.forEach(function(it, i){ if(on[i]){ used += it.c; val += it.v; } });
+    var capacity = +cap.value;
+    var over = used > capacity;
+    summary.innerHTML = "";
+    var g = el("div","metric-grid");
+    [["Pontos comprometidos", used + " / " + capacity, over ? "acima da capacidade" : "dentro da capacidade"],
+     ["Valor da entrega", String(val), "soma do valor percebido"],
+     ["Eficiência", used ? (Math.round(val / used * 100) / 100) : "0", "valor por ponto de esforço"]
+    ].forEach(function(x){
+      g.appendChild(el("div","metric","<span>" + x[0] + "</span><b>" + x[1] + "</b><small>" + x[2] + "</small>"));
+    });
+    summary.appendChild(g);
+
+    var msgs = [];
+    if(over) msgs.push('<span class="bad">Escopo estourado.</span> Prometer ' + used + " pontos com capacidade de " + capacity + " é como a equipe entra em dívida com o cliente.");
+    if(!on[0] || !on[1]) msgs.push('<span class="warn">Sem login ou sem registro de pedidos o sistema não cumpre seu objetivo básico.</span>');
+    if(!on[2]) msgs.push('<span class="warn">Requisitos não-funcionais críticos (criptografia) costumam ser cortados primeiro — e viram incidente de segurança depois.</span>');
+    if(!on[3]) msgs.push("Nota fiscal é obrigação legal: adiar exige acordo formal com o cliente sobre a data-limite.");
+    if(on[5]) msgs.push("O app offline custa 20 pontos e entrega valor 5: é o candidato natural à próxima release.");
+    if(!over && on[0] && on[1] && on[2]){
+      msgs.push('<span class="ok">Negociação defensável:</span> base funcional + segurança dentro da capacidade real, com o resto priorizado para a próxima entrega.');
+      if(window.__apostila) window.__apostila.markDone("1.6");
+    }
+    out.innerHTML = msgs.join("<br>");
+  }
+  cap.addEventListener("input", render);
+  render();
+})();
+
+/* ============================================================
+   1.7 — Verificação × Validação
+   ============================================================ */
+(function(){
+  var chain = $("s8-chain");
+  if(!chain) return;
+  var result = $("s8-result"), out = $("s8-out");
+  var bug1 = false, bug2 = false;
+
+  function render(){
+    $("s8-bug1").classList.toggle("on", bug1);
+    $("s8-bug2").classList.toggle("on", bug2);
+    var spec = bug1
+      ? "Relatório deve listar os <b>produtos mais vendidos do mês</b>."
+      : "Relatório deve listar os produtos com <b>estoque abaixo do mínimo</b>.";
+    var code = bug2
+      ? "Consulta implementada, mas <b>ignora o estoque do depósito filial</b>."
+      : "Consulta implementada exatamente como descrito na especificação.";
+    chain.innerHTML = "";
+    var g = el("div","metric-grid");
+    [["Necessidade real do usuário", "O gerente precisa saber quais produtos estão prestes a acabar para repor o estoque.", ""],
+     ["Especificação", spec, bug1 ? "bad" : ""],
+     ["Código entregue", code, bug2 ? "bad" : ""]
+    ].forEach(function(x){
+      var c = el("div","panel-card");
+      c.innerHTML = "<h4>" + x[0] + (x[2] ? ' <span class="tag-pill bad">defeito injetado</span>' : "") + "</h4><p>" + x[1] + "</p>";
+      g.appendChild(c);
+    });
+    chain.appendChild(g);
+    result.innerHTML = "";
+  }
+
+  function run(kind){
+    var lines = [];
+    if(kind === "verif"){
+      lines.push("<b>Verificação — “estamos construindo o produto corretamente?”</b>");
+      lines.push("Compara o código com a especificação escrita.");
+      if(bug2) lines.push('<span class="bad">FALHA detectada:</span> o código não cobre o depósito filial exigido pela especificação. Corrigir no código.');
+      else lines.push('<span class="ok">APROVADO:</span> o código corresponde à especificação.');
+      if(bug1 && !bug2) lines.push('<span class="warn">Atenção:</span> a verificação passou mesmo com a especificação errada. Ela não sabe o que o usuário queria — só compara com o documento.');
+    }else{
+      lines.push("<b>Validação — “estamos construindo o produto certo?”</b>");
+      lines.push("Compara o produto entregue com a necessidade real do gerente.");
+      if(bug1) lines.push('<span class="bad">FALHA detectada:</span> o relatório mostra os mais vendidos, não os produtos em falta. O erro nasceu na tradução da necessidade para a especificação.');
+      else if(bug2) lines.push('<span class="bad">FALHA detectada:</span> o gerente não vê os produtos em falta no depósito filial — a decisão de reposição fica errada.');
+      else lines.push('<span class="ok">APROVADO:</span> o produto resolve o problema real do usuário.');
+    }
+    var box = el("div","panel-card", lines.join("<br>"));
+    result.innerHTML = "";
+    result.appendChild(box);
+
+    if(bug1 && kind === "verif"){
+      out.innerHTML = '<b>A lição do laboratório:</b> um software pode passar em <span class="ok">100% dos testes técnicos</span> e ainda assim <span class="bad">não resolver o problema do cliente</span>. Verificação e validação respondem a perguntas diferentes e nenhuma substitui a outra.';
+      if(window.__apostila) window.__apostila.markDone("1.7");
+    }else{
+      out.innerHTML = "<b>Verificação</b> olha para a especificação. <b>Validação</b> olha para a necessidade. Injete o erro de tradução e rode a verificação para ver o ponto cego.";
+    }
+  }
+
+  $("s8-bug1").addEventListener("click", function(){ bug1 = !bug1; render(); });
+  $("s8-bug2").addEventListener("click", function(){ bug2 = !bug2; render(); });
+  $("s8-verif").addEventListener("click", function(){ run("verif"); });
+  $("s8-valid").addEventListener("click", function(){ run("valid"); });
+  $("s8-reset").addEventListener("click", function(){ bug1 = false; bug2 = false; render(); out.innerHTML = ""; });
+  render();
+  out.innerHTML = "Injete um defeito e rode os dois tipos de teste para comparar o que cada um enxerga.";
+})();
+
+/* ============================================================
+   1.8 — Zoom de abstração
+   ============================================================ */
+(function(){
+  var range = $("s9-level");
+  if(!range) return;
+  var view = $("s9-view"), out = $("s9-out"), name = $("s9-levelName");
+  var LEVELS = [
+    {n:"Contexto", who:"Diretoria e patrocinadores",
+     shows:"o sistema como uma caixa única e quem conversa com ele",
+     hides:"toda a estrutura interna",
+     html:'<div class="metric-grid">' +
+       '<div class="panel-card"><h4>Cliente</h4><p>navega, compra e acompanha o pedido</p></div>' +
+       '<div class="panel-card" style="border-color:#1F5135"><h4>Loja Online</h4><p>o sistema em construção</p></div>' +
+       '<div class="panel-card"><h4>Gateway de pagamento</h4><p>autoriza a cobrança</p></div>' +
+       '<div class="panel-card"><h4>Transportadora</h4><p>recebe a ordem de envio</p></div></div>'},
+    {n:"Casos de uso", who:"Analistas e cliente",
+     shows:"o que o sistema faz para cada ator",
+     hides:"como cada funcionalidade é construída",
+     html:'<div class="metric-grid">' +
+       '<div class="panel-card"><h4>Registrar usuário</h4><p>criar conta com nome, e-mail e senha</p></div>' +
+       '<div class="panel-card"><h4>Pesquisar produto</h4><p>navegar por categorias e filtrar</p></div>' +
+       '<div class="panel-card"><h4>Adicionar ao carrinho</h4><p>selecionar produto e quantidade</p></div>' +
+       '<div class="panel-card"><h4>Finalizar compra</h4><p>pagar e confirmar o pedido</p></div></div>'},
+    {n:"Classes", who:"Equipe de desenvolvimento",
+     shows:"a estrutura de dados e comportamento do domínio",
+     hides:"a implementação de cada método",
+     html:'<div class="code">' +
+       '<span class="kw">class</span> <span class="fn">Produto</span> {\n' +
+       '  productId, name, price\n' +
+       '  <span class="fn">getStock</span>()\n}\n\n' +
+       '<span class="kw">class</span> <span class="fn">Pedido</span> {\n' +
+       '  orderId, orderDate, totalAmount\n' +
+       '  <span class="fn">calculateTotal</span>()\n}\n\n' +
+       '<span class="kw">class</span> <span class="fn">Cliente</span> {\n' +
+       '  customerId, name, address\n' +
+       '  <span class="fn">placeOrder</span>()\n}</div>'},
+    {n:"Código", who:"Quem implementa e mantém",
+     shows:"o comportamento exato, linha a linha",
+     hides:"a visão do todo — é fácil perder o contexto do sistema",
+     html:'<div class="code">' +
+       '<span class="kw">function</span> <span class="fn">calculateTotal</span>(itens, cupom) {\n' +
+       '  <span class="kw">let</span> total = <span class="st">0</span>;\n' +
+       '  <span class="kw">for</span> (<span class="kw">const</span> i <span class="kw">of</span> itens) {\n' +
+       '    total += i.price * i.qtd;\n  }\n' +
+       '  <span class="cm">// desconto acumulativo só até 30%</span>\n' +
+       '  <span class="kw">return</span> total * (<span class="st">1</span> - Math.min(cupom, <span class="st">0.3</span>));\n}</div>'}
+  ];
+
+  function draw(){
+    var i = +range.value, L = LEVELS[i];
+    name.textContent = L.n;
+    view.innerHTML = L.html;
+    out.innerHTML = "<b>" + L.n + "</b> — feito para: " + L.who + "<br>" +
+      "Mostra: " + L.shows + "<br>Esconde: " + L.hides +
+      (i === 3 ? '<br><span class="warn">Nenhum nível é “o certo”.</span> Modelar é escolher, de propósito, o que omitir para o interlocutor daquela conversa.' : "");
+    if(i === 3 && window.__apostila) window.__apostila.markDone("1.8");
+  }
+  range.addEventListener("input", draw);
+  draw();
+})();
+})();
+</script>
+<script>
+(function(){
+"use strict";
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+var SVGNS = "http://www.w3.org/2000/svg";
+function svgEl(tag, attrs){
+  var e = document.createElementNS(SVGNS, tag);
+  for(var k in attrs){ if(Object.prototype.hasOwnProperty.call(attrs, k)) e.setAttribute(k, attrs[k]); }
+  return e;
+}
+function svgText(x, y, txt, cls, anchor){
+  var t = svgEl("text", {x:x, y:y, "text-anchor":anchor || "middle"});
+  if(cls) t.setAttribute("class", cls);
+  t.textContent = txt;
+  return t;
+}
+
+/* ============================================================
+   1.9 — parte 1: Procedural × OO
+   ============================================================ */
+(function(){
+  var codeBox = $("s10-code");
+  if(!codeBox) return;
+  var out = $("s10-out");
+  var mode = "proc", added = 0;
+  var NEW = ["drone", "internacional", "retiradaLoja"];
+
+  function render(){
+    $("s10-proc").classList.toggle("on", mode === "proc");
+    $("s10-oo").classList.toggle("on", mode === "oo");
+    var html = "";
+    if(mode === "proc"){
+      html = '<span class="kw">function</span> <span class="fn">calcularFrete</span>(tipo, peso) {\n' +
+             '  <span class="kw">if</span> (tipo === <span class="st">"normal"</span>)   <span class="kw">return</span> peso * 1.5;\n' +
+             '  <span class="kw">if</span> (tipo === <span class="st">"expressa"</span>) <span class="kw">return</span> peso * 2.8 + 10;\n';
+      for(var i = 0; i < added; i++){
+        html += '<span class="hl">  <span class="kw">if</span> (tipo === <span class="st">"' + NEW[i % NEW.length] +
+                '"</span>) <span class="kw">return</span> peso * ' + (1.9 + i) + ';</span>\n';
+      }
+      html += '  <span class="kw">throw</span> <span class="kw">new</span> Error(<span class="st">"tipo desconhecido"</span>);\n}';
+    }else{
+      html = '<span class="kw">class</span> <span class="fn">Entrega</span> {\n' +
+             '  <span class="fn">calcularFrete</span>(peso) { <span class="kw">throw</span> <span class="st">"implementar"</span>; }\n}\n\n' +
+             '<span class="kw">class</span> <span class="fn">Normal</span> <span class="kw">extends</span> Entrega {\n' +
+             '  <span class="fn">calcularFrete</span>(peso) { <span class="kw">return</span> peso * 1.5; }\n}\n\n' +
+             '<span class="kw">class</span> <span class="fn">Expressa</span> <span class="kw">extends</span> Entrega {\n' +
+             '  <span class="fn">calcularFrete</span>(peso) { <span class="kw">return</span> peso * 2.8 + 10; }\n}';
+      for(var j = 0; j < added; j++){
+        var nm = NEW[j % NEW.length];
+        html += '\n\n<span class="hl"><span class="kw">class</span> <span class="fn">' +
+                nm.charAt(0).toUpperCase() + nm.slice(1) + '</span> <span class="kw">extends</span> Entrega {\n' +
+                '  <span class="fn">calcularFrete</span>(peso) { <span class="kw">return</span> peso * ' + (1.9 + j) + '; }\n}</span>';
+      }
+    }
+    codeBox.innerHTML = '<div class="code">' + html + "</div>";
+
+    if(added === 0){
+      out.innerHTML = "Os dois trechos resolvem o mesmo problema. Clique em <b>“Chegou um novo tipo”</b> para ver o que cada abordagem exige quando o negócio muda.";
+    }else if(mode === "proc"){
+      out.innerHTML = "<b>Procedural — " + added + " tipo(s) novo(s):</b> arquivos existentes modificados: <span class=\"bad\">" + added +
+        "</span>.<br>Cada novo tipo abre uma função que já estava correta e testada. Risco de regressão a cada alteração, e o condicional cresce sem limite.";
+    }else{
+      out.innerHTML = "<b>Orientado a objetos — " + added + " tipo(s) novo(s):</b> arquivos existentes modificados: <span class=\"ok\">0</span>.<br>" +
+        "Cada tipo novo é uma classe nova que herda de <span class=\"mono\">Entrega</span>. O polimorfismo faz o resto do sistema chamar <span class=\"mono\">calcularFrete()</span> sem saber qual tipo está na mão — estender sem modificar.";
+      if(window.__apostila) window.__apostila.markDone("1.9");
+    }
+  }
+  $("s10-proc").addEventListener("click", function(){ mode = "proc"; render(); });
+  $("s10-oo").addEventListener("click", function(){ mode = "oo"; render(); });
+  $("s10-add").addEventListener("click", function(){ if(added < 3) added++; render(); });
+  $("s10-reset").addEventListener("click", function(){ added = 0; render(); });
+  render();
+})();
+
+/* ============================================================
+   1.9 — parte 2: custo da falta de documentação
+   ============================================================ */
+(function(){
+  var box = $("s11-docs");
+  if(!box) return;
+  var meter = $("s11-meter"), out = $("s11-out");
+  var DOCS = [
+    {t:"README com passo a passo para rodar o projeto", d:4, w:"sem ele, a primeira semana vira caça ao ambiente"},
+    {t:"Diagrama de arquitetura dos módulos", d:4, w:"mostra por onde uma mudança se propaga"},
+    {t:"ADRs — registro das decisões arquiteturais", d:3, w:"explica por que o sistema é assim, evitando refazer discussões"},
+    {t:"Modelo de dados / diagrama de classes", d:3, w:"traduz as entidades do negócio"},
+    {t:"Guia de testes e de deploy", d:2, w:"dá autonomia para publicar sem depender de alguém"},
+    {t:"Glossário do domínio", d:2, w:"traduz o vocabulário do cliente para a equipe"}
+  ];
+  var on = {};
+
+  function render(){
+    box.innerHTML = "";
+    DOCS.forEach(function(d, i){
+      var b = el("button","pick" + (on[i] ? " ok" : ""));
+      b.type = "button";
+      b.innerHTML = '<span class="lead">' + d.t + (on[i] ? '<br><span class="mono" style="font-size:11.5px;color:var(--panel-muted)">' + d.w + "</span>" : "") + "</span>" +
+        '<span class="side"><span class="tag-pill' + (on[i] ? " ok" : "") + '">' + (on[i] ? "existe" : "ausente") + "</span></span>";
+      b.addEventListener("click", function(){ on[i] = !on[i]; render(); });
+      box.appendChild(b);
+    });
+    var days = 22;
+    var have = 0;
+    DOCS.forEach(function(d, i){ if(on[i]){ days -= d.d; have++; } });
+    days = Math.max(4, days);
+    var pct = (days - 4) / 18 * 100;
+    meter.innerHTML = "";
+    var row = el("div","bar-row");
+    row.innerHTML = '<span class="bar-name">Onboarding</span>' +
+      '<span class="bar-track"><span class="bar-fill" style="width:' + pct + '%;background:' +
+      (days > 14 ? "#e2685f" : (days > 8 ? "#e0a33a" : "#2E8B57")) + '"></span></span>' +
+      '<span class="bar-val">' + days + " dias</span>";
+    meter.appendChild(row);
+    out.innerHTML = "<b>" + have + " de 6 artefatos presentes · primeira entrega segura da pessoa nova em ~" + days + " dias.</b><br>" +
+      (have === 6
+        ? '<span class="ok">Documentação viva não é burocracia:</span> ela é o que permite que o sistema sobreviva à saída de quem o escreveu.'
+        : "Cada artefato ausente é tempo que alguém da equipe vai gastar explicando — ou que a pessoa nova vai gastar adivinhando.");
+    if(have >= 5 && window.__apostila) window.__apostila.markDone("1.9");
+  }
+  render();
+})();
+
+/* ============================================================
+   1.10 — Fábrica de objetos
+   ============================================================ */
+(function(){
+  var host = $("s12-objs");
+  if(!host) return;
+  var out = $("s12-out"), classBox = $("s12-class");
+  var objs = [], seq = 0;
+
+  classBox.innerHTML = '<div class="code">' +
+    '<span class="kw">class</span> <span class="fn">Carro</span> {\n' +
+    '  <span class="cm">// atributos</span>\n  cor\n  marca\n  modelo\n  velocidade = <span class="st">0</span>\n\n' +
+    '  <span class="cm">// métodos</span>\n  <span class="fn">acelerar</span>()\n  <span class="fn">frear</span>()\n}</div>' +
+    '<p class="lab-hint" style="margin:12px 0 0">A classe não guarda nenhum carro. Ela só descreve o que todo carro <b>tem</b> e o que todo carro <b>faz</b>.</p>';
+
+  function render(){
+    host.innerHTML = "";
+    objs.forEach(function(o){
+      var card = el("div","obj-card");
+      card.innerHTML = '<h5>carro' + o.n + " = new Carro()</h5>" +
+        '<div class="obj-attr"><span>cor</span><b>' + o.cor + "</b></div>" +
+        '<div class="obj-attr"><span>marca</span><b>' + o.marca + "</b></div>" +
+        '<div class="obj-attr"><span>modelo</span><b>' + o.modelo + "</b></div>" +
+        '<div class="obj-attr"><span>velocidade</span><b>' + o.vel + " km/h</b></div>" +
+        '<div class="speed-track"><span class="speed-fill" style="width:' + (o.vel / 180 * 100) + '%"></span></div>';
+      var row = el("div","ctrl-row");
+      row.style.margin = "0";
+      var acc = el("button","btn btn-sm solid","acelerar()");
+      acc.type = "button";
+      acc.addEventListener("click", function(){ o.vel = Math.min(180, o.vel + 20); render(); });
+      var brk = el("button","btn btn-sm","frear()");
+      brk.type = "button";
+      brk.addEventListener("click", function(){ o.vel = Math.max(0, o.vel - 20); render(); });
+      row.appendChild(acc); row.appendChild(brk);
+      card.appendChild(row);
+      host.appendChild(card);
+    });
+
+    if(!objs.length){
+      out.innerHTML = "Nenhum objeto em memória. A classe existe, mas ainda não há nenhum carro — <b>molde não é instância</b>.";
+      return;
+    }
+    var speeds = objs.map(function(o){ return o.vel; });
+    var diff = Math.max.apply(null, speeds) !== Math.min.apply(null, speeds);
+    out.innerHTML = "<b>" + objs.length + " objeto(s) instanciado(s) a partir da mesma classe.</b><br>" +
+      "Velocidades: " + speeds.map(function(s, i){ return "carro" + objs[i].n + "=" + s; }).join(" · ") + "<br>" +
+      (diff
+        ? '<span class="ok">Repare:</span> acelerar um objeto não muda os outros. A estrutura é compartilhada (vem da classe); o <b>estado</b> pertence a cada instância.'
+        : "Acelere apenas um dos carros para ver que cada objeto guarda o próprio estado.");
+    if(objs.length >= 2 && diff && window.__apostila) window.__apostila.markDone("1.10");
+  }
+
+  $("s12-new").addEventListener("click", function(){
+    if(objs.length >= 6) return;
+    seq++;
+    objs.push({
+      n: seq,
+      cor: ($("s12-cor").value || "sem cor").trim(),
+      marca: ($("s12-marca").value || "genérica").trim(),
+      modelo: ($("s12-modelo").value || "base").trim(),
+      vel: 0
+    });
+    render();
+  });
+  $("s12-clear").addEventListener("click", function(){ objs = []; seq = 0; render(); });
+  render();
+})();
+
+/* ============================================================
+   1.11 — Bancada UML
+   ============================================================ */
+(function(){
+  var ucHost = $("s13-uc");
+  if(!ucHost) return;
+  var out = $("s13-out");
+
+  /* --- abas --- */
+  var panes = {uc:$("uml-uc"), cls:$("uml-cls"), seq:$("uml-seq")};
+  Array.prototype.forEach.call(document.querySelectorAll("[data-uml]"), function(b){
+    b.addEventListener("click", function(){
+      var k = b.getAttribute("data-uml");
+      Array.prototype.forEach.call(document.querySelectorAll("[data-uml]"), function(o){
+        o.classList.toggle("on", o === b);
+      });
+      Object.keys(panes).forEach(function(p){ panes[p].style.display = (p === k) ? "block" : "none"; });
+    });
+  });
+
+  /* --- 1: casos de uso --- */
+  var UC = [
+    {t:"Procurar produtos", y:72, ok:true},
+    {t:"Adicionar ao carrinho", y:130, ok:true},
+    {t:"Finalizar compra", y:188, ok:true},
+    {t:"Acompanhar pedido", y:246, ok:true},
+    {t:"Repor estoque do depósito", y:304, ok:false}
+  ];
+  var actorSel = false, linked = {};
+
+  function drawUC(){
+    ucHost.innerHTML = "";
+    var wrap = el("div","uml-wrap");
+    var svg = svgEl("svg", {viewBox:"0 0 600 352", "class":"uml", role:"img",
+      "aria-label":"Diagrama de casos de uso do e-commerce"});
+
+    var sysRect = svgEl("rect", {x:200, y:16, width:388, height:322, rx:6, "class":"box"});
+    svg.appendChild(sysRect);
+    svg.appendChild(svgText(394, 36, "Sistema de E-commerce", "sm"));
+
+    UC.forEach(function(u, i){
+      if(linked[i]){
+        var line = svgEl("line", {x1:92, y1:188, x2:250, y2:u.y, "class":"link"});
+        svg.appendChild(line);
+      }
+    });
+
+    var g = svgEl("g", {"class":"actor-group", tabindex:"0", role:"button",
+      "aria-label":"Ator Cliente"});
+    g.style.cursor = "pointer";
+    var cls = "actor" + (actorSel ? " sel" : "");
+    g.appendChild(svgEl("circle", {cx:66, cy:148, r:13, "class":cls}));
+    g.appendChild(svgEl("line", {x1:66, y1:161, x2:66, y2:202, "class":cls}));
+    g.appendChild(svgEl("line", {x1:42, y1:176, x2:90, y2:176, "class":cls}));
+    g.appendChild(svgEl("line", {x1:66, y1:202, x2:48, y2:232, "class":cls}));
+    g.appendChild(svgEl("line", {x1:66, y1:202, x2:84, y2:232, "class":cls}));
+    g.appendChild(svgText(66, 254, "Cliente"));
+    g.appendChild(svgEl("rect", {x:36, y:130, width:60, height:132, fill:"transparent"}));
+    g.addEventListener("click", function(){ actorSel = !actorSel; drawUC(); });
+    svg.appendChild(g);
+
+    UC.forEach(function(u, i){
+      var e = svgEl("ellipse", {cx:394, cy:u.y, rx:132, ry:24,
+        "class":"uc" + (linked[i] ? " linked" : "")});
+      e.addEventListener("click", function(){ pick(i); });
+      var t = svgText(394, u.y + 4, u.t);
+      t.style.pointerEvents = "none";
+      svg.appendChild(e); svg.appendChild(t);
+    });
+
+    wrap.appendChild(svg);
+    ucHost.appendChild(wrap);
+  }
+
+  function pick(i){
+    if(!actorSel){
+      out.innerHTML = '<span class="warn">Selecione primeiro o ator.</span> Em um diagrama de casos de uso, toda ligação parte de quem executa a funcionalidade.';
+      return;
+    }
+    linked[i] = !linked[i];
+    drawUC();
+    var okCount = UC.filter(function(u, k){ return u.ok && linked[k]; }).length;
+    var wrong = UC.filter(function(u, k){ return !u.ok && linked[k]; }).length;
+    var html = "<b>Ligações do ator Cliente: " + Object.keys(linked).filter(function(k){ return linked[k]; }).length + "</b><br>";
+    if(wrong) html += '<span class="bad">“Repor estoque do depósito” não é um caso de uso do Cliente</span> — é do Estoquista. Casos de uso pertencem a atores específicos.<br>';
+    if(okCount === 4 && !wrong){
+      html += '<span class="ok">Diagrama correto.</span> As quatro funcionalidades que o Cliente executa estão ligadas a ele, e cada uma entrega valor completo do início ao fim.';
+      if(window.__apostila) window.__apostila.markDone("1.11");
+    }else if(okCount < 4){
+      html += "Faltam " + (4 - okCount) + " funcionalidade(s) do Cliente.";
+    }
+    out.innerHTML = html;
+  }
+  $("s13-reset").addEventListener("click", function(){ linked = {}; actorSel = false; drawUC(); out.innerHTML = "Clique no ator e depois nas funcionalidades que ele executa."; });
+  drawUC();
+  out.innerHTML = "Clique no ator <b>Cliente</b> e depois nas funcionalidades que ele executa.";
+
+  /* --- 2: classes --- */
+  var clsHost = $("s14-cls");
+  var CLASSES = [
+    {n:"Cliente", x:20, attrs:["customerId","name","address"], meth:["placeOrder()"]},
+    {n:"Pedido", x:230, attrs:["orderId","orderDate","totalAmount"], meth:["calculateTotal()"]},
+    {n:"Produto", x:440, attrs:["productId","name","price"], meth:["getStock()"]}
+  ];
+  var open = {0:true};
+
+  function drawCLS(){
+    clsHost.innerHTML = "";
+    var wrap = el("div","uml-wrap");
+    var svg = svgEl("svg", {viewBox:"0 0 620 300", "class":"uml", role:"img",
+      "aria-label":"Diagrama de classes do e-commerce"});
+
+    svg.appendChild(svgEl("line", {x1:180, y1:60, x2:230, y2:60, "class":"rel"}));
+    svg.appendChild(svgText(192, 52, "1", "mono"));
+    svg.appendChild(svgText(220, 52, "0..*", "mono"));
+    svg.appendChild(svgEl("line", {x1:390, y1:60, x2:440, y2:60, "class":"rel"}));
+    svg.appendChild(svgText(402, 52, "1..*", "mono"));
+    svg.appendChild(svgText(430, 52, "1..*", "mono"));
+    svg.appendChild(svgText(125, 96, "faz", "sm"));
+    svg.appendChild(svgText(415, 96, "contém", "sm"));
+
+    CLASSES.forEach(function(c, i){
+      var isOpen = !!open[i];
+      var h = isOpen ? (46 + (c.attrs.length + c.meth.length) * 18 + 14) : 40;
+      var g = svgEl("g");
+      g.style.cursor = "pointer";
+      var r = svgEl("rect", {x:c.x, y:40, width:160, height:h, rx:4, "class":"box" + (isOpen ? " on" : "")});
+      g.appendChild(r);
+      g.appendChild(svgEl("line", {x1:c.x, y1:70, x2:c.x + 160, y2:70, "class":"rel"}));
+      var title = svgText(c.x + 80, 62, c.n);
+      title.setAttribute("font-weight", "500");
+      g.appendChild(title);
+      if(isOpen){
+        var y = 90;
+        c.attrs.forEach(function(a){ g.appendChild(svgText(c.x + 12, y, "- " + a, "mono", "start")); y += 18; });
+        g.appendChild(svgEl("line", {x1:c.x, y1:y - 12, x2:c.x + 160, y2:y - 12, "class":"rel"}));
+        y += 8;
+        c.meth.forEach(function(m){ g.appendChild(svgText(c.x + 12, y, "+ " + m, "mono", "start")); y += 18; });
+      }else{
+        g.appendChild(svgText(c.x + 80, 90, "clique para abrir", "sm"));
+      }
+      g.addEventListener("click", function(){ open[i] = !open[i]; drawCLS(); });
+      svg.appendChild(g);
+    });
+    wrap.appendChild(svg);
+    clsHost.appendChild(wrap);
+  }
+  drawCLS();
+
+  /* --- 3: sequência --- */
+  var seqHost = $("s15-seq");
+  var LIFE = [
+    {n:":Cliente", x:78},
+    {n:":Carrinho", x:236},
+    {n:":Pedido", x:394},
+    {n:":Pagamento", x:552}
+  ];
+  var MSGS = [
+    {f:0, t:1, y:96,  lbl:"finalizarCompra()", ret:false, d:"O cliente aciona a finalização da compra na interface do carrinho."},
+    {f:1, t:2, y:136, lbl:"criarPedido(itens)", ret:false, d:"O carrinho pede ao objeto Pedido que se crie a partir dos itens selecionados."},
+    {f:2, t:3, y:176, lbl:"autorizar(valor)", ret:false, d:"O pedido solicita ao gateway de pagamento a autorização do valor total."},
+    {f:3, t:2, y:216, lbl:"autorizado: true", ret:true,  d:"O pagamento responde. A seta tracejada representa o retorno da mensagem."},
+    {f:2, t:1, y:256, lbl:"pedido confirmado", ret:true,  d:"O pedido confirma ao carrinho que a compra foi concluída."},
+    {f:1, t:0, y:296, lbl:"exibirComprovante()", ret:true, d:"O carrinho devolve ao cliente a confirmação — fim do caso de uso."}
+  ];
+  var step = 0, timer = null;
+
+  function drawSEQ(){
+    seqHost.innerHTML = "";
+    var wrap = el("div","uml-wrap");
+    var svg = svgEl("svg", {viewBox:"0 0 640 340", "class":"uml", role:"img",
+      "aria-label":"Diagrama de sequência da finalização de compra"});
+    var defs = svgEl("defs");
+    ["#1F5135", "#2E8B57"].forEach(function(color, i){
+      var m = svgEl("marker", {id:"arw" + i, markerWidth:"9", markerHeight:"9", refX:"8", refY:"3",
+        orient:"auto", markerUnits:"strokeWidth"});
+      m.appendChild(svgEl("path", {d:"M0,0 L0,6 L8,3 z", fill:color}));
+      defs.appendChild(m);
+    });
+    svg.appendChild(defs);
+
+    LIFE.forEach(function(l){
+      svg.appendChild(svgEl("rect", {x:l.x - 62, y:14, width:124, height:30, rx:4, "class":"box"}));
+      svg.appendChild(svgText(l.x, 34, l.n, "mono"));
+      svg.appendChild(svgEl("line", {x1:l.x, y1:44, x2:l.x, y2:326, "class":"lifeline"}));
+    });
+
+    MSGS.forEach(function(m, i){
+      var on = i < step;
+      var x1 = LIFE[m.f].x, x2 = LIFE[m.t].x;
+      var dir = x2 > x1 ? -6 : 6;
+      var line = svgEl("line", {x1:x1, y1:m.y, x2:x2 + dir, y2:m.y,
+        "class":"msg" + (m.ret ? " ret" : "") + (on ? " on" : ""),
+        "marker-end":"url(#arw" + (m.ret ? 1 : 0) + ")"});
+      svg.appendChild(line);
+      var t = svgText((x1 + x2) / 2, m.y - 8, (i + 1) + ". " + m.lbl, "mono");
+      t.setAttribute("class", "mono msg-lbl" + (on ? " on" : ""));
+      svg.appendChild(t);
+    });
+    wrap.appendChild(svg);
+    seqHost.appendChild(wrap);
+
+    var d = step === 0 ? "Nenhuma mensagem trocada ainda. A leitura é sempre de cima para baixo: o tempo corre na vertical."
+      : MSGS[step - 1].d;
+    out.innerHTML = "<b>Diagrama de sequência — passo " + step + " / " + MSGS.length + "</b><br>" + d +
+      (step === MSGS.length ? '<br><span class="ok">Fluxo completo.</span> O mesmo caso de uso “Finalizar compra” que você ligou ao ator aparece aqui detalhado em mensagens entre objetos.' : "");
+    if(step === MSGS.length && window.__apostila) window.__apostila.markDone("1.11");
+  }
+
+  $("s15-step").addEventListener("click", function(){
+    if(timer){ clearInterval(timer); timer = null; }
+    step = (step >= MSGS.length) ? 0 : step + 1;
+    drawSEQ();
+  });
+  $("s15-play").addEventListener("click", function(){
+    if(timer) clearInterval(timer);
+    step = 0; drawSEQ();
+    timer = setInterval(function(){
+      step++;
+      drawSEQ();
+      if(step >= MSGS.length){ clearInterval(timer); timer = null; }
+    }, 900);
+  });
+  $("s15-reset").addEventListener("click", function(){
+    if(timer){ clearInterval(timer); timer = null; }
+    step = 0; drawSEQ();
+  });
+  drawSEQ();
+  out.innerHTML = "Clique no ator <b>Cliente</b> e depois nas funcionalidades que ele executa.";
+})();
+})();
+</script>
+<script>
+window.ATIVIDADES = {
+"ap-m1":{
+  topic:"u1", tag:"Módulo 1 · Fundamentos de Engenharia de Software",
+  questions:[
+    {q:"Uma padaria quer um sistema para controlar encomendas. O que NÃO pertence à fronteira desse sistema?",
+     o:["O cadastro de clientes que fazem encomendas na loja",
+        "A tela usada pelo atendente para registrar a encomenda",
+        "O forno industrial que assa os produtos encomendados",
+        "O relatório com as encomendas previstas para o dia"],
+     a:2,
+     why:"A fronteira do sistema contém apenas os <b>componentes de software</b> que colaboram para o objetivo comum. O forno é parte do ambiente: essencial para o negócio, mas fora do sistema de informação."},
+    {q:"Por que analisar o sistema existente antes de propor um novo?",
+     o:["Para reproduzir fielmente o que já existe, evitando resistência",
+        "Para identificar pontos fortes a preservar e fraquezas a corrigir",
+        "Porque a legislação exige documentação prévia do sistema atual",
+        "Para justificar o descarte da opinião dos usuários atuais"],
+     a:1,
+     why:"O sistema atual é a melhor fonte de <b>regras de negócio reais</b> e de problemas concretos. Ignorá-lo costuma produzir um sistema novo que repete os mesmos erros ou perde regras importantes."},
+    {q:"Um requisito mal entendido no planejamento só é descoberto após a implantação. O que se pode afirmar sobre o custo de corrigi-lo?",
+     o:["É praticamente o mesmo de corrigir na fase de planejamento",
+        "Cresce muito: envolve código, testes, dados migrados e usuários",
+        "Não há custo adicional se a correção entrar na próxima versão",
+        "Deixa de ser um problema relevante depois que o sistema é lançado"],
+     a:1,
+     why:"Quanto mais tarde o erro é descoberto, <b>mais artefatos precisam ser refeitos</b>. É por isso que planejar não é burocracia: o planejamento é o ponto mais barato de errar."},
+    {q:"Um órgão público contrata um sistema com escopo fechado em edital, requisitos estáveis e auditoria formal por fase. Qual modelo tende a se ajustar melhor?",
+     o:["Waterfall, com fases sequenciais e aprovação formal em cada uma",
+        "Ágil, dispensando a documentação exigida pelo órgão contratante",
+        "Nenhum modelo conhecido se aplica a contratos dessa natureza",
+        "Sempre o Ágil, por ser mais moderno e produtivo que os demais"],
+     a:0,
+     why:"Requisitos estáveis somados à exigência de aprovação formal por fase favorecem o modelo <b>sequencial</b>. O Ágil brilha quando o cliente ainda descobre o que quer usando o produto."},
+    {q:"Qual é a principal vantagem do modelo Ágil quando o cliente muda de ideia com frequência?",
+     o:["Eliminar a necessidade de testes formais a cada nova entrega",
+        "Entregar software funcionando cedo e absorver mudanças por iteração",
+        "Impedir que o cliente altere os requisitos depois da aprovação",
+        "Reduzir o número de desenvolvedores necessários no projeto"],
+     a:1,
+     why:"Iterações curtas transformam mudança em <b>ajuste de rota</b>, e não em retrabalho acumulado sobre um escopo congelado meses antes."},
+    {q:"Um sistema será usado diariamente por operadores experientes de call center. Qual decisão de interface faz mais sentido?",
+     o:["Assistente passo a passo obrigatório em todas as operações",
+        "Atalhos de teclado, mais densidade e menos confirmações na tela",
+        "Ocultar as funcionalidades avançadas para simplificar o uso",
+        "Textos explicativos longos em cada campo do formulário"],
+     a:1,
+     why:"Para uso intenso e usuário experiente, <b>velocidade vence tutela</b>. Assistentes e textos longos ajudam o iniciante esporádico, mas atrapalham quem opera o sistema o dia inteiro."},
+    {q:"Você precisa descobrir os passos reais do trabalho, incluindo atalhos informais que ninguém admite em reunião. Qual técnica usar?",
+     o:["Questionário online enviado a todos os funcionários do setor",
+        "Observação do trabalho atual, no ambiente real de atendimento",
+        "Análise da documentação e dos manuais de procedimento da área",
+        "Reunião de alinhamento com a diretoria e os gerentes do setor"],
+     a:1,
+     why:"A <b>observação</b> revela o processo praticado. Questionários e documentos capturam o processo oficial — que quase sempre difere do que acontece no balcão."},
+    {q:"“Qualquer consulta deve responder em até 2 segundos” é um requisito:",
+     o:["Funcional, porque descreve a consulta que o sistema realiza",
+        "Não-funcional, porque define desempenho, uma qualidade do sistema",
+        "Regra de negócio, porque restringe a operação da empresa",
+        "Caso de uso, porque descreve a interação do usuário com o sistema"],
+     a:1,
+     why:"A frase não cria uma ação nova: diz <b>com que qualidade</b> uma ação existente deve acontecer. Isso caracteriza o requisito não-funcional."},
+    {q:"O software passou em todos os testes técnicos e atende à especificação, mas o cliente diz que não resolve o problema dele. O que falhou?",
+     o:["A verificação, que compara o produto com a especificação escrita",
+        "A validação, que compara o produto com a necessidade real",
+        "O processo de implantação do sistema no ambiente do cliente",
+        "O controle de versão utilizado durante o desenvolvimento"],
+     a:1,
+     why:"Construímos o produto <b>corretamente</b> (verificação passou), mas não o <b>produto certo</b> (validação falhou). São perguntas diferentes, e nenhuma substitui a outra."},
+    {q:"Dois objetos foram instanciados a partir da classe Carro. Você acelera apenas o primeiro. O que acontece?",
+     o:["Ambos aceleram, porque compartilham a mesma classe de origem",
+        "Apenas o primeiro muda: cada objeto guarda o seu próprio estado",
+        "A classe Carro passa a registrar a velocidade de 20 km/h",
+        "O segundo objeto é destruído por inconsistência de estado"],
+     a:1,
+     why:"A classe define a <b>estrutura</b> (atributos e métodos); o <b>estado</b> pertence a cada instância. É por isso que dois carros do mesmo molde podem estar em velocidades diferentes."}
+  ]
+},
+
+"ap-m2":{
+  topic:"u2", tag:"Módulo 2 · UML e visão integrada",
+  questions:[
+    {q:"Qual diagrama UML mostra a ordem cronológica das mensagens trocadas entre objetos?",
+     o:["Diagrama de classes, que apresenta a estrutura estática do sistema",
+        "Diagrama de casos de uso, que mostra as funcionalidades por ator",
+        "Diagrama de sequência, que ordena as mensagens no tempo",
+        "Diagrama de implantação, que descreve os nós de infraestrutura"],
+     a:2,
+     why:"O <b>diagrama de sequência</b> enfatiza tempo e ordem: a leitura é de cima para baixo, ao longo das linhas de vida dos objetos."},
+    {q:"O que um diagrama de casos de uso comunica melhor?",
+     o:["A estrutura interna das classes e seus atributos e métodos",
+        "O que o sistema oferece a cada ator externo que o utiliza",
+        "O tempo de resposta esperado nas operações do banco de dados",
+        "A topologia dos servidores em que o sistema será implantado"],
+     a:1,
+     why:"É a <b>vista funcional</b> do sistema sob a ótica de quem o usa. Estrutura interna é assunto do diagrama de classes; infraestrutura, do diagrama de implantação."},
+    {q:"Em um diagrama de classes, a multiplicidade 1..* entre Cliente e Pedido afirma que:",
+     o:["Um cliente pode ser cadastrado sem ter feito nenhum pedido",
+        "Um cliente tem pelo menos um pedido, podendo ter vários",
+        "Um pedido pode pertencer a vários clientes simultaneamente",
+        "Cada cliente possui exatamente um pedido registrado"],
+     a:1,
+     why:"1..* significa “um ou mais”. Repare que essa escolha é uma <b>regra de negócio</b>: ela proíbe cadastrar cliente antes da primeira compra. Se isso for permitido, o correto é 0..*."},
+    {q:"A linha de vida, em um diagrama de sequência, representa:",
+     o:["A duração total prevista para o projeto de desenvolvimento",
+        "A existência de um objeto ao longo do tempo da interação",
+        "O prazo de validade atribuído a um requisito do sistema",
+        "O tempo de vida útil do sistema depois de entrar em produção"],
+     a:1,
+     why:"Cada objeto participante tem sua <b>linha de vida</b> vertical; as mensagens são as setas horizontais entre elas, lidas de cima para baixo."},
+    {q:"Qual é o papel das ferramentas CASE (Astah, Visual Paradigm, StarUML) no processo?",
+     o:["Substituir a etapa de análise de requisitos junto ao cliente",
+        "Apoiar a modelagem visual, a geração de código e a documentação",
+        "Executar automaticamente os testes de sistema e de aceitação",
+        "Gerenciar os servidores de produção e as rotinas de backup"],
+     a:1,
+     why:"Ferramenta CASE é <b>apoio</b>: ela acelera e padroniza a modelagem, mas não decide o que modelar nem substitui a conversa com o cliente."},
+    {q:"Qual é o principal benefício da UML apontado no material?",
+     o:["Reduzir a quantidade de linhas de código escritas pela equipe",
+        "Permitir que técnicos e não técnicos leiam o mesmo desenho",
+        "Eliminar a fase de testes por antecipar todos os defeitos",
+        "Garantir o desempenho do sistema em produção após a entrega"],
+     a:1,
+     why:"A UML é um padrão gráfico para especificar, visualizar, construir e documentar. O ganho é de <b>comunicação</b> — e, com ela, a detecção de conflitos e redundâncias antes de custarem código."},
+    {q:"Por que a orientação a objetos absorve melhor a chegada de um novo tipo (por exemplo, uma nova modalidade de frete)?",
+     o:["Porque o código escrito costuma ter menos linhas no total",
+        "Porque basta criar uma classe nova, sem alterar o que já funciona",
+        "Porque dispensa a escrita de testes para o novo comportamento",
+        "Porque o compilador otimiza melhor programas orientados a objetos"],
+     a:1,
+     why:"Estender sem modificar reduz o <b>risco de regressão</b>. Na versão procedural, cada tipo novo obriga a abrir um condicional já testado e correto."},
+    {q:"Qual é a principal função da documentação de design?",
+     o:["Registrar decisões arquiteturais e apoiar manutenção e comunicação",
+        "Demonstrar ao cliente o volume de trabalho realizado pela equipe",
+        "Substituir as reuniões periódicas de alinhamento da equipe técnica",
+        "Atender exclusivamente às exigências de auditorias externas"],
+     a:0,
+     why:"Documentação é <b>fonte comum de verdade</b> para quem chega depois: explica por que o sistema é assim e evita refazer discussões já encerradas."},
+    {q:"Modelar um sistema serve principalmente para:",
+     o:["Substituir a programação por representações visuais precisas",
+        "Reduzir ambiguidade e alinhar o entendimento entre os envolvidos",
+        "Cumprir uma exigência burocrática do processo de qualidade",
+        "Aumentar o volume de documentos formais entregues ao cliente"],
+     a:1,
+     why:"O modelo é ferramenta de <b>comunicação e decisão</b>. Cada nível de abstração omite detalhes de propósito, conforme o interlocutor daquela conversa."},
+    {q:"Um sistema precisa ser apresentado à diretoria em cinco minutos. Qual nível de modelo é mais adequado?",
+     o:["Diagrama de contexto, com o sistema e seus atores externos",
+        "Diagrama de classes completo, com todos os atributos e métodos",
+        "O código-fonte das rotinas principais, devidamente comentado",
+        "O script de criação do banco de dados com todas as tabelas"],
+     a:0,
+     why:"Cada nível serve a um público: para a diretoria, <b>contexto e valor</b>; classes e código servem a quem implementa e mantém o sistema."}
+  ]
+}
+};
+</script>
+<style>
+/* ============================================================
+   Atividade avaliativa por módulo
+   ============================================================ */
+.ativ{
+  background:var(--panel);color:var(--panel-text);border:1px solid var(--panel-line);
+  border-radius:8px;padding:34px 32px 36px;margin:0 0 46px;position:relative;overflow:hidden;
+}
+.ativ::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--grad)}
+.ativ-head{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+.ativ-tag{
+  font-family:var(--font-display);font-size:10px;font-weight:600;letter-spacing:3px;
+  text-transform:uppercase;color:var(--panel-muted);margin:0;
+}
+.ativ-count{font-family:var(--font-mono);font-size:12px;color:var(--panel-muted);font-variant-numeric:tabular-nums}
+.ativ-track{height:3px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin-bottom:26px}
+.ativ-fill{height:100%;width:0;background:var(--grad);transition:width .45s cubic-bezier(.4,0,.2,1)}
+.ativ-q{
+  font-family:var(--font-display);font-size:19px;font-weight:400;line-height:1.5;
+  color:#fff;margin:0 0 8px;text-wrap:balance;
+}
+.ativ-ctx{font-size:14px;line-height:1.75;color:var(--panel-muted);margin:0 0 18px;max-width:74ch}
+.ativ-opts{display:flex;flex-direction:column;gap:10px}
+.ativ-opt{
+  text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--panel-line);
+  border-radius:var(--radius);padding:14px 17px;color:#fff;font-family:var(--font-body);
+  font-size:14.5px;font-weight:300;line-height:1.6;cursor:pointer;transition:all .2s ease;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.ativ-opt:hover:not(.locked){border-color:rgba(255,255,255,.45);background:rgba(255,255,255,.06)}
+.ativ-opt .letra{
+  flex:0 0 22px;height:22px;border-radius:50%;border:1px solid var(--panel-line);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);
+  font-size:11px;color:var(--panel-muted);margin-top:1px;
+}
+.ativ-opt.locked{cursor:default}
+.ativ-opt.certa{border-color:var(--ok);background:rgba(44,201,157,.13)}
+.ativ-opt.certa .letra{background:var(--ok);border-color:var(--ok);color:#06281f}
+.ativ-opt.errada{border-color:var(--bad);background:rgba(226,104,95,.12)}
+.ativ-opt.errada .letra{background:var(--bad);border-color:var(--bad);color:#3b100c}
+.ativ-fb{
+  margin-top:20px;border-left:2px solid var(--panel-line);padding:2px 0 2px 18px;
+  font-size:14.5px;line-height:1.75;color:var(--panel-muted);
+}
+.ativ-fb.good{border-color:var(--ok)}
+.ativ-fb.bad{border-color:var(--bad)}
+.ativ-fb b{color:#fff;font-weight:500}
+.ativ-fb .veredito{
+  display:block;font-family:var(--font-display);font-size:11px;font-weight:600;
+  letter-spacing:2.4px;text-transform:uppercase;margin-bottom:8px;
+}
+.ativ-fb.good .veredito{color:var(--ok)}
+.ativ-fb.bad .veredito{color:var(--bad)}
+.ativ-score{font-family:var(--font-display);font-size:64px;font-weight:200;letter-spacing:-2px;color:#fff;margin:0;line-height:1}
+.ativ-score small{font-size:20px;color:var(--panel-muted);font-weight:300;letter-spacing:0}
+.ativ-rev{border-top:1px solid var(--panel-line);margin-top:24px;padding-top:22px}
+.ativ-rev h4{font-family:var(--font-display);font-size:13px;font-weight:500;color:#fff;margin:0 0 14px}
+.ativ-rev-item{
+  border:1px solid var(--panel-line);border-radius:var(--radius);padding:14px 16px;
+  margin-bottom:10px;background:rgba(255,255,255,.03);
+}
+.ativ-rev-item .rq{font-size:14px;color:#fff;font-weight:400;margin:0 0 8px;line-height:1.55}
+.ativ-rev-item .ra{font-family:var(--font-mono);font-size:12px;color:var(--panel-muted);margin:0 0 6px}
+.ativ-rev-item .ra b{color:var(--ok);font-weight:500}
+.ativ-rev-item .ra i{color:var(--bad);font-style:normal}
+.ativ-rev-item p.pq{font-size:13.5px;line-height:1.7;color:var(--panel-muted);margin:0}
+</style>
+<script>
+(function(){
+"use strict";
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+var LETRAS = ["A", "B", "C", "D", "E"];
+
+function embaralhar(arr){
+  var a = arr.slice();
+  for(var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function montar(host, cfg){
+  var KEY = (window.APOSTILA && window.APOSTILA.storeKey ? window.APOSTILA.storeKey : "apostila") + "-ativ-" + cfg.id;
+  var melhor = null;
+  try{ var raw = localStorage.getItem(KEY); if(raw) melhor = JSON.parse(raw); }catch(e){}
+
+  var ordem, atual, respostas;
+
+  function iniciar(){
+    ordem = embaralhar(cfg.questions.map(function(q, i){ return i; })).map(function(i){
+      var q = cfg.questions[i];
+      var opts = embaralhar(q.o.map(function(txt, k){ return {txt:txt, certa:k === q.a}; }));
+      return {q:q, opts:opts};
+    });
+    atual = 0;
+    respostas = [];
+    render();
+  }
+
+  function salvar(pct){
+    if(melhor === null || pct > melhor.pct){
+      melhor = {pct:pct, data:new Date().toLocaleDateString("pt-BR")};
+      try{ localStorage.setItem(KEY, JSON.stringify(melhor)); }catch(e){}
+    }
+  }
+
+  function render(){
+    host.innerHTML = "";
+    var box = el("div","ativ");
+    var head = el("div","ativ-head");
+    head.appendChild(el("p","ativ-tag", cfg.tag || "Atividade avaliativa"));
+    head.appendChild(el("span","ativ-count",
+      atual < ordem.length ? "Questão " + (atual + 1) + " de " + ordem.length : "Resultado"));
+    box.appendChild(head);
+
+    var track = el("div","ativ-track");
+    var fill = el("div","ativ-fill");
+    fill.style.width = (respostas.length / ordem.length * 100) + "%";
+    track.appendChild(fill);
+    box.appendChild(track);
+
+    if(atual >= ordem.length){ resultado(box); }
+    else { questao(box); }
+    host.appendChild(box);
+  }
+
+  function questao(box){
+    var item = ordem[atual];
+    var q = item.q;
+    box.appendChild(el("p","ativ-q", q.q));
+    if(q.ctx) box.appendChild(el("p","ativ-ctx", q.ctx));
+
+    var opts = el("div","ativ-opts");
+    var respondida = false;
+    item.opts.forEach(function(o, k){
+      var b = el("button","ativ-opt");
+      b.type = "button";
+      b.innerHTML = '<span class="letra">' + LETRAS[k] + "</span><span>" + o.txt + "</span>";
+      b.addEventListener("click", function(){
+        if(respondida) return;
+        respondida = true;
+        var certaIdx = 0;
+        item.opts.forEach(function(x, i){ if(x.certa) certaIdx = i; });
+        Array.prototype.forEach.call(opts.children, function(c, i){
+          c.classList.add("locked");
+          if(item.opts[i].certa) c.classList.add("certa");
+        });
+        if(!o.certa) b.classList.add("errada");
+        respostas.push({q:q, acertou:o.certa, escolha:o.txt, certa:item.opts[certaIdx].txt});
+
+        var fb = el("div","ativ-fb " + (o.certa ? "good" : "bad"));
+        fb.innerHTML = '<span class="veredito">' + (o.certa ? "Resposta correta" : "Resposta incorreta") + "</span>" +
+          (o.certa ? "" : "A alternativa correta é: <b>" + item.opts[certaIdx].txt + "</b>.<br>") + q.why;
+        box.appendChild(fb);
+
+        var row = el("div","ctrl-row");
+        row.style.margin = "24px 0 0";
+        var next = el("button","btn btn-sm solid",
+          atual === ordem.length - 1 ? "Ver resultado" : "Próxima questão");
+        next.type = "button";
+        next.addEventListener("click", function(){ atual++; render(); });
+        row.appendChild(next);
+        box.appendChild(row);
+        next.focus();
+      });
+      opts.appendChild(b);
+    });
+    box.appendChild(opts);
+  }
+
+  function resultado(box){
+    var acertos = respostas.filter(function(r){ return r.acertou; }).length;
+    var pct = Math.round(acertos / ordem.length * 100);
+    salvar(pct);
+    if(window.__apostila) window.__apostila.markDone(cfg.topic || cfg.id);
+
+    var grid = el("div");
+    grid.style.cssText = "display:flex;flex-wrap:wrap;gap:26px;align-items:flex-end;margin-bottom:20px";
+    grid.appendChild(el("p","ativ-score", pct + "<small>%</small>"));
+    var info = el("div");
+    info.style.cssText = "flex:1;min-width:220px";
+    var nivel = pct >= 90 ? "Domínio consolidado do módulo."
+      : (pct >= 70 ? "Bom desempenho — reveja os pontos abaixo."
+      : (pct >= 50 ? "Passou da metade, mas há lacunas importantes."
+      : "Vale reler o módulo antes de refazer a atividade."));
+    info.innerHTML = "<p style=\"margin:0 0 6px;color:#fff;font-family:var(--font-display);font-size:17px;font-weight:300\">" +
+      acertos + " de " + ordem.length + " questões corretas</p>" +
+      '<p style="margin:0;font-size:14px;color:var(--panel-muted);line-height:1.7">' + nivel +
+      (melhor ? " · melhor resultado: <b style=\"color:#fff\">" + melhor.pct + "%</b> em " + melhor.data : "") + "</p>";
+    grid.appendChild(info);
+    box.appendChild(grid);
+
+    var barra = el("div","bar-row");
+    barra.innerHTML = '<span class="bar-name">Aproveitamento</span>' +
+      '<span class="bar-track"><span class="bar-fill" style="width:' + pct + "%;background:" +
+      (pct >= 70 ? "#2E8B57" : (pct >= 50 ? "#e0a33a" : "#e2685f")) + '"></span></span>' +
+      '<span class="bar-val">' + acertos + "/" + ordem.length + "</span>";
+    box.appendChild(barra);
+
+    var erradas = respostas.filter(function(r){ return !r.acertou; });
+    var rev = el("div","ativ-rev");
+    if(erradas.length){
+      rev.appendChild(el("h4", null, "Revisão das " + erradas.length + " questão(ões) que você errou"));
+      erradas.forEach(function(r){
+        var it = el("div","ativ-rev-item");
+        it.innerHTML = '<p class="rq">' + r.q.q + "</p>" +
+          '<p class="ra">sua resposta: <i>' + r.escolha + "</i><br>correta: <b>" + r.certa + "</b></p>" +
+          '<p class="pq">' + r.q.why + "</p>";
+        rev.appendChild(it);
+      });
+    }else{
+      rev.appendChild(el("h4", null, "Nenhum erro — revisão do raciocínio de cada questão"));
+      respostas.slice(0, 3).forEach(function(r){
+        var it = el("div","ativ-rev-item");
+        it.innerHTML = '<p class="rq">' + r.q.q + '</p><p class="ra">correta: <b>' + r.certa + "</b></p>" +
+          '<p class="pq">' + r.q.why + "</p>";
+        rev.appendChild(it);
+      });
+    }
+    box.appendChild(rev);
+
+    var row = el("div","ctrl-row");
+    row.style.margin = "24px 0 0";
+    var again = el("button","btn btn-sm solid","Refazer atividade");
+    again.type = "button";
+    again.addEventListener("click", iniciar);
+    var all = el("button","btn btn-sm","Ver gabarito completo");
+    all.type = "button";
+    all.addEventListener("click", function(){
+      var full = el("div","ativ-rev");
+      full.appendChild(el("h4", null, "Gabarito comentado — todas as questões"));
+      respostas.forEach(function(r, i){
+        var it = el("div","ativ-rev-item");
+        it.innerHTML = '<p class="rq">' + (i + 1) + ". " + r.q.q + "</p>" +
+          '<p class="ra">correta: <b>' + r.certa + "</b></p>" +
+          '<p class="pq">' + r.q.why + "</p>";
+        full.appendChild(it);
+      });
+      all.disabled = true;
+      box.appendChild(full);
+    });
+    row.appendChild(again);
+    row.appendChild(all);
+    box.appendChild(row);
+  }
+
+  iniciar();
+}
+
+function build(){
+  var dados = window.ATIVIDADES || {};
+  Array.prototype.forEach.call(document.querySelectorAll("[data-atividade]"), function(host){
+    var id = host.getAttribute("data-atividade");
+    if(dados[id]) montar(host, dados[id]);
+  });
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", build);
+else build();
+})();
+</script>
+
+<script>
+window.PAINEIS = {
+
+/* ============ UNIDADE 1 — FUNDAMENTOS ============ */
+"es-p1":{
+  topico:"pe1",
+  tag:"Panorama · Unidade 1",
+  titulo:"As camadas da engenharia de software",
+  intro:"Engenharia de software costuma ser apresentada como um conjunto de camadas que se apoiam umas nas outras — a formulação clássica de Roger Pressman. A base sustenta tudo; a ferramenta, no topo, é a parte mais visível e a menos importante. Clique em cada camada para ver o que ela entrega e o que acontece quando se pula direto para o topo.",
+  fecho:"O erro mais comum é comprar a camada de cima esperando que ela resolva as de baixo. Uma ferramenta excelente aplicada a um processo inexistente só produz desorganização mais rápido.",
+  camadas:{
+    rotulo:"Da ferramenta ao alicerce",
+    rotuloItem:"Camada",
+    hint:"Leia de baixo para cima: cada camada só funciona se a de baixo existir.",
+    fluxo:"cada camada apoia a de cima",
+    itens:[
+      {nome:"Ferramentas", papel:"apoio automatizado ao método",
+       detalhe:"Astah, Visual Paradigm, StarUML, controle de versão, rastreadores de tarefa. Automatizam e padronizam o trabalho — e é por isso que são a camada mais fácil de adotar e a mais fácil de confundir com a solução.",
+       exemplo:"Ferramenta CASE, repositorio Git, quadro de tarefas,\nintegracao continua, gerador de documentacao",
+       exemploRotulo:"Exemplos",
+       nota:"Ferramenta <b>acelera</b> um método que você já domina. Sozinha, não ensina ninguém a modelar."},
+      {nome:"Métodos", papel:"como fazer cada tarefa técnica",
+       detalhe:"As técnicas concretas: levantar requisitos por entrevista e observação, modelar com diagramas, projetar a arquitetura, escrever casos de teste. É o conteúdo dos tópicos 1.4 a 1.10 desta apostila.",
+       exemplo:"Entrevista e observacao  → levantamento\nDiagrama de casos de uso → analise\nDiagrama de classes      → projeto\nTeste de unidade         → validacao"},
+      {nome:"Processo", papel:"a ordem e a cadência do trabalho",
+       detalhe:"Define quais atividades acontecem, em que ordem, com que artefatos e quem decide o quê. Waterfall e Ágil são dois arranjos possíveis das mesmas atividades — o tópico 1.3 compara os dois.",
+       exemplo:"Planejamento → Analise → Desenvolvimento\n→ Testes → Implantacao → Manutencao\n\n(ou tudo isso dentro de cada iteracao de 2 semanas)",
+       nota:"Sem processo, cada pessoa inventa o seu. Em time pequeno isso ainda funciona; <b>em time grande, não</b>."},
+      {nome:"Foco na qualidade", papel:"o alicerce de tudo",
+       detalhe:"O compromisso, assumido pela organização, de que qualidade não é etapa final nem responsabilidade de um setor. É o que faz valer a pena ter processo, método e ferramenta — e sem ele nada acima se sustenta.",
+       exemplo:"Pergunta que revela a camada:\n“quando o prazo aperta, o que a empresa corta primeiro?”",
+       exemploRotulo:"O teste prático"}
+    ]
+  },
+  linha:{
+    rotulo:"Linha do tempo — a disciplina",
+    hint:"Cinquenta anos de tentativas de fazer software deixar de ser artesanato.",
+    itens:[
+      {ano:"1968", t:"A conferência da OTAN", d:"O termo “engenharia de software” nasce em uma conferência convocada para discutir a chamada crise do software: sistemas pouco confiáveis, acima do orçamento e muito além do prazo."},
+      {ano:"1970", t:"O artigo do cascata", d:"Winston Royce descreve o modelo sequencial — e, no mesmo artigo, adverte que aplicá-lo sem iteração é arriscado. A advertência foi menos citada que o diagrama."},
+      {ano:"1975", t:"“The Mythical Man-Month”", d:"Fred Brooks mostra que acrescentar pessoas a um projeto atrasado o atrasa ainda mais, por causa do custo de comunicação. O laboratório do tópico 1.3 vive desse princípio."},
+      {ano:"1986", t:"O modelo espiral", d:"Barry Boehm coloca o risco no centro: cada volta da espiral escolhe o que atacar primeiro pelo risco, não pela ordem das fases."},
+      {ano:"1999", t:"Programação extrema", d:"Kent Beck sistematiza práticas que hoje parecem óbvias: testes automatizados, integração contínua, programação em par, entregas frequentes."},
+      {ano:"2001", t:"Manifesto Ágil", d:"Dezessete pessoas formulam quatro valores que reposicionam a discussão: indivíduos e interações, software funcionando, colaboração e resposta a mudanças."},
+      {ano:"2009", t:"DevOps", d:"A fronteira entre desenvolver e operar se dissolve. Implantar deixa de ser evento raro e vira rotina — o que muda radicalmente o custo de errar."}
+    ]
+  }
+},
+
+/* ============ UNIDADE 2 — UML ============ */
+"es-p2":{
+  topico:"pe2",
+  tag:"Panorama · Unidade 2",
+  titulo:"Quatro perguntas, quatro diagramas",
+  intro:"A UML tem mais de uma dúzia de diagramas, mas quase todo projeto resolve a vida com quatro. Cada um responde a uma pergunta diferente sobre o mesmo sistema — e a confusão começa quando se tenta responder a todas em um desenho só. Clique em cada nível para ver a pergunta, o diagrama e o leitor a que ele se destina.",
+  fecho:"Modelo não é desenho bonito: é resposta a uma pergunta. Antes de abrir a ferramenta, decida qual pergunta você está respondendo e para quem — a escolha do diagrama vem sozinha depois disso.",
+  camadas:{
+    rotulo:"Do fora para dentro do sistema",
+    rotuloItem:"Vista",
+    hint:"De cima para baixo, a abstração diminui e o detalhe aumenta. O leitor também muda.",
+    fluxo:"menos abstração, mais detalhe",
+    itens:[
+      {nome:"Contexto", papel:"“o que é esse sistema, afinal?”",
+       detalhe:"O sistema como uma caixa só, cercado pelos atores externos e pelos sistemas com que conversa. É o nível para apresentar o projeto à diretoria em cinco minutos — nenhum detalhe interno, só fronteira e valor.",
+       exemplo:"[Cliente] → ( Sistema de E-commerce ) ← [Gateway\n                                        de pagamento]\n            ↑\n       [Estoquista]",
+       exemploRotulo:"O desenho, em texto"},
+      {nome:"Casos de uso", papel:"“o que ele faz, e para quem?”",
+       detalhe:"A vista funcional: cada elipse é algo de valor que um ator consegue realizar. Comunica bem com quem não é técnico, porque fala de objetivos e não de telas nem de classes.",
+       exemplo:"Cliente  → Buscar produto\n         → Finalizar compra\n         → Acompanhar pedido\nEstoquista → Repor estoque",
+       nota:"Caso de uso descreve <b>o que</b> o ator consegue fazer, nunca como a tela será desenhada."},
+      {nome:"Classes", papel:"“que estrutura sustenta isso?”",
+       detalhe:"A vista estática: as classes do domínio, seus atributos, seus métodos e as associações entre elas, com a multiplicidade de cada ponta. É o diagrama que mais se aproxima do código — e do banco de dados.",
+       exemplo:"Cliente 1 ——— 0..* Pedido\nPedido  1 ——— 1..* ItemPedido\n\nPedido: numero, data, total\n        calcularTotal(), fechar()"},
+      {nome:"Sequência", papel:"“em que ordem isso acontece?”",
+       detalhe:"A vista dinâmica: as linhas de vida dos objetos, de cima para baixo, e as mensagens trocadas entre elas. Mostra o tempo, que nenhum dos diagramas anteriores consegue mostrar.",
+       exemplo:"Cliente  Pedido  Estoque  Pagamento\n   |       |       |        |\n   |--fechar()->|       |\n   |       |--reservar()->|\n   |       |<----ok-------|\n   |       |--cobrar()----------->|",
+       exemploRotulo:"Leitura de cima para baixo"},
+      {nome:"Implantação", papel:"“onde cada parte roda?”",
+       detalhe:"A vista física: os nós de hardware e os artefatos instalados em cada um. Responde às perguntas da operação — quantos servidores, onde fica o banco, o que atravessa a rede.",
+       exemplo:"[Navegador] --HTTPS--> [Servidor web]\n                            |\n                            +--> [Servidor de banco]"}
+    ]
+  },
+  linha:{
+    rotulo:"Linha do tempo — da OO à UML",
+    hint:"A UML não inventou a modelagem: ela encerrou uma guerra de notações.",
+    itens:[
+      {ano:"1967", t:"Simula 67", d:"A primeira linguagem com classes e objetos, criada para simulação. O vocabulário que a UML desenharia trinta anos depois nasce aqui."},
+      {ano:"1980", t:"Smalltalk", d:"A orientação a objetos se populariza com um ambiente inteiro construído sobre ela. Herança e polimorfismo deixam de ser curiosidade acadêmica."},
+      {ano:"1991", t:"O método de Booch", d:"Grady Booch publica sua notação para análise e projeto orientados a objetos. Outras surgem em paralelo — e cada equipe desenha de um jeito."},
+      {ano:"1992", t:"Casos de uso, por Jacobson", d:"Ivar Jacobson introduz o caso de uso como forma de capturar requisitos pela ótica de quem usa o sistema. É o diagrama que abre a Unidade 2."},
+      {ano:"1995", t:"Os três amigos", d:"Booch, Rumbaugh e Jacobson reúnem seus métodos na Rational. A fusão de notações rivais é o que torna possível uma linguagem comum."},
+      {ano:"1997", t:"UML 1.0 na OMG", d:"A linguagem vira padrão aberto. A partir daí, um diagrama feito em uma empresa pode ser lido em qualquer outra — o ganho real da padronização."},
+      {ano:"2005", t:"UML 2.0", d:"A revisão amplia os diagramas e torna a semântica mais precisa, com a ambição de gerar código a partir do modelo. Na prática, a UML seguiu sendo mais útil para comunicar do que para gerar."}
+    ]
+  }
+}
+
+};
+</script>
+
+<script>
+/* ============================================================
+   PAINEL — componente de abertura de módulo
+   Pilha de camadas clicáveis em SVG + linha do tempo navegável.
+   Lê window.PAINEIS e monta em cada [data-painel].
+   ============================================================ */
+window.PAINEL = (function(){
+"use strict";
+var NS = "http://www.w3.org/2000/svg";
+var seq = 0;
+
+function sv(tag, at){
+  var e = document.createElementNS(NS, tag);
+  if(at) for(var k in at) if(at.hasOwnProperty(k)) e.setAttribute(k, at[k]);
+  return e;
+}
+function el(tag, cls, html){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html !== undefined) e.innerHTML = html;
+  return e;
+}
+function txt(t){ return document.createTextNode(t); }
+
+/* cores derivadas do gradiente do design system */
+var G = [[147,87,204],[41,137,216],[44,201,157]];
+function mix(a, b, t){
+  return [0,1,2].map(function(i){ return Math.round(a[i] + (b[i] - a[i]) * t); });
+}
+function cor(i, n){
+  var t = (n > 1) ? i / (n - 1) : 0;
+  var c = (t < 0.5) ? mix(G[0], G[1], t * 2) : mix(G[1], G[2], (t - 0.5) * 2);
+  return "rgb(" + c.join(",") + ")";
+}
+
+/* quebra de texto para SVG */
+function quebrar(texto, max){
+  var palavras = String(texto).split(/\s+/), linhas = [], atual = "";
+  palavras.forEach(function(p){
+    var teste = atual ? atual + " " + p : p;
+    if(teste.length > max && atual){ linhas.push(atual); atual = p; }
+    else atual = teste;
+  });
+  if(atual) linhas.push(atual);
+  return linhas;
+}
+
+/* ------------------------------------------------------------
+   Pilha de camadas
+   ------------------------------------------------------------ */
+function montarCamadas(cfg, aoEscolher){
+  var itens = cfg.itens, n = itens.length;
+  var LX = 54, LW = 428, LH = 54, GAP = 9, TOP = 6;
+  var H = TOP + n * LH + (n - 1) * GAP + 6;
+  var svg = sv("svg", {
+    "class": "pan-svg",
+    viewBox: "0 0 500 " + H,
+    role: "group",
+    "aria-label": cfg.titulo || "Camadas"
+  });
+
+  /* trilho com seta indicando o sentido do fluxo */
+  if(cfg.fluxo){
+    var defs = sv("defs");
+    var mk = sv("marker", { id:"panSeta" + seq, viewBox:"0 0 10 10", refX:"7", refY:"5",
+      markerWidth:"5", markerHeight:"5", orient:"auto-start-reverse" });
+    mk.appendChild(sv("path", { d:"M0,0 L10,5 L0,10 z", fill:"rgba(255,255,255,.45)" }));
+    defs.appendChild(mk);
+    svg.appendChild(defs);
+    var y1 = TOP + 8, y2 = H - 14;
+    svg.appendChild(sv("line", {
+      x1:26, y1:y1, x2:26, y2:y2,
+      stroke:"rgba(255,255,255,.22)", "stroke-width":1.5,
+      "marker-end":"url(#panSeta" + seq + ")"
+    }));
+    var rot = sv("text", { "class":"rail", transform:"rotate(-90 14 " + ((y1+y2)/2) + ")",
+      x:14, y:(y1+y2)/2, "text-anchor":"middle" });
+    rot.appendChild(txt(cfg.fluxo));
+    svg.appendChild(rot);
+  }
+
+  var grupos = [];
+  itens.forEach(function(it, i){
+    var y = TOP + i * (LH + GAP);
+    var c = cor(i, n);
+    var g = sv("g", { "class":"cam", tabindex:"0", role:"button",
+      "aria-label": it.nome + ". " + (it.papel || "") });
+
+    var base = sv("rect", { "class":"base", x:LX, y:y, width:LW, height:LH, rx:5,
+      fill:c, "fill-opacity":.13, stroke:c, "stroke-opacity":.45, "stroke-width":1.5 });
+    g.appendChild(base);
+    g.appendChild(sv("rect", { x:LX, y:y, width:4, height:LH, rx:2, fill:c }));
+
+    var t1 = sv("text", { "class":"cam-t", x:LX + 18, y:y + 23 });
+    t1.appendChild(txt(it.nome));
+    g.appendChild(t1);
+
+    if(it.papel){
+      var t2 = sv("text", { "class":"cam-s", x:LX + 18, y:y + 41 });
+      t2.appendChild(txt(it.papel));
+      g.appendChild(t2);
+    }
+    var t3 = sv("text", { "class":"cam-n", x:LX + LW - 14, y:y + 30, "text-anchor":"end" });
+    t3.appendChild(txt(String(i + 1).padStart(2, "0")));
+    g.appendChild(t3);
+
+    function escolher(){ aoEscolher(i); }
+    g.addEventListener("click", escolher);
+    g.addEventListener("keydown", function(ev){
+      if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); escolher(); }
+    });
+    svg.appendChild(g);
+    grupos.push({ g:g, base:base, cor:c });
+  });
+
+  function marcar(sel){
+    grupos.forEach(function(o, i){
+      var on = (i === sel);
+      o.base.setAttribute("fill-opacity", on ? .32 : .13);
+      o.base.setAttribute("stroke-opacity", on ? 1 : .45);
+      o.base.setAttribute("stroke-width", on ? 2 : 1.5);
+      o.g.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+  return { svg: svg, marcar: marcar, cor: function(i){ return grupos[i].cor; } };
+}
+
+/* ------------------------------------------------------------
+   Linha do tempo
+   ------------------------------------------------------------ */
+function montarLinha(cfg, aoEscolher, gid){
+  var itens = cfg.itens, n = itens.length;
+  var PASSO = 142, MARG = 62;
+  var W = MARG * 2 + (n - 1) * PASSO;
+  var EIXO = 74, H = 132;
+  var svg = sv("svg", { "class":"pan-tl", viewBox:"0 0 " + W + " " + H,
+    width: W, height: H, role:"group", "aria-label": cfg.titulo || "Linha do tempo" });
+
+  var defs = sv("defs");
+  var lg = sv("linearGradient", { id:gid, x1:"0", x2:"1" });
+  [["0","#163D28"],["0.5","#1F5135"],["1","#2E8B57"]].forEach(function(s){
+    lg.appendChild(sv("stop", { offset:s[0], "stop-color":s[1] }));
+  });
+  defs.appendChild(lg);
+  svg.appendChild(defs);
+
+  svg.appendChild(sv("line", { "class":"eixo", x1:MARG - 26, y1:EIXO, x2:W - MARG + 26, y2:EIXO }));
+  var feito = sv("line", { "class":"feito", x1:MARG, y1:EIXO, x2:MARG, y2:EIXO, stroke:"url(#" + gid + ")" });
+  svg.appendChild(feito);
+
+  var marcos = [];
+  itens.forEach(function(it, i){
+    var x = MARG + i * PASSO;
+    var g = sv("g", { "class":"marco", tabindex:"0", role:"button",
+      "aria-label": it.ano + ": " + it.t });
+
+    var hit = sv("circle", { "class":"hit", cx:x, cy:EIXO, r:16, fill:"transparent" });
+    g.appendChild(hit);
+    var anel = sv("circle", { cx:x, cy:EIXO, r:10, fill:"none",
+      stroke:"rgba(255,255,255,.3)", "stroke-width":1.5 });
+    g.appendChild(anel);
+    var ponto = sv("circle", { cx:x, cy:EIXO, r:5, fill:"rgba(255,255,255,.45)" });
+    g.appendChild(ponto);
+
+    var ano = sv("text", { "class":"ano off", x:x, y:EIXO - 26, "text-anchor":"middle" });
+    ano.appendChild(txt(it.ano));
+    g.appendChild(ano);
+
+    var linhas = quebrar(it.t, 17).slice(0, 2);
+    var rots = [];
+    linhas.forEach(function(ln, li){
+      var r = sv("text", { "class":"rot", x:x, y:EIXO + 30 + li * 15, "text-anchor":"middle" });
+      r.appendChild(txt(ln));
+      g.appendChild(r);
+      rots.push(r);
+    });
+
+    function escolher(){ aoEscolher(i); }
+    g.addEventListener("click", escolher);
+    g.addEventListener("keydown", function(ev){
+      if(ev.key === "Enter" || ev.key === " "){ ev.preventDefault(); escolher(); }
+    });
+    svg.appendChild(g);
+    marcos.push({ g:g, ponto:ponto, anel:anel, ano:ano, rots:rots, x:x });
+  });
+
+  function marcar(sel){
+    marcos.forEach(function(m, i){
+      var on = (i === sel);
+      m.ponto.setAttribute("r", on ? 7 : 5);
+      m.ponto.setAttribute("fill", on ? "#fff" : "rgba(255,255,255,.45)");
+      m.anel.setAttribute("r", on ? 13 : 10);
+      m.anel.setAttribute("stroke", on ? "#2E8B57" : "rgba(255,255,255,.3)");
+      m.ano.setAttribute("class", on ? "ano" : "ano off");
+      m.rots.forEach(function(r){ r.setAttribute("class", on ? "rot on" : "rot"); });
+      m.g.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    feito.setAttribute("x2", marcos[sel].x);
+  }
+  return { svg: svg, marcar: marcar, largura: W, foco: function(i){ marcos[i].g.focus(); } };
+}
+
+/* ------------------------------------------------------------
+   Montagem do painel
+   ------------------------------------------------------------ */
+function montar(host, cfg){
+  seq++;
+  var gid = "panGrad" + seq;
+  var vistasCam = {}, vistasTl = {}, concluido = false;
+
+  var raiz = el("div", "pan");
+  raiz.appendChild(el("p", "pan-tag", cfg.tag || "Panorama do módulo"));
+  raiz.appendChild(el("h3", null, cfg.titulo));
+  if(cfg.intro) raiz.appendChild(el("p", "pan-intro", cfg.intro));
+
+  /* --- camadas --- */
+  var cam = cfg.camadas;
+  raiz.appendChild(el("p", "pan-sec", cam.rotulo || "Camadas"));
+  if(cam.hint) raiz.appendChild(el("p", "pan-sub", cam.hint));
+
+  var grade = el("div", "pan-layers");
+  var colEsq = el("div");
+  var det = el("div", "pan-det");
+  grade.appendChild(colEsq);
+  grade.appendChild(det);
+  raiz.appendChild(grade);
+
+  var leitura = el("p", "pan-read");
+
+  function pintarDetalhe(i){
+    var it = cam.itens[i];
+    det.innerHTML = "";
+    var k = el("p", "kick");
+    var bolinha = el("i");
+    bolinha.style.background = camadas.cor(i);
+    k.appendChild(bolinha);
+    k.appendChild(txt((cam.rotuloItem || "Camada") + " " + String(i + 1).padStart(2, "0") + " de " + String(cam.itens.length).padStart(2, "0")));
+    det.appendChild(k);
+    det.appendChild(el("h4", null, it.nome));
+    det.appendChild(el("p", null, it.detalhe));
+    if(it.exemplo){
+      det.appendChild(el("p", "ex-lbl", it.exemploRotulo || "Na prática"));
+      var pre = el("pre", "ex");
+      pre.textContent = it.exemplo;   /* texto puro: o exemplo contém tags */
+      det.appendChild(pre);
+    }
+    if(it.nota) det.appendChild(el("p", null, it.nota));
+  }
+
+  var camadas = montarCamadas(cam, function(i){
+    camadas.marcar(i);
+    pintarDetalhe(i);
+    vistasCam[i] = true;
+    atualizar();
+  });
+  colEsq.appendChild(camadas.svg);
+
+  /* --- linha do tempo --- */
+  var tl = cfg.linha;
+  var tlDet, linha, indice = 0, tocando = null;
+  if(tl){
+    raiz.appendChild(el("hr", "pan-rule"));
+    raiz.appendChild(el("p", "pan-sec", tl.rotulo || "Linha do tempo"));
+    if(tl.hint) raiz.appendChild(el("p", "pan-sub", tl.hint));
+
+    var wrap = el("div", "pan-tl-wrap");
+    linha = montarLinha(tl, function(i){ irPara(i, true); }, gid);
+    wrap.appendChild(linha.svg);
+    raiz.appendChild(wrap);
+
+    tlDet = el("div", "pan-det");
+    tlDet.style.minHeight = "0";
+    tlDet.style.marginTop = "16px";
+    raiz.appendChild(tlDet);
+
+    var ctrl = el("div", "pan-ctrl");
+    var bAnt = el("button", "btn btn-sm", "◀ Anterior");
+    var bProx = el("button", "btn btn-sm", "Próximo ▶");
+    var bPlay = el("button", "btn btn-sm solid", "Reproduzir");
+    var conta = el("span", "pan-conta");
+    [bAnt, bProx, bPlay].forEach(function(b){ b.type = "button"; });
+    bAnt.addEventListener("click", function(){ parar(); irPara(Math.max(0, indice - 1), true); });
+    bProx.addEventListener("click", function(){ parar(); irPara(Math.min(tl.itens.length - 1, indice + 1), true); });
+    bPlay.addEventListener("click", function(){
+      if(tocando){ parar(); return; }
+      bPlay.textContent = "Pausar";
+      bPlay.classList.add("on");
+      tocando = setInterval(function(){
+        if(indice >= tl.itens.length - 1){ parar(); return; }
+        irPara(indice + 1, false);
+      }, 2300);
+    });
+    function parar(){
+      if(tocando){ clearInterval(tocando); tocando = null; }
+      bPlay.textContent = "Reproduzir";
+      bPlay.classList.remove("on");
+    }
+    ctrl.appendChild(bAnt); ctrl.appendChild(bProx); ctrl.appendChild(bPlay); ctrl.appendChild(conta);
+    raiz.appendChild(ctrl);
+
+    var irPara = function(i, manual){
+      indice = i;
+      linha.marcar(i);
+      var it = tl.itens[i];
+      tlDet.innerHTML = "";
+      var k = el("p", "kick");
+      k.appendChild(txt(it.ano));
+      tlDet.appendChild(k);
+      tlDet.appendChild(el("h4", null, it.t));
+      tlDet.appendChild(el("p", null, it.d));
+      vistasTl[i] = true;
+      conta.textContent = Object.keys(vistasTl).length + " de " + tl.itens.length + " marcos";
+      /* mantém o marco selecionado visível na rolagem horizontal */
+      var alvo = (i / Math.max(1, tl.itens.length - 1)) * (linha.largura - wrap.clientWidth);
+      if(linha.largura > wrap.clientWidth) wrap.scrollTo({ left: Math.max(0, alvo), behavior: manual ? "auto" : "smooth" });
+      atualizar();
+    };
+  }
+
+  raiz.appendChild(leitura);
+  host.appendChild(raiz);
+
+  function atualizar(){
+    var a = Object.keys(vistasCam).length, A = cam.itens.length;
+    var b = tl ? Object.keys(vistasTl).length : 0, B = tl ? tl.itens.length : 0;
+    if(a >= A && b >= B){
+      if(!concluido){
+        concluido = true;
+        if(cfg.topico && window.__apostila) window.__apostila.markDone(cfg.topico);
+      }
+      leitura.innerHTML = "<b class='ok'>Panorama completo.</b> " + (cfg.fecho || "");
+    }else{
+      var faltam = [];
+      if(a < A) faltam.push((A - a) + " camada(s)");
+      if(b < B) faltam.push((B - b) + " marco(s)");
+      leitura.innerHTML = "Explorado: <b>" + a + " de " + A + "</b> camadas" +
+        (tl ? " e <b>" + b + " de " + B + "</b> marcos" : "") +
+        ". Faltam " + faltam.join(" e ") + ".";
+    }
+  }
+
+  camadas.marcar(0);
+  pintarDetalhe(0);
+  vistasCam[0] = true;
+  if(tl) irPara(0, true);
+  atualizar();
+}
+
+function build(){
+  var dados = window.PAINEIS || {};
+  Array.prototype.forEach.call(document.querySelectorAll("[data-painel]"), function(host){
+    var id = host.getAttribute("data-painel");
+    if(dados[id] && !host.getAttribute("data-montado")){
+      host.setAttribute("data-montado", "1");
+      montar(host, dados[id]);
+    }
+  });
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", build);
+else build();
+
+return { montar: montar, build: build };
+})();
+</script>
+
+<script src="../acessibilidade.js" defer></script>
+</body>
+</html>
