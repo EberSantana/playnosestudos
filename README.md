@@ -1,6 +1,6 @@
 # Play nos Estudos · Prof. Eber Santana
 
-> Portal de disciplinas gamificado: cada estudante escolhe um avatar (robô Bit, Pixel, Tatu-bola tech, Sonda, Árvore-circuito ou Minha Smart City) que ganha XP, sobe de nível, evolui em 6 etapas e libera acessórios conforme estuda. Regras completas em [SPEC.md](SPEC.md). Veja um exemplo em `meu-personagem/?demo`.
+> Portal de disciplinas gamificado: cada estudante escolhe um avatar (robô Bit, Pixel, Tatu-bola tech, Sonda, Árvore-circuito, Minha Smart City, Girassol, Gotinha, Borboleta ou Gata) que ganha XP, sobe de nível, evolui em 6 etapas e libera acessórios conforme estuda. Regras completas em [SPEC.md](SPEC.md). Veja um exemplo em `meu-personagem/?demo`.
 
 ## Gamificação (avatares)
 
@@ -16,7 +16,7 @@
 
 Portal de materiais didáticos interativos das disciplinas de Informática do **Instituto Federal de Sergipe (IFS), Campus Tobias Barreto**.
 
-**Acesse:** [ebersantana.github.io/disciplinas](https://ebersantana.github.io/disciplinas/)
+**Acesse:** [ebersantana.github.io/playnosestudos](https://ebersantana.github.io/playnosestudos/)
 
 Cada disciplina reúne laboratórios visuais, atividades de caderno, flashcards, questões de verdadeiro ou falso com justificativa e problemas de PBL (Aprendizagem Baseada em Problemas). As respostas só aparecem depois que o estudante tenta resolver. O portal funciona no computador, no tablet e no celular, sem instalar nada.
 
@@ -26,24 +26,24 @@ Cada disciplina reúne laboratórios visuais, atividades de caderno, flashcards,
 
 | Curso | Disciplina | Materiais |
 |---|---|---|
-| Técnico em Informática | [Redes de Computadores](https://ebersantana.github.io/disciplinas/redes-de-computadores/) | Console de estudo, atividades com ranking, Subnetting na Prática, Mapa do Chamado (TCP/IP na prática) |
-| Técnico em Informática | [Projeto de Redes](https://ebersantana.github.io/disciplinas/projeto-de-redes/) | Atividades com ranking (metodologia Top-Down) |
-| Técnico em Informática | [Segurança da Informação](https://ebersantana.github.io/disciplinas/seguranca-da-informacao/) | Console de estudo, Detetives Digitais (desinformação, checagem de fatos, deepfakes e algoritmos) |
-| Subsequente em Informática | [Informática Básica](https://ebersantana.github.io/disciplinas/informatica-basica/) | Ambiente interativo, apostila, Método Office Visual, Trilha Windows 11 (12 aulas, com laboratório visual em cada uma, caderno, flashcards, V ou F e PBL) |
-| Subsequente em Informática | [Engenharia de Software](https://ebersantana.github.io/disciplinas/engenharia-de-software/) | Apostilas, roteiro de processo, dicionário de dados, estante |
-| Integrado em Desenvolvimento de Sistemas · 1º ano | [Construção de Sites 1](https://ebersantana.github.io/disciplinas/construcao-de-sites-1/) | Apostila de HTML e CSS |
-| Integrado em Desenvolvimento de Sistemas · 2º ano | [Banco de Dados](https://ebersantana.github.io/disciplinas/banco-de-dados/) | Console de estudo, apostila de SQL |
+| Técnico em Informática | [Redes de Computadores](https://ebersantana.github.io/playnosestudos/redes-de-computadores/) | Console de estudo, atividades com ranking, Subnetting na Prática, Mapa do Chamado (TCP/IP na prática) |
+| Técnico em Informática | [Projeto de Redes](https://ebersantana.github.io/playnosestudos/projeto-de-redes/) | Atividades com ranking (metodologia Top-Down) |
+| Técnico em Informática | [Segurança da Informação](https://ebersantana.github.io/playnosestudos/seguranca-da-informacao/) | Console de estudo, Detetives Digitais (desinformação, checagem de fatos, deepfakes e algoritmos) |
+| Subsequente em Informática | [Informática Básica](https://ebersantana.github.io/playnosestudos/informatica-basica/) | Ambiente interativo, apostila, Método Office Visual, Trilha Windows 11 (12 aulas, com laboratório visual em cada uma, caderno, flashcards, V ou F e PBL) |
+| Subsequente em Informática | [Engenharia de Software](https://ebersantana.github.io/playnosestudos/engenharia-de-software/) | Apostilas, roteiro de processo, dicionário de dados, estante |
+| Integrado em Desenvolvimento de Sistemas · 1º ano | [Construção de Sites 1](https://ebersantana.github.io/playnosestudos/construcao-de-sites-1/) | Apostila de HTML e CSS |
+| Integrado em Desenvolvimento de Sistemas · 2º ano | [Banco de Dados](https://ebersantana.github.io/playnosestudos/banco-de-dados/) | Console de estudo, apostila de SQL |
 
-Também estão disponíveis [recursos de aula](https://ebersantana.github.io/disciplinas/recursos-de-aula/) para qualquer disciplina: cronômetro com ranking de equipes, a Linha do Tempo Tecnológica e o guia 14 Códigos para Aprender com IA.
+Também estão disponíveis [recursos de aula](https://ebersantana.github.io/playnosestudos/recursos-de-aula/) para qualquer disciplina: cronômetro com ranking de equipes, a Linha do Tempo Tecnológica e o guia 14 Códigos para Aprender com IA.
 
-Há ainda o [Laboratório 3D](https://ebersantana.github.io/disciplinas/laboratorio-3d/) (Vamos praticar?): ESP32, micro:bit e Arduino em 3D, com montagem de circuitos e programação direto no navegador.
+Há ainda o [Laboratório 3D](https://ebersantana.github.io/playnosestudos/laboratorio-3d/) (Vamos praticar?): ESP32, micro:bit e Arduino em 3D, com montagem de circuitos e programação direto no navegador.
 
 ---
 
 ## Como acessar e usar o portal
 
 ### 1. Acessar
-Abra **[ebersantana.github.io/disciplinas](https://ebersantana.github.io/disciplinas/)** no navegador do computador, tablet ou celular. Não precisa instalar nada. Dica: salve o endereço nos favoritos ou adicione à tela inicial do celular.
+Abra **[ebersantana.github.io/playnosestudos](https://ebersantana.github.io/playnosestudos/)** no navegador do computador, tablet ou celular. Não precisa instalar nada. Dica: salve o endereço nos favoritos ou adicione à tela inicial do celular.
 
 ### 2. Entrar (primeiro acesso)
 1. Escolha a **sua turma**.
@@ -126,7 +126,7 @@ A verificação automática não substitui o teste com pessoas. Se você encontr
 | Desenvolvimento | Engenharia de prompt e criação assistida por IA |
 
 ```
-disciplinas/
+playnosestudos/
 ├── index.html              página inicial do portal
 ├── config.js               endereço do serviço de progresso
 ├── progresso-turma.js      login, menu de disciplinas e envio do progresso

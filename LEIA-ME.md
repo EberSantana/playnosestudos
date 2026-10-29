@@ -1,6 +1,6 @@
 # Ambientes de estudo · Prof. Eber Santana
 
-Site: `https://ebersantana.github.io/disciplinas/`
+Site: `https://ebersantana.github.io/playnosestudos/`
 
 ## Como está organizado
 
@@ -56,8 +56,8 @@ Regras dos nomes: letras minúsculas, sem acento, sem espaço, palavras separada
 
 ## Endereços para mandar aos alunos
 
-- Todas: `https://ebersantana.github.io/disciplinas/`
-- Uma disciplina: `https://ebersantana.github.io/disciplinas/banco-de-dados/` (troque pelo nome da pasta)
+- Todas: `https://ebersantana.github.io/playnosestudos/`
+- Uma disciplina: `https://ebersantana.github.io/playnosestudos/banco-de-dados/` (troque pelo nome da pasta)
 
 ## Para substituir tudo de uma vez
 
