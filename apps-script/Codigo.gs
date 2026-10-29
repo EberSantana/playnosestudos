@@ -21,6 +21,14 @@ const CAB_TURMAS = ["turma", "curso", "turno", "matricula", "nome", "pin", "ulti
 const CAB_PROG = ["material", "nome", "matricula", "curso", "turno", "turma", "feitas", "total", "pontos", "atualizado", "detalhe"];
 const ABA_AVATAR = "Avatar";
 const CAB_AVATAR = ["matricula", "nome", "turma", "curso", "nome do robo", "cor", "cabeca", "peito", "extra", "expressao", "xp", "nivel", "atualizado", "modelo", "dias", "historico xp"];
+const ABA_ACESSO = "Acesso", CAB_ACESSO = ["turma", "disciplinas liberadas"];
+// Pastas do site e nomes aceitos na aba Acesso (com ou sem acento, maiúsculas ou minúsculas).
+const DISCIPLINAS_ = [
+  ["informatica-basica", "Informática Básica"], ["engenharia-de-software", "Engenharia de Software"],
+  ["construcao-de-sites-1", "Construção de Sites 1"], ["banco-de-dados", "Banco de Dados"],
+  ["redes-de-computadores", "Redes de Computadores"], ["projeto-de-redes", "Projeto de Redes"],
+  ["seguranca-da-informacao", "Segurança da Informação"], ["laboratorio-3d", "Laboratório 3D"]
+];
 const MAX_TENTATIVAS = 5, BLOQUEIO_MIN = 15;
 
 function aba_(nome, cab) {
@@ -105,6 +113,27 @@ function gravarAvatar_(a, lp, escolhas) {
   if (atual) sh.getRange(atual.linha, 1, 1, linha.length).setValues([linha]);
   else sh.appendRow(linha);
   return esc;
+}
+
+const norm_ = s => String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
+
+// Disciplinas liberadas para uma turma, lidas da aba Acesso. null = todas (sem linha, vazio ou "todas").
+function interpretarAcesso_(texto) {
+  const t = norm_(texto);
+  if (!t || t === "todas" || t === "todos" || t === "*") return null;
+  if (t === "nenhuma" || t === "nenhum") return [];
+  const achadas = [];
+  t.split(/[,;\n]/).map(x => x.trim()).filter(Boolean).forEach(tok => {
+    const d = DISCIPLINAS_.find(x => norm_(x[0]) === tok || norm_(x[1]) === tok);
+    if (d && achadas.indexOf(d[0]) < 0) achadas.push(d[0]);
+  });
+  return achadas.length ? achadas : null; // nome errado nunca deixa o aluno sem nada
+}
+function liberadasDe_(turma) {
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA_ACESSO);
+  if (!sh) return null;
+  const linha = sh.getDataRange().getValues().slice(1).find(r => chave_(r[0]) === chave_(turma));
+  return linha ? interpretarAcesso_(linha[1]) : null;
 }
 
 function json_(obj) {
@@ -208,7 +237,7 @@ function doPost(e) {
     if (r.erro) return json_({ ok: false, erro: r.erro });
     const a = r.aluno;
     const curto = nomesCurtos_([a.nome])[0];
-    const perfil = { id: idDe_(a.matricula), nome: a.nome, apelido: curto, curso: a.curso, turno: a.turno, turma: a.turma };
+    const perfil = { id: idDe_(a.matricula), nome: a.nome, apelido: curto, curso: a.curso, turno: a.turno, turma: a.turma, disciplinas: liberadasDe_(a.turma) };
 
     if (d.acao === "avatar") {
       const lp = prog_().getDataRange().getValues();
@@ -254,6 +283,7 @@ function onOpen() {
   SpreadsheetApp.getUi().createMenu("Play nos Estudos")
     .addItem("Atualizar painel da turma", "atualizarPainel")
     .addItem("Importar lista de alunos (aba Importar)", "importarAlunos")
+    .addItem("Disciplinas por turma (preparar aba Acesso)", "prepararAcesso")
     .addSeparator()
     .addItem("Liberar bloqueio e apagar PIN do aluno selecionado", "liberarAlunoSelecionado")
     .addSeparator()
@@ -391,4 +421,19 @@ function ligarBackupSemanal() {
   const ja = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === "backupAgora");
   if (!ja) ScriptApp.newTrigger("backupAgora").timeBased().everyWeeks(1).onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(3).create();
   avisar_(ja ? "O backup semanal já estava ligado." : "Backup semanal ligado: toda segunda-feira, de madrugada.");
+}
+
+// Cria a aba Acesso com uma linha por turma (todas liberadas). O professor edita a segunda coluna.
+function prepararAcesso() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName(ABA_ACESSO) || ss.insertSheet(ABA_ACESSO);
+  const atuais = {};
+  sh.getDataRange().getValues().slice(1).forEach(r => { if (r[0]) atuais[chave_(r[0])] = true; });
+  if (sh.getLastRow() === 0) sh.appendRow(CAB_ACESSO);
+  const turmas = {};
+  lerTurmas_().forEach(a => { turmas[a.turma] = true; });
+  Object.keys(turmas).sort().forEach(tu => { if (!atuais[chave_(tu)]) sh.appendRow([tu, "todas"]); });
+  sh.getRange(1, 4, 1, 1).setValue("Nomes aceitos (separe por vírgula; ou escreva todas / nenhuma)");
+  DISCIPLINAS_.forEach((d, i) => sh.getRange(2 + i, 4, 1, 1).setValue(d[1]));
+  avisar_("Aba Acesso pronta. Em cada turma, escreva as disciplinas liberadas separadas por vírgula (ex.: Banco de Dados, Redes de Computadores). Escreva todas para liberar tudo.");
 }

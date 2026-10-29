@@ -62,7 +62,7 @@ function carregar() {
     DriveApp: {}, PropertiesService: {}, ScriptApp: { getProjectTriggers: () => [], WeekDay: { MONDAY: 1 }, newTrigger: () => ({ timeBased() { return this; }, everyWeeks() { return this; }, onWeekDay() { return this; }, atHour() { return this; }, create() {} }) }, MailApp: {}, Logger: { log() {} }
   };
   vm.createContext(ctx);
-  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "apps-script", "Codigo.gs"), "utf8") + ";this.__api = { doGet, doPost, turmas_, idDe_, atualizarPainel, importarAlunos, importarLista_, lerTurmas_, liberarAlunoSelecionado, exportarPesquisa, montarPesquisa_, montarPainel_, backupAgora, ligarBackupSemanal };", ctx);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "apps-script", "Codigo.gs"), "utf8") + ";this.__api = { interpretarAcesso_, prepararAcesso, doGet, doPost, turmas_, idDe_, atualizarPainel, importarAlunos, importarLista_, lerTurmas_, liberarAlunoSelecionado, exportarPesquisa, montarPesquisa_, montarPainel_, backupAgora, ligarBackupSemanal };", ctx);
   return { ctx, api: ctx.__api, abas };
 }
 
@@ -169,4 +169,20 @@ test("professor: painel, liberar PIN e exportação anonimizada", () => {
   assert.equal(abas["Pesquisa"].dados.length, 3);
   assert.equal(abas["Pesquisa"].dados[1][8], 1);
   assert.doesNotThrow(() => { api.backupAgora(); api.ligarBackupSemanal(); });
+});
+
+test("disciplinas por turma: aba Acesso limita o que o aluno vê", () => {
+  const { api, abas } = carregar(); semear(api);
+  const ids = get(api, { acao: "alunos", turma: "INFO1" }).alunos;
+  const base = { turma: "INFO1", id: ids[0].id, pin: "4821" };
+  assert.equal(post(api, { ...base, acao: "entrar", criarPin: true }).perfil.disciplinas, null);
+  api.prepararAcesso();
+  assert.equal(JSON.stringify(abas["Acesso"].dados.slice(0, 2).map(r => r.slice(0, 2))), JSON.stringify([["turma", "disciplinas liberadas"], ["INFO1", "todas"]]));
+  assert.equal(post(api, { ...base, acao: "entrar" }).perfil.disciplinas, null);
+  abas["Acesso"].dados[1][1] = "Banco de Dados, redes de computadores; Segurança da Informação";
+  assert.equal(JSON.stringify(post(api, { ...base, acao: "entrar" }).perfil.disciplinas), JSON.stringify(["banco-de-dados", "redes-de-computadores", "seguranca-da-informacao"]));
+  assert.equal(JSON.stringify(api.interpretarAcesso_("banco-de-dados")), '["banco-de-dados"]');
+  assert.equal(api.interpretarAcesso_("todas"), null);
+  assert.equal(api.interpretarAcesso_("nome errado"), null);
+  assert.equal(JSON.stringify(api.interpretarAcesso_("nenhuma")), "[]");
 });

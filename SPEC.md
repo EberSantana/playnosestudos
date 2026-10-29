@@ -102,6 +102,10 @@ Todas as recompensas são só visuais.
 Cores liberadas por nível: Verde IFS, Azul, Laranja, Roxo e Rosa (1), Grafite (5), Dourado (10), Holográfico (16).
 Expressões (feliz, focado, surpreso, piscando) e o nome do robô (até 16 caracteres) são livres.
 
+### Disciplinas por turma
+
+A aba **Acesso** da planilha (turma | disciplinas liberadas) define o que cada turma vê. O servidor devolve `perfil.disciplinas` no login e a cada envio de progresso. Sem linha, vazio ou `todas`: tudo liberado. `nenhuma`: nada. Nome que não existe é ignorado (nunca deixa a turma sem acesso por engano). No site, a página inicial e o menu mostram só as liberadas e uma disciplina não liberada abre um aviso no lugar do conteúdo. Recursos de aula e Meu personagem são sempre livres. É controle de navegação, não de segurança.
+
 ### Ritmo de estudo (metas e sequência)
 
 Só visual e sem punição. O servidor guarda na aba Avatar os dias em que o XP cresceu (`dias`) e o XP ao fim de cada dia (`historico xp`, últimos 40 dias).

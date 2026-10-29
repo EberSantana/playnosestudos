@@ -35,9 +35,10 @@ O Play nos Estudos usa a **sua própria planilha**, separada do portal de discip
 2. **Implantar → Nova implantação → App da Web** (executar como você; acesso: qualquer pessoa).
 3. Copie a URL que termina em `/exec` para `window.RANKING_URL` em `config.js`.
 4. As abas **Turmas**, **Progresso** e **Avatar** são criadas sozinhas. Cadastre os alunos em **Turmas** (`turma, curso, turno, matricula, nome`); o PIN o próprio aluno cria no primeiro acesso.
-5. Menu **Play nos Estudos** na planilha (aparece ao reabrir): atualizar o **painel da turma**, **importar a lista** de alunos (aba Importar; há um modelo em `modelo-lista-alunos.csv`), **liberar o PIN** de um aluno, **exportar dados anonimizados** para pesquisa, **backup** agora e **backup semanal**.
-6. O PIN não aceita sequências óbvias (1234, 0000) e, depois de erros seguidos, o bloqueio cresce (15 min, 1 h, 24 h). O professor libera pelo menu.
-7. Ao atualizar o código, faça uma **nova versão** da implantação (mesmo endereço).
+5. **Disciplinas por turma:** no menu, use **Disciplinas por turma (preparar aba Acesso)**. A aba **Acesso** ganha uma linha por turma. Na segunda coluna escreva as disciplinas liberadas separadas por vírgula (ex.: `Banco de Dados, Redes de Computadores`), ou `todas`, ou `nenhuma`. Os nomes aceitos aparecem na coluna D. A turma sem linha vê tudo. A mudança chega ao aluno no próximo acesso. Atenção: o site é estático, então isso organiza e bloqueia a navegação do aluno, mas não é uma proteção de segurança do conteúdo.
+6. Menu **Play nos Estudos** na planilha (aparece ao reabrir): atualizar o **painel da turma**, **importar a lista** de alunos (aba Importar; há um modelo em `modelo-lista-alunos.csv`), **liberar o PIN** de um aluno, **exportar dados anonimizados** para pesquisa, **backup** agora e **backup semanal**.
+7. O PIN não aceita sequências óbvias (1234, 0000) e, depois de erros seguidos, o bloqueio cresce (15 min, 1 h, 24 h). O professor libera pelo menu.
+8. Ao atualizar o código, faça uma **nova versão** da implantação (mesmo endereço).
 
 Testes: `node --test testes/*.test.js` (inclui a conferência de que o Apps Script calcula o mesmo XP que o site).
 

@@ -29,6 +29,9 @@
       ["Projeto de Redes", "projeto-de-redes"],
       ["Seguran\u00e7a da Informa\u00e7\u00e3o", "seguranca-da-informacao"] ] }
   ];
+  // Pastas que o professor pode liberar ou bloquear por turma (aba Acesso da planilha).
+  var NOMES_PASTAS = { "laboratorio-3d": "Laborat\u00f3rio 3D" };
+  CURSOS.forEach(function (c) { c.disciplinas.forEach(function (d) { NOMES_PASTAS[d[1]] = d[0]; }); });
   var TKEY = "pt-ultima-turma", LKEY = "pt-turmas-v2";
 
   var URL_ = String(window.RANKING_URL || "").trim();
@@ -45,6 +48,8 @@
     try { var p = JSON.parse(localStorage.getItem(PKEY) || "null"); return p && p.id && p.pin && p.nome ? p : null; } catch (e) { return null; }
   }
   var perfil = lerPerfil();
+  // perfil.disciplinas: lista de pastas liberadas para a turma, ou ausente/null = todas.
+  function liberada(pasta) { return !perfil || !Array.isArray(perfil.disciplinas) || !NOMES_PASTAS[pasta] || perfil.disciplinas.indexOf(pasta) >= 0; }
 
   if (!document.querySelector('link[href*="Barlow+Condensed"]')) {
     var fl = document.createElement("link");
@@ -141,11 +146,35 @@
     if (!BASE || location.href.indexOf(BASE) !== 0) return "";
     return location.href.slice(BASE.length).split(/[\/?#]/)[0];
   }
+  // Bloqueia a p\u00e1gina de uma disciplina que n\u00e3o foi liberada para a turma do estudante.
+  function guarda() {
+    var pasta = pastaAtual(), ex = document.getElementById("pt-bloqueio");
+    if (!perfil || liberada(pasta) || LIVRE) { if (ex) { ex.remove(); root.classList.remove("pt-trava"); } return; }
+    if (ex) return;
+    var b = document.createElement("div");
+    b.id = "pt-bloqueio"; b.className = "pt-screen"; b.setAttribute("role", "alertdialog"); b.setAttribute("aria-modal", "true"); b.setAttribute("aria-labelledby", "pt-bl-t");
+    b.style.cssText = "display:grid;place-items:center;grid-template-columns:1fr;padding:20px";
+    b.innerHTML = '<div class="pt-card" style="max-width:440px"><h2 id="pt-bl-t">Esta disciplina ainda n\u00e3o foi liberada</h2>' +
+      '<p class="pt-sub">' + esc(NOMES_PASTAS[pasta] || "Esta disciplina") + " n\u00e3o est\u00e1 dispon\u00edvel para a turma " + esc(perfil.turma) + ". O professor libera quando chegar a hora.</p>" +
+      '<a class="pt-go" style="display:block;text-align:center;text-decoration:none;line-height:48px" href="' + esc(BASE) + '">Voltar \u00e0s minhas disciplinas</a></div>';
+    document.body.appendChild(b);
+    var a = b.querySelector("a"); if (a) a.focus();
+  }
   function enviar(d) {
     if (!URL_ || !perfil || !d) return Promise.resolve({ ok: false, erro: "sem configura\u00e7\u00e3o" });
     return fetch(URL_, { method: "POST", body: JSON.stringify(corpo(d)) })
       .then(function (r) { return r.json(); })
-      .then(function (r) { if (r && r.ok) { try { window.dispatchEvent(new CustomEvent("progresso:enviado")); } catch (e) {} } return r; })
+      .then(function (r) {
+        if (r && r.ok) {
+          try { window.dispatchEvent(new CustomEvent("progresso:enviado")); } catch (e) {}
+          if (r.perfil && perfil && JSON.stringify(r.perfil.disciplinas || null) !== JSON.stringify(perfil.disciplinas || null)) {
+            perfil.disciplinas = r.perfil.disciplinas || null;
+            try { localStorage.setItem(PKEY, JSON.stringify(perfil)); } catch (e) {}
+            avisar(); guarda();
+          }
+        }
+        return r;
+      })
       .catch(function () { return { ok: false, erro: "Sem conex\u00e3o com a internet. Tente de novo." }; });
   }
 
@@ -342,7 +371,7 @@
         try { sessionStorage.setItem("pt-sync", perfil.id); } catch (err) {}
         if (window.A11Y_AP) window.A11Y_AP.recarregar();
         if (DADOS) enviar(dados());
-        paintFab(); esconderEntrada(); avisar();
+        paintFab(); esconderEntrada(); avisar(); guarda();
       });
   });
 
@@ -369,7 +398,7 @@
   function bmsg(t, cl) { var m = box.querySelector(".pt-msg"); if (m) { m.textContent = t; m.className = "pt-msg " + (cl || ""); } }
 
   function painel() {
-    var d = dados(), c = cursoDe(perfil.curso) || { disciplinas: [].concat.apply([], CURSOS.map(function (x) { return x.disciplinas; })).filter(function (x, i, a) { return a.map(function (y) { return y[1]; }).indexOf(x[1]) === i; }) }, atual = pastaAtual();
+    var d = dados(), c = Array.isArray(perfil.disciplinas) ? { disciplinas: perfil.disciplinas.filter(function (f) { return NOMES_PASTAS[f]; }).map(function (f) { return [NOMES_PASTAS[f], f]; }) } : cursoDe(perfil.curso) || { disciplinas: [].concat.apply([], CURSOS.map(function (x) { return x.disciplinas; })).filter(function (x, i, a) { return a.map(function (y) { return y[1]; }).indexOf(x[1]) === i; }) }, atual = pastaAtual();
     box.innerHTML =
       '<button class="pt-close" id="pt-x" type="button" aria-label="Fechar">\u00d7</button>' +
       "<h3>Ol\u00e1, " + esc(primeiroNome()) + "</h3>" +
@@ -437,7 +466,7 @@
   });
 
   // Para a p\u00e1gina inicial organizar as disciplinas pelo curso do aluno
-  window.PORTAL_ALUNO = { perfil: function () { return perfil; }, cursos: CURSOS, entrar: mostrarEntrada };
+  window.PORTAL_ALUNO = { perfil: function () { return perfil; }, liberada: liberada, nomes: NOMES_PASTAS, cursos: CURSOS, entrar: mostrarEntrada };
 
   // Quem entrou quando o envio ainda n\u00e3o estava ligado \u00e9 cadastrado na planilha agora (uma vez por visita).
   function sincronizar() {
@@ -448,7 +477,7 @@
     });
   }
 
-  if (perfil) { paintFab(); esconderEntrada(); sincronizar(); }
+  if (perfil) { paintFab(); esconderEntrada(); sincronizar(); guarda(); }
   else if (LIVRE) { root.classList.remove("pt-gate"); }
   else { mostrarEntrada(); }
   avisar();

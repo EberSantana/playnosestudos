@@ -139,7 +139,7 @@ footer{color:var(--muted);font-size:14px;margin-top:32px}
       <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     </a>
   </div>
-  <h2 class="sec">Laboratório 3D <span style="font-weight:600;color:var(--muted)">(Vamos praticar?)</span></h2>
+  <div id="lab3d-sec"><h2 class="sec">Laboratório 3D <span style="font-weight:600;color:var(--muted)">(Vamos praticar?)</span></h2>
   <div class="grid">
     <a class="card" href="laboratorio-3d/" aria-label="Abrir Laboratório 3D">
       <span class="meta">3 laboratórios</span>
@@ -147,7 +147,7 @@ footer{color:var(--muted);font-size:14px;margin-top:32px}
       <p>ESP32, micro:bit e Arduino em 3D: gire a placa, monte o circuito e programe direto no navegador.</p>
       <span class="go" aria-hidden="true">Abrir<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
     </a>
-  </div>
+  </div></div>
   <footer>Play nos Estudos · Prof. Eber Santana · IFS Campus Tobias Barreto. O progresso fica salvo no aparelho e é enviado ao professor quando você entra no portal.</footer>
 </div></main>
 <script src="config.js"></script>
@@ -187,6 +187,17 @@ footer{color:var(--muted);font-size:14px;margin-top:32px}
     var p = P.perfil(), curso = null;
     if (p) P.cursos.forEach(function (c) { if (c.nome === p.curso) curso = c; });
     cards.forEach(function (a) { todas.appendChild(a); });
+    var lab = document.getElementById("lab3d-sec");
+    if (lab) lab.hidden = !(!p || P.liberada("laboratorio-3d"));
+    if (p && Array.isArray(p.disciplinas)) { // turma com disciplinas restritas pelo professor
+      p.disciplinas.forEach(function (f) { cards.forEach(function (a) { if (pasta(a) === f) meuGrid.appendChild(a); }); });
+      document.getElementById("meu-curso-titulo").textContent = p.turma + " · " + p.turno + " · liberadas pelo professor";
+      todas.style.display = "none"; document.getElementById("todas-titulo").style.display = "none";
+      meu.hidden = !p.disciplinas.length || !meuGrid.children.length; aviso.hidden = true;
+      if (meu.hidden) { document.getElementById("todas-titulo").style.display = ""; document.getElementById("todas-titulo").textContent = "Nenhuma disciplina liberada para a sua turma ainda."; }
+      return;
+    }
+    todas.style.display = ""; document.getElementById("todas-titulo").style.display = "";
     if (!curso) { meu.hidden = true; aviso.hidden = false; document.getElementById("todas-titulo").textContent = "Disciplinas"; return; }
     var minhas = curso.disciplinas.map(function (d) { return d[1]; });
     minhas.forEach(function (f) { cards.forEach(function (a) { if (pasta(a) === f) meuGrid.appendChild(a); }); });
