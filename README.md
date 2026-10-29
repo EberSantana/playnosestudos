@@ -4,15 +4,43 @@
 
 ## Gamificação (avatares)
 
-- **XP:** +10 por atividade feita, +50 na metade de um material, +100 ao concluir. Nunca diminui.
-- **Nível:** 50 × (N−1) × N de XP para chegar ao nível N. Seis etapas de evolução por modelo, ligadas aos cargos Estagiário, Técnico, Analista, Especialista, Arquiteto e Lenda.
-- **Atributos:** Conexão (Redes), Escudo (Segurança), Memória (Banco de Dados), Base (Informática Básica), Maker (Laboratório 3D), Criação e Processo.
-- **Conquistas:** 10 conquistas, cada uma libera um acessório. Cores liberadas por nível. Tudo é só visual e não vale nota.
-- **Professor:** a aba **Avatar** da planilha mostra XP, nível e as escolhas de cada estudante.
-- **Testes:** `node --test testes/*.test.js` (inclui a conferência de que o Apps Script calcula o mesmo XP que o site).
-- **Para atualizar o Apps Script:** cole o novo `apps-script/Codigo.gs` na planilha e faça uma **nova implantação** do App da Web (mesmo endereço, versão nova).
+Cada estudante escolhe o seu avatar entre **10 modelos**, pode trocar quando quiser, e ele evolui em **6 etapas** conforme o estudante avança nas disciplinas.
 
-# Ambientes de Estudo · Prof. Eber Santana
+| Modelo | Evolução |
+|---|---|
+| **Bit**, o robô (padrão) | Robô sobre rodas → Aura de lenda |
+| **Pixel**, a criatura digital | Ovo de dados → Dragão de código |
+| **Tatu-bola tech** | Filhote → Bola de energia |
+| **Sonda** | Drone → Estação orbital |
+| **Árvore-circuito** | Semente-chip → Frutos de LED |
+| **Minha Smart City** | Vila → Metrópole inteligente |
+| **Girassol** | Semente → Girassol solar |
+| **Gotinha** | Gotinha → Nuvem arco-íris |
+| **Borboleta** | Ovinho → Borboleta de luz |
+| **Gata (Mia)** | Gatinha → Gata mística |
+
+- **XP:** +10 por atividade feita, +50 na metade de um material, +100 ao concluir. Nunca diminui.
+- **Nível:** 50 × (N−1) × N de XP para chegar ao nível N. As etapas ligam-se aos cargos Estagiário, Técnico, Analista, Especialista, Arquiteto e Lenda.
+- **Personalização:** cor (liberada por nível), acessórios (liberados por conquistas), expressão (nos modelos com rosto) e nome. A cor pinta a parte principal do avatar.
+- **Atributos:** Conexão (Redes), Escudo (Segurança), Memória (Banco de Dados), Base (Informática Básica), Maker (Laboratório 3D), Criação e Processo.
+- **Conquistas:** 10 conquistas, cada uma libera um acessório. Tudo é só visual e não vale nota.
+- **Professor:** a aba **Avatar** da planilha mostra XP, nível, modelo e as escolhas de cada estudante.
+- **Regras completas:** [SPEC.md](SPEC.md). Exemplo sem login: `meu-personagem/?demo`.
+
+### Para o professor: planilha e Apps Script
+
+O Play nos Estudos usa a **sua própria planilha**, separada do portal de disciplinas anterior.
+1. Na planilha, abra **Extensões → Apps Script** e cole `apps-script/Codigo.gs`.
+2. **Implantar → Nova implantação → App da Web** (executar como você; acesso: qualquer pessoa).
+3. Copie a URL que termina em `/exec` para `window.RANKING_URL` em `config.js`.
+4. As abas **Turmas**, **Progresso** e **Avatar** são criadas sozinhas. Cadastre os alunos em **Turmas** (`turma, curso, turno, matricula, nome`); o PIN o próprio aluno cria no primeiro acesso.
+5. Ao atualizar o código, faça uma **nova versão** da implantação (mesmo endereço).
+
+Testes: `node --test testes/*.test.js` (inclui a conferência de que o Apps Script calcula o mesmo XP que o site).
+
+---
+
+## Sobre o portal
 
 Portal de materiais didáticos interativos das disciplinas de Informática do **Instituto Federal de Sergipe (IFS), Campus Tobias Barreto**.
 
@@ -62,6 +90,9 @@ O portal mostra primeiro as disciplinas do seu curso. Toque em uma para abrir os
 
 ### 5. Acompanhar o progresso e o ranking
 O progresso fica salvo no seu aparelho e é enviado ao professor. Abra o botão do canto da tela para ver a sua pontuação e o **ranking da turma** (aparece só o primeiro nome e a inicial do sobrenome). Se sair do aparelho ou trocar de computador, entre de novo com o mesmo PIN.
+
+### 5b. Escolher e evoluir o seu avatar
+Na página inicial, toque em **Meu personagem**. Escolha entre 10 avatares (Bit, Pixel, Tatu, Sonda, Árvore, Cidade, Girassol, Gotinha, Borboleta ou Gata), a cor, os acessórios, a expressão e o nome, e toque em **Salvar personagem**. Cada atividade feita dá XP: ao subir de nível o avatar evolui e libera novas cores e acessórios. Você pode trocar de avatar quando quiser, sem perder XP. Nada disso vale nota.
 
 ### 6. Deixar o portal do seu jeito
 Toque em **Aparência** (canto inferior esquerdo) para escolher:
@@ -130,9 +161,13 @@ playnosestudos/
 ├── index.html              página inicial do portal
 ├── config.js               endereço do serviço de progresso
 ├── progresso-turma.js      login, menu de disciplinas e envio do progresso
+├── jogo/jogo.js            motor do jogo (XP, nível, conquistas) e desenho dos 10 avatares
+├── meu-personagem/         página onde o estudante escolhe e personaliza o avatar
+├── testes/                 testes automáticos do motor e do Apps Script
+├── SPEC.md                 especificação e regras da gamificação
 ├── aparencia.js            seletor de cores e leitura "Meu visual" (todas as páginas)
 ├── acessibilidade.js       VLibras, pular conteúdo, foco e teclado (todas as páginas)
-├── apps-script/Codigo.gs   código da planilha (login, progresso e ranking)
+├── apps-script/Codigo.gs   código da planilha (login, progresso, ranking e avatar)
 └── <disciplina>/           uma pasta por disciplina, com index.html e os materiais
 ```
 
@@ -143,6 +178,7 @@ As instruções de manutenção (incluir materiais, ligar a planilha, atualizar 
 - A lista de alunos (nome completo e matrícula) fica somente na planilha do professor, que não é pública. Nenhum dado pessoal é gravado neste repositório.
 - O ranking mostra apenas o primeiro nome e a inicial do sobrenome.
 - A lista pública mostra só o primeiro nome e a inicial do sobrenome. O PIN impede que um colega entre no lugar do outro, e 5 erros bloqueiam a conta por 15 minutos.
+- A gamificação não cria dado pessoal novo: só guarda as escolhas do avatar (modelo, cor, acessórios, expressão e nome do personagem), além do XP e do nível calculados do progresso.
 - Os dados servem apenas para acompanhar a aprendizagem na disciplina, em linha com a LGPD (Lei nº 13.709/2018).
 
 ---
@@ -157,7 +193,3 @@ Professor EBTT do Instituto Federal de Sergipe, Campus Tobias Barreto. Pesquisad
 ## Uso dos materiais
 
 Os materiais são de uso educacional. Para reutilizar ou adaptar em outra instituição, entre em contato com o autor.
-
-### Avatares femininos
-
-Além dos 6 modelos iniciais, o aluno pode escolher **Girassol**, **Gotinha**, **Borboleta** e **Gata (Mia)**, todos com 6 etapas, rosto com cílios e bochechas, acessórios e expressões. Ao atualizar, cole o novo `apps-script/Codigo.gs` no Apps Script e faça uma nova implantação (a lista `MODELOS_` mudou).
