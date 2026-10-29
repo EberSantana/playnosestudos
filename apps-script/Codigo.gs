@@ -152,6 +152,11 @@ function doGet(e) {
 }
 
 // Confere turma + id + PIN. No primeiro acesso (sem PIN na planilha), grava o PIN novo.
+function bloqueioMin_(erros) { return erros >= 10 ? 1440 : erros >= 8 ? 60 : erros >= MAX_TENTATIVAS ? BLOQUEIO_MIN : 0; }
+// PIN óbvio: todos iguais ou sequência (1234, 4321, 0123...).
+function pinFraco_(pin) {
+  return /^(\d)\1{3}$/.test(pin) || "01234567890".indexOf(pin) >= 0 || "09876543210".indexOf(pin) >= 0;
+}
 function autenticar_(d, sh) {
   const t = chave_(d.turma), id = String(d.id || "");
   const a = lerTurmas_().find(x => chave_(x.turma) === t && idDe_(x.matricula) === id);
@@ -165,13 +170,15 @@ function autenticar_(d, sh) {
   if (!/^\d{4}$/.test(pin)) return { erro: "O PIN precisa ter 4 números." };
   if (!a.pin) {
     if (!d.criarPin) return { erro: "Você ainda não tem PIN. Volte e crie o seu." };
+    if (pinFraco_(pin)) return { erro: "Esse PIN é fácil de adivinhar. Escolha outro (evite 1234, 0000 e repetições)." };
     sh.getRange(a.linha, 6, 1, 4).setValues([["p" + pin, agora, 0, ""]]);
     return { aluno: a, novo: true };
   }
   if (a.pin !== "p" + pin) {
-    const n = a.tentativas + 1;
-    sh.getRange(a.linha, 8, 1, 2).setValues([[n >= MAX_TENTATIVAS ? 0 : n, n >= MAX_TENTATIVAS ? new Date(agora.getTime() + BLOQUEIO_MIN * 60000) : ""]]);
-    return { erro: n >= MAX_TENTATIVAS ? "PIN errado. Por segurança, espere " + BLOQUEIO_MIN + " minutos para tentar de novo." : "PIN errado. Confira e tente de novo." };
+    // Erros seguidos: o bloqueio cresce (15 min, 1 h, 24 h) e só zera com um acerto ou quando o professor libera.
+    const n = a.tentativas + 1, min = bloqueioMin_(n);
+    sh.getRange(a.linha, 8, 1, 2).setValues([[n, min ? new Date(agora.getTime() + min * 60000) : ""]]);
+    return { erro: min ? "PIN errado. Por segurança, espere " + (min >= 60 ? min / 60 + " hora(s)" : min + " minutos") + " para tentar de novo." : "PIN errado. Confira e tente de novo." };
   }
   sh.getRange(a.linha, 7, 1, 3).setValues([[agora, 0, ""]]);
   return { aluno: a };
@@ -225,4 +232,149 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/* ================= Ferramentas do professor (menu "Play nos Estudos" na planilha) ================= */
+
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu("Play nos Estudos")
+    .addItem("Atualizar painel da turma", "atualizarPainel")
+    .addItem("Importar lista de alunos (aba Importar)", "importarAlunos")
+    .addSeparator()
+    .addItem("Liberar bloqueio e apagar PIN do aluno selecionado", "liberarAlunoSelecionado")
+    .addSeparator()
+    .addItem("Exportar dados anonimizados para pesquisa", "exportarPesquisa")
+    .addItem("Fazer backup agora", "backupAgora")
+    .addItem("Ligar backup semanal", "ligarBackupSemanal")
+    .addToUi();
+}
+
+function avisar_(msg) { try { SpreadsheetApp.getUi().alert(msg); } catch (e) {} }
+
+function abaLimpa_(nome) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = ss.getSheetByName(nome) || ss.insertSheet(nome);
+  sh.clear();
+  return sh;
+}
+function escreve_(sh, linha, matriz) {
+  if (!matriz.length) return linha;
+  const n = matriz.reduce((m, r) => Math.max(m, r.length), 1);
+  sh.getRange(linha, 1, matriz.length, n).setValues(matriz.map(r => r.concat(new Array(n - r.length).fill(""))));
+  return linha + matriz.length;
+}
+
+// Resumo por turma: quem já criou PIN, bloqueios, XP e nível.
+function montarPainel_(agora) {
+  agora = agora || new Date();
+  const alunos = lerTurmas_();
+  const av = {};
+  avatar_().getDataRange().getValues().slice(1).forEach(r => { av[String(r[0]).trim()] = { xp: Number(r[10]) || 0, nivel: Number(r[11]) || 1 }; });
+  const turmas = {};
+  alunos.forEach(a => {
+    const t = turmas[a.turma] = turmas[a.turma] || { turma: a.turma, n: 0, comPin: 0, bloq: 0, xp: 0, nivelMax: 0, ativos: 0 };
+    t.n++; if (a.pin) t.comPin++;
+    if (a.bloqueio && a.bloqueio > agora) t.bloq++;
+    const x = av[a.matricula];
+    if (x) { t.xp += x.xp; t.nivelMax = Math.max(t.nivelMax, x.nivel); if (x.xp > 0) t.ativos++; }
+  });
+  const resumo = [["Turma", "Alunos", "Com PIN", "Sem PIN", "Bloqueados", "Com XP", "XP médio", "Maior nível"]]
+    .concat(Object.keys(turmas).sort().map(k => { const t = turmas[k];
+      return [t.turma, t.n, t.comPin, t.n - t.comPin, t.bloq, t.ativos, t.n ? Math.round(t.xp / t.n) : 0, t.nivelMax || 1]; }));
+  const semPin = [["Ainda sem PIN", "Turma"]].concat(alunos.filter(a => !a.pin).map(a => [a.nome, a.turma]));
+  const bloq = [["Bloqueados agora", "Turma", "Até"]].concat(alunos.filter(a => a.bloqueio && a.bloqueio > agora).map(a => [a.nome, a.turma, a.bloqueio]));
+  const paradosSemXp = [["Sem nenhuma atividade ainda", "Turma"]].concat(alunos.filter(a => a.pin && !(av[a.matricula] && av[a.matricula].xp > 0)).map(a => [a.nome, a.turma]));
+  return { resumo: resumo, semPin: semPin, bloq: bloq, semXp: paradosSemXp };
+}
+function atualizarPainel() {
+  const p = montarPainel_(new Date());
+  const sh = abaLimpa_("Painel");
+  let l = escreve_(sh, 1, [["Painel do professor · Play nos Estudos", "", "", "", "", "", "", "Atualizado em " + new Date().toLocaleString("pt-BR")]]);
+  l = escreve_(sh, l + 1, p.resumo);
+  [p.semPin, p.bloq, p.semXp].forEach(t => { l = escreve_(sh, l + 1, t); });
+  try { sh.getRange(1, 1, 1, 1).setFontWeight("bold"); } catch (e) {}
+  avisar_("Painel atualizado na aba Painel.");
+}
+
+// Importa a aba "Importar" (turma | curso | turno | matricula | nome) sem duplicar matrículas.
+function importarLista_(linhas, existentes) {
+  const vistos = {};
+  existentes.forEach(a => { vistos[chave_(a.turma) + "|" + a.matricula] = true; });
+  const novos = [], ignorados = [];
+  linhas.forEach(r => {
+    const t = txt_(r[0], 60), c = txt_(r[1], 80), tu = txt_(r[2], 20), m = String(r[3] == null ? "" : r[3]).trim(), n = txt_(r[4], 100);
+    if (!t && !m && !n) return;
+    if (!t || !m || !n) { ignorados.push(n || m || "(linha vazia)"); return; }
+    const k = chave_(t) + "|" + m;
+    if (vistos[k]) { ignorados.push(n + " (já cadastrado)"); return; }
+    vistos[k] = true;
+    novos.push([t, c, tu, m, n, "", "", "", ""]);
+  });
+  return { novos: novos, ignorados: ignorados };
+}
+function importarAlunos() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName("Importar");
+  if (!sh) {
+    sh = ss.insertSheet("Importar");
+    sh.appendRow(["turma", "curso", "turno", "matricula", "nome"]);
+    sh.appendRow(["EXEMPLO", "Informática", "Noturno", "0000", "Apague esta linha e cole a sua lista a partir daqui"]);
+    avisar_("Criei a aba Importar. Cole a lista (turma, curso, turno, matricula, nome) a partir da linha 2 e rode este menu de novo.");
+    return;
+  }
+  const v = sh.getDataRange().getValues().slice(1).filter(r => String(r[0]).trim().toUpperCase() !== "EXEMPLO");
+  const r = importarLista_(v, lerTurmas_());
+  const tu = turmas_();
+  r.novos.forEach(x => tu.appendRow(x));
+  if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 5).clearContent();
+  avisar_(r.novos.length + " aluno(s) importado(s)." + (r.ignorados.length ? " Ignorados: " + r.ignorados.slice(0, 10).join("; ") : ""));
+}
+
+// Apaga PIN, tentativas e bloqueio da linha selecionada na aba Turmas. O aluno cria outro PIN no próximo acesso.
+function liberarLinha_(sh, linha) {
+  sh.getRange(linha, 6, 1, 4).setValues([["", "", 0, ""]]);
+}
+function liberarAlunoSelecionado() {
+  const sh = SpreadsheetApp.getActiveSheet();
+  if (sh.getName() !== "Turmas") { avisar_("Abra a aba Turmas e clique em uma célula da linha do aluno."); return; }
+  const l = sh.getActiveRange().getRow();
+  if (l < 2) { avisar_("Selecione a linha de um aluno, não o cabeçalho."); return; }
+  liberarLinha_(sh, l);
+  avisar_("PIN e bloqueio apagados para " + sh.getRange(l, 5).getValue() + ". Ele cria um PIN novo no próximo acesso.");
+}
+
+// Dados para pesquisa sem nome nem matrícula (código anônimo gerado por hash).
+function montarPesquisa_() {
+  const alunos = lerTurmas_();
+  const lp = prog_().getDataRange().getValues().slice(1).filter(r => r[0] !== "portal");
+  const av = {};
+  avatar_().getDataRange().getValues().slice(1).forEach(r => { av[String(r[0]).trim()] = r; });
+  const cab = ["codigo anonimo", "turma", "curso", "turno", "modelo", "xp", "nivel", "materiais iniciados", "materiais concluidos", "ultima atividade"];
+  const linhas = alunos.map(a => {
+    const mine = lp.filter(r => String(r[2]).trim() === a.matricula && Number(r[6]) > 0);
+    const conc = mine.filter(r => Number(r[7]) > 0 && Number(r[6]) >= Number(r[7])).length;
+    const ult = mine.reduce((m, r) => r[9] && (!m || new Date(r[9]) > m) ? new Date(r[9]) : m, null);
+    const x = av[a.matricula] || [];
+    return [idDe_(a.matricula), a.turma, a.curso, a.turno, x[13] || "", Number(x[10]) || 0, Number(x[11]) || 1, mine.length, conc, ult || ""];
+  });
+  return [cab].concat(linhas);
+}
+function exportarPesquisa() {
+  const sh = abaLimpa_("Pesquisa");
+  const m = montarPesquisa_();
+  escreve_(sh, 1, m);
+  avisar_("Aba Pesquisa gerada com " + (m.length - 1) + " aluno(s), sem nome e sem matrícula. Para publicar dados, siga o seu termo de consentimento e o parecer do comitê de ética.");
+}
+
+function backupAgora() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const nome = "Backup Play nos Estudos " + Utilities.formatDate(new Date(), "America/Bahia", "yyyy-MM-dd HH:mm");
+  const c = ss.copy(nome);
+  avisar_("Backup criado no seu Google Drive: " + nome);
+  return c;
+}
+function ligarBackupSemanal() {
+  const ja = ScriptApp.getProjectTriggers().some(t => t.getHandlerFunction() === "backupAgora");
+  if (!ja) ScriptApp.newTrigger("backupAgora").timeBased().everyWeeks(1).onWeekDay(ScriptApp.WeekDay.MONDAY).atHour(3).create();
+  avisar_(ja ? "O backup semanal já estava ligado." : "Backup semanal ligado: toda segunda-feira, de madrugada.");
 }

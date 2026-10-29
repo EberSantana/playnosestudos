@@ -192,6 +192,7 @@
         '<div class="pt-msg" role="status" aria-live="polite"></div>' +
         '<p class="pt-note pt-pin-nota"></p>' +
       "</form>" +
+      '<p class="pt-note pt-priv">Guardamos s\u00f3 o seu nome na lista da turma, o seu progresso, o XP e as escolhas do avatar. N\u00e3o pedimos e-mail, telefone nem foto. O professor v\u00ea o seu progresso. <a href="' + BASE + 'privacidade.html">Aviso de privacidade</a></p>' +
     "</div></section>";
   document.body.appendChild(screen);
   var passo = 1, turmaSel = null, alunoSel = null, turmasCache = null, autoFeito = false;
@@ -320,6 +321,7 @@
     ev.preventDefault();
     var p = q("#pt-p").value.trim(), p2 = q("#pt-p2").value.trim();
     if (!/^\d{4}$/.test(p)) { gmsg("O PIN precisa ter 4 n\u00fameros.", "bad"); q("#pt-p").focus(); return; }
+    if (!alunoSel.temPin && (/^(\d)\1{3}$/.test(p) || "01234567890".indexOf(p) >= 0 || "09876543210".indexOf(p) >= 0)) { gmsg("Esse PIN \u00e9 f\u00e1cil de adivinhar. Escolha outro (evite 1234, 0000 e repeti\u00e7\u00f5es).", "bad"); q("#pt-p").focus(); return; }
     if (!alunoSel.temPin && p !== p2) { gmsg("Os dois PINs n\u00e3o s\u00e3o iguais. Digite de novo.", "bad"); q("#pt-p2").focus(); return; }
     var btn = q(".pt-go"), txt = btn.textContent;
     btn.disabled = true; btn.textContent = "Entrando\u2026"; gmsg("");

@@ -177,6 +177,7 @@ As instruções de manutenção (incluir materiais, ligar a planilha, atualizar 
 
 - A lista de alunos (nome completo e matrícula) fica somente na planilha do professor, que não é pública. Nenhum dado pessoal é gravado neste repositório.
 - O ranking mostra apenas o primeiro nome e a inicial do sobrenome.
+- O texto completo está em [privacidade.html](privacidade.html) e aparece como link na tela de entrada.
 - A lista pública mostra só o primeiro nome e a inicial do sobrenome. O PIN impede que um colega entre no lugar do outro, e 5 erros bloqueiam a conta por 15 minutos.
 - A gamificação não cria dado pessoal novo: só guarda as escolhas do avatar (modelo, cor, acessórios, expressão e nome do personagem), além do XP e do nível calculados do progresso.
 - Os dados servem apenas para acompanhar a aprendizagem na disciplina, em linha com a LGPD (Lei nº 13.709/2018).
