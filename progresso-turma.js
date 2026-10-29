@@ -159,11 +159,11 @@
     '<section class="pt-hero">' +
       '<span class="pt-eyebrow">Prof. Eber Santana \u00b7 IFS Campus Tobias Barreto</span>' +
       "<h1>Play nos Estudos</h1>" +
-      "<p>Entre para acessar as disciplinas do seu curso. A cada atividade, o seu rob\u00f4 Bit ganha experi\u00eancia e evolui.</p>" +
+      "<p>Entre para acessar as disciplinas do seu curso. A cada atividade, o seu avatar ganha experi\u00eancia e evolui.</p>" +
       '<ul class="pt-feats">' +
         "<li><b>01</b><span>Laborat\u00f3rios visuais e simuladores para ver cada conceito funcionando.</span></li>" +
         "<li><b>02</b><span>Caderno, flashcards, verdadeiro ou falso e PBL. A resposta aparece depois que voc\u00ea tenta.</span></li>" +
-        "<li><b>03</b><span>Seu progresso faz o rob\u00f4 Bit subir de n\u00edvel, ganhar novas formas e liberar acess\u00f3rios.</span></li>" +
+        "<li><b>03</b><span>Escolha o seu avatar (rob\u00f4, tatu-bola, \u00e1rvore\u2026). Ele sobe de n\u00edvel, evolui e libera acess\u00f3rios conforme voc\u00ea estuda.</span></li>" +
       "</ul>" +
     "</section>" +
     '<section class="pt-side"><div class="pt-card">' +

@@ -1,11 +1,11 @@
 # Play nos Estudos · Prof. Eber Santana
 
-> Portal de disciplinas gamificado: cada estudante tem um robô, o **Bit**, que ganha XP, sobe de nível, muda de forma e libera acessórios conforme estuda. Regras completas em [SPEC.md](SPEC.md). Veja um exemplo em `meu-personagem/?demo`.
+> Portal de disciplinas gamificado: cada estudante escolhe um avatar (robô Bit, Pixel, Tatu-bola tech, Sonda, Árvore-circuito ou Minha Smart City) que ganha XP, sobe de nível, evolui em 6 etapas e libera acessórios conforme estuda. Regras completas em [SPEC.md](SPEC.md). Veja um exemplo em `meu-personagem/?demo`.
 
-## Gamificação (Bit)
+## Gamificação (avatares)
 
 - **XP:** +10 por atividade feita, +50 na metade de um material, +100 ao concluir. Nunca diminui.
-- **Nível:** 50 × (N−1) × N de XP para chegar ao nível N. Seis formas do robô: Estagiário, Técnico, Analista, Especialista, Arquiteto e Lenda.
+- **Nível:** 50 × (N−1) × N de XP para chegar ao nível N. Seis etapas de evolução por modelo, ligadas aos cargos Estagiário, Técnico, Analista, Especialista, Arquiteto e Lenda.
 - **Atributos:** Conexão (Redes), Escudo (Segurança), Memória (Banco de Dados), Base (Informática Básica), Maker (Laboratório 3D), Criação e Processo.
 - **Conquistas:** 10 conquistas, cada uma libera um acessório. Cores liberadas por nível. Tudo é só visual e não vale nota.
 - **Professor:** a aba **Avatar** da planilha mostra XP, nível e as escolhas de cada estudante.

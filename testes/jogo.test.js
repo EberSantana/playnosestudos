@@ -114,7 +114,7 @@ test("desenhar devolve SVG acessível com descrição, para todas as formas", ()
     const s = J.desenhar({ forma: f, cor: "roxo", cabeca: "coroa", peito: "chip", extra: "escudo", expressao: "piscando" }, { titulo: "Bit" });
     assert.match(s, /^<svg[^>]+role="img"/);
     assert.match(s, /<title[^>]*>Bit<\/title>/);
-    assert.match(s, /<desc[^>]*>Robô na forma /);
+    assert.match(s, /<desc[^>]*>Bit, o robô, etapa /);
     assert.ok(!/(\s[a-z-]+="[^"]*")[^>]*\1/.test(s.replace(/"[^"]*"/g, '""')) || true);
     for (const tag of s.match(/<[a-z]+\s[^>]*>/g)) {
       const nomes = (tag.match(/\s([a-z-]+)=/g) || []).map(x => x.trim());
@@ -148,4 +148,41 @@ test("O XP do Apps Script é igual ao do motor", () => {
   const g = ctx.xpENivel_(rows.map(r => ({ feitas: r.feitas, total: r.total })));
   assert.equal(g.xp, e.xp);
   assert.equal(g.nivel, e.nivel);
+});
+
+test("Modelos: 6 avatares, cada um com 6 etapas", () => {
+  assert.deepEqual(J.MODELOS.map(m => m.id), ["bit", "pixel", "tatu", "sonda", "arvore", "cidade"]);
+  for (const m of J.MODELOS) assert.equal(m.etapas.length, 6, m.id);
+  assert.equal(J.etapaDe("pixel", 6), "Dragão de código");
+  assert.equal(J.etapaDe("inexistente", 1), "Robô sobre rodas");
+});
+
+test("validarEscolhas aceita só modelos conhecidos (padrão: bit)", () => {
+  const e = J.calcular([]);
+  assert.equal(J.validarEscolhas({ modelo: "tatu" }, e).modelo, "tatu");
+  assert.equal(J.validarEscolhas({ modelo: "dragao<script>" }, e).modelo, "bit");
+  assert.equal(J.validarEscolhas({}, e).modelo, "bit");
+});
+
+test("Todos os modelos desenham as 6 etapas, com e sem acessórios, sem atributo repetido", () => {
+  const combos = [{}, { cabeca: "oculos", peito: "chip", extra: "jetpack" }, { cabeca: "coroa", peito: "medalha", extra: "escudo" }, { cabeca: "fone", extra: "chave" }, { cabeca: "bone" }, { cabeca: "antena-wifi" }];
+  for (const m of J.MODELOS) for (let f = 1; f <= 6; f++) for (const c of combos) for (const cor of ["verde", "holografico"]) {
+    const s = J.desenhar(Object.assign({ modelo: m.id, forma: f, cor, expressao: "piscando" }, c));
+    assert.match(s, /^<svg[^>]+role="img"/);
+    assert.ok(!/undefined|NaN|d=""/.test(s), m.id + " " + f);
+    assert.match(s, new RegExp("<desc[^>]*>" + m.nome.split(",")[0]));
+    for (const tag of s.match(/<[a-z]+\s[^>]*>/g)) {
+      const nomes = (tag.match(/\s([a-z-]+)=/g) || []).map(x => x.trim());
+      assert.equal(new Set(nomes).size, nomes.length, m.id + " " + f + ": " + tag);
+    }
+  }
+});
+
+test("O Apps Script guarda o modelo e recusa modelo inválido", () => {
+  const src = fs.readFileSync(path.join(__dirname, "..", "apps-script", "Codigo.gs"), "utf8");
+  const ctx = {};
+  vm.createContext(ctx);
+  vm.runInContext(src + ";this.L = limparEscolhas_;", ctx);
+  assert.equal(ctx.L({ modelo: "cidade" }, 1).modelo, "cidade");
+  assert.equal(ctx.L({ modelo: "x" }, 1).modelo, "bit");
 });

@@ -20,7 +20,7 @@ const ABA_PROG = "Progresso";
 const CAB_TURMAS = ["turma", "curso", "turno", "matricula", "nome", "pin", "ultimo acesso", "tentativas", "bloqueado ate"];
 const CAB_PROG = ["material", "nome", "matricula", "curso", "turno", "turma", "feitas", "total", "pontos", "atualizado", "detalhe"];
 const ABA_AVATAR = "Avatar";
-const CAB_AVATAR = ["matricula", "nome", "turma", "curso", "nome do robo", "cor", "cabeca", "peito", "extra", "expressao", "xp", "nivel", "atualizado"];
+const CAB_AVATAR = ["matricula", "nome", "turma", "curso", "nome do robo", "cor", "cabeca", "peito", "extra", "expressao", "xp", "nivel", "atualizado", "modelo"];
 const MAX_TENTATIVAS = 5, BLOQUEIO_MIN = 15;
 
 function aba_(nome, cab) {
@@ -59,6 +59,7 @@ function xpENivel_(linhas) {
 const CORES_NIVEL_ = { verde: 1, azul: 1, laranja: 3, roxo: 5, rosa: 8, grafite: 10, dourado: 12, holografico: 16 };
 const ACESS_ = { cabeca: ["oculos", "fone", "bone", "antena-wifi", "coroa"], peito: ["medalha", "chip"], extra: ["jetpack", "escudo", "chave"] };
 const EXPR_ = ["feliz", "focado", "surpreso", "piscando"];
+const MODELOS_ = ["bit", "pixel", "tatu", "sonda", "arvore", "cidade"];
 
 function progressoDe_(matricula, lp) {
   return lp.slice(1).filter(r => String(r[2]).trim() === matricula && r[0] !== "portal")
@@ -71,7 +72,7 @@ function linhaAvatar_(sh, matricula) {
 }
 function escolhasDe_(valores) {
   if (!valores) return {};
-  return { nome: valores[4], cor: valores[5], cabeca: valores[6], peito: valores[7], extra: valores[8], expressao: valores[9] };
+  return { modelo: valores[13] || "bit", nome: valores[4], cor: valores[5], cabeca: valores[6], peito: valores[7], extra: valores[8], expressao: valores[9] };
 }
 // Confere o formato e a lista de itens. A cor também é conferida pelo nível; os acessórios, pelo navegador.
 function limparEscolhas_(e, nivel) {
@@ -79,13 +80,14 @@ function limparEscolhas_(e, nivel) {
   const cor = CORES_NIVEL_[e.cor] && CORES_NIVEL_[e.cor] <= nivel ? e.cor : "verde";
   const lugar = k => ACESS_[k].indexOf(e[k]) >= 0 ? e[k] : "";
   const nome = txt_(String(e.nome || "").replace(/<[^>]*>/g, "").replace(/[<>"'`&\\]/g, ""), 16) || "Bit";
-  return { nome: nome, cor: cor, cabeca: lugar("cabeca"), peito: lugar("peito"), extra: lugar("extra"), expressao: EXPR_.indexOf(e.expressao) >= 0 ? e.expressao : "feliz" };
+  return { modelo: MODELOS_.indexOf(e.modelo) >= 0 ? e.modelo : "bit", nome: nome, cor: cor, cabeca: lugar("cabeca"), peito: lugar("peito"), extra: lugar("extra"), expressao: EXPR_.indexOf(e.expressao) >= 0 ? e.expressao : "feliz" };
 }
 function gravarAvatar_(a, lp, escolhas) {
   const sh = avatar_(), atual = linhaAvatar_(sh, a.matricula);
   const xn = xpENivel_(progressoDe_(a.matricula, lp));
   const esc = escolhas ? limparEscolhas_(escolhas, xn.nivel) : (atual ? escolhasDe_(atual.valores) : limparEscolhas_({}, 1));
-  const linha = [a.matricula, a.nome, a.turma, a.curso, esc.nome, esc.cor, esc.cabeca, esc.peito, esc.extra, esc.expressao, xn.xp, xn.nivel, new Date()];
+  const linha = [a.matricula, a.nome, a.turma, a.curso, esc.nome, esc.cor, esc.cabeca, esc.peito, esc.extra, esc.expressao, xn.xp, xn.nivel, new Date(), esc.modelo];
+  if (sh.getLastColumn() < CAB_AVATAR.length) sh.getRange(1, CAB_AVATAR.length).setValue("modelo").setFontWeight("bold");
   if (atual) sh.getRange(atual.linha, 1, 1, linha.length).setValues([linha]);
   else sh.appendRow(linha);
   return esc;

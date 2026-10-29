@@ -1,7 +1,7 @@
 # Especificação · Play nos Estudos
 
-Gamificação com avatar sobre o portal de disciplinas do Prof. Eber Santana (IFS Campus Tobias Barreto).
-O estudante tem um robô, o **Bit**, que evolui conforme ele estuda. O avatar compara o estudante com ele mesmo; o ranking da turma continua existindo, mas não é o centro.
+Gamificação com avatares sobre o portal de disciplinas do Prof. Eber Santana (IFS Campus Tobias Barreto).
+O estudante escolhe um avatar entre 6 modelos (o padrão é o robô **Bit**) que evolui conforme ele estuda. O avatar compara o estudante com ele mesmo; o ranking da turma continua existindo, mas não é o centro.
 
 ## Objetivos
 
@@ -36,7 +36,24 @@ Calculado a partir das linhas da aba **Progresso** (uma por estudante e por mate
 
 XP para chegar ao nível N = `50 × (N − 1) × N` (100, 300, 600, 1000, 1500…). Não há nível máximo.
 
-### Forma do Bit (cargo)
+### Modelos de avatar (o aluno escolhe)
+
+O aluno escolhe o modelo na aba **Avatar** de "Meu personagem" e pode trocar quando quiser: XP, nível e conquistas não mudam.
+
+| Modelo | Etapas 1 → 6 | Rosto |
+|---|---|---|
+| Bit, o robô (padrão) | Robô sobre rodas → Braços e antena → Visor e painel → Pernas e ombreiras → Propulsores → Aura de lenda | sim |
+| Pixel, a criatura digital | Ovo de dados → Ovo rachando → Filhote → Pixel jovem → Asas de cabo → Dragão de código | sim |
+| Tatu-bola tech | Filhote → Capacete de minerador → Casco com circuitos → Carapaça placa-mãe → Rolando → Bola de energia | sim |
+| Sonda | Drone → Drone de patrulha → Satélite → Sonda espacial → Sonda com anel → Estação orbital | não |
+| Árvore-circuito | Semente-chip → Broto → Muda → Árvore jovem → Copa de circuitos → Frutos de LED | não |
+| Minha Smart City | Vila → Vila com escola → Bairro conectado → Cidade → Cidade grande → Metrópole inteligente | não |
+
+- Modelos com rosto vestem os acessórios e têm expressões. Nos outros, os acessórios aparecem como selos ao redor e a aba Expressão some.
+- A cor escolhida pinta a parte principal do modelo (corpo, casco, copa, prédio principal).
+- O nome padrão acompanha o modelo (Bit, Pixel, Tatu, Sonda, Raiz, Cidade); um nome personalizado é mantido.
+
+### Forma do avatar (cargo)
 
 | Níveis | Cargo | O que muda no robô |
 |---|---|---|
@@ -100,7 +117,7 @@ testes/jogo.test.js     node --test testes/
 
 ## Privacidade (LGPD / ECA Digital)
 
-- Nenhum dado novo do estudante: só as escolhas do avatar (cor, acessórios, expressão, nome do robô).
+- Nenhum dado novo do estudante: só as escolhas do avatar (modelo, cor, acessórios, expressão, nome).
 - Nada de foto ou imagem real. O avatar é um robô desenhado no próprio site, sem serviço externo.
 - A aba Avatar fica só na planilha do professor.
 

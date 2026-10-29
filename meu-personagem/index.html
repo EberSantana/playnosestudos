@@ -5,7 +5,7 @@
 <script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&](professor|demo)\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meu personagem · Play nos Estudos</title>
-<meta name="description" content="O robô Bit evolui conforme você estuda. Veja seu nível, suas conquistas e personalize o seu personagem.">
+<meta name="description" content="Seu avatar evolui conforme você estuda. Veja seu nível, suas conquistas e personalize o seu personagem.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
@@ -44,9 +44,9 @@ h3{font:700 12px/1.3 "JetBrains Mono",monospace;letter-spacing:.08em;text-transf
 .xp-linha{display:flex;justify-content:space-between;gap:8px;font:13px/1.4 "JetBrains Mono",monospace;color:var(--muted)}
 .barra{height:12px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0}
 .barra i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),#7CC77A);transition:width .6s ease}
-.trilha{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
-.trilha li{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);line-height:1.2}
-.trilha svg{width:100%;max-width:58px;height:auto}
+.trilha{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;align-items:start}
+.trilha li{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);line-height:1.2;text-align:center;overflow-wrap:anywhere;hyphens:auto}
+.trilha svg{width:100%;max-width:58px;height:auto;aspect-ratio:200/224}
 .trilha li.off svg{filter:grayscale(1) brightness(.55);opacity:.45}
 .trilha li.atual{color:var(--ink);font-weight:600}
 .trilha li.atual svg{background:var(--accent-soft);border-radius:12px}
@@ -109,7 +109,7 @@ td .barra{height:6px;margin:4px 0 0;min-width:70px}
 .nota{font-size:14px;color:var(--muted);margin:12px 0 0}
 footer{color:var(--muted);font-size:14px;margin-top:28px}
 @media (max-width:860px){.topo{grid-template-columns:1fr}}
-@media (max-width:420px){.opcoes{grid-template-columns:repeat(3,1fr)}.opc svg{width:52px}.trilha small{display:none}}
+@media (max-width:420px){.opcoes{grid-template-columns:repeat(3,1fr)}.opc svg{width:52px}.trilha small{display:none}.trilha li{font-size:10.5px}}
 </style>
 <script src="../aparencia.js"></script>
 </head>
@@ -118,7 +118,7 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
   <a class="back" href="../">← Disciplinas</a>
   <span class="eyebrow">Play nos Estudos</span>
   <h1>Meu personagem</h1>
-  <p>O seu robô evolui com você. Cada atividade feita nas disciplinas dá experiência (XP), sobe o nível e libera novas formas, cores e acessórios.</p>
+  <p>Escolha o seu avatar: robô, criatura digital, tatu-bola, sonda, árvore ou cidade inteligente. Cada atividade feita nas disciplinas dá experiência (XP), sobe o nível e faz o avatar evoluir em 6 etapas.</p>
 </div></header>
 <main id="conteudo"><div class="wrap">
   <p class="aviso" id="aviso" hidden></p>
@@ -133,8 +133,8 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
         <div class="barra" role="progressbar" aria-labelledby="xp-falta" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="xp-barra"><i style="width:0"></i></div>
         <div class="xp-linha"><span id="xp-falta">Faltam 100 XP para o nível 2</span></div>
       </div>
-      <h3>Evolução do robô</h3>
-      <ol class="trilha" id="trilha" aria-label="Formas do robô por nível"></ol>
+      <h3 id="t-trilha">Evolução do avatar</h3>
+      <ol class="trilha" id="trilha" aria-labelledby="t-trilha"></ol>
     </section>
 
     <section class="card" aria-labelledby="t-editor">
@@ -176,7 +176,7 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
     <p class="nota">Tente responder antes de ver o gabarito: é assim que você aprende de verdade. O XP é para acompanhar o seu caminho e não vale nota.</p>
   </section>
 
-  <footer>Play nos Estudos · Prof. Eber Santana · IFS Campus Tobias Barreto. O personagem é um robô desenhado no próprio site: nenhuma foto ou dado pessoal novo é coletado.</footer>
+  <footer>Play nos Estudos · Prof. Eber Santana · IFS Campus Tobias Barreto. O avatar é desenhado no próprio site: nenhuma foto ou dado pessoal novo é coletado.</footer>
 </div></main>
 
 <script src="../config.js"></script>
@@ -187,8 +187,10 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
   "use strict";
   var J = window.JOGO, $ = function (s) { return document.getElementById(s); };
   if (!J) return;
-  var esc = J.esc, rascunho = J.escolhas(), salvo = J.escolhas(), abaAtual = "cor";
-  var ABAS = [["cor", "Cor"], ["cabeca", "Cabeça"], ["peito", "Peito"], ["extra", "Extra"], ["expressao", "Expressão"], ["nome", "Nome"]];
+  var esc = J.esc, rascunho = J.escolhas(), salvo = J.escolhas(), abaAtual = "modelo";
+  var TODAS = [["modelo", "Avatar"], ["cor", "Cor"], ["cabeca", "Cabeça"], ["peito", "Peito"], ["extra", "Extra"], ["expressao", "Expressão"], ["nome", "Nome"]];
+  function modeloAtual() { return J.MODELOS.filter(function (m) { return m.id === rascunho.modelo; })[0] || J.MODELOS[0]; }
+  function abas() { var rosto = modeloAtual().rosto; return TODAS.filter(function (a) { return rosto || a[0] !== "expressao"; }); }
 
   function mini(op, tam) {
     var e = J.estado();
@@ -203,7 +205,7 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
     $("robo").firstChild.classList.add("bit-vivo");
     $("t-nome").textContent = rascunho.nome;
     $("c-nivel").textContent = "Nível " + e.nivel;
-    $("c-cargo").textContent = e.cargo;
+    $("c-cargo").textContent = e.cargo + " · " + J.etapaDe(rascunho.modelo, e.forma);
     $("xp-total").textContent = fmt(e.xp) + " XP";
     $("xp-meta").textContent = "nível " + (e.nivel + 1) + ": " + fmt(e.proximo) + " XP";
     $("xp-falta").textContent = "Faltam " + fmt(e.proximo - e.xp) + " XP para o nível " + (e.nivel + 1);
@@ -213,19 +215,21 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
     $("trilha").innerHTML = J.CARGOS.map(function (c) {
       var cls = e.forma > c.forma ? "" : e.forma === c.forma ? "atual" : "off";
       return '<li class="' + cls + '"' + (cls === "atual" ? ' aria-current="step"' : "") + ">" +
-        J.desenhar(Object.assign({}, rascunho, { forma: c.forma }), { titulo: c.nome + (cls === "off" ? ", liberado no nível " + c.de : ""), desc: " " }) +
-        "<span>" + esc(c.nome) + "</span><small>Nv " + c.de + "+</small></li>";
+        J.desenhar(Object.assign({}, rascunho, { forma: c.forma }), { titulo: J.etapaDe(rascunho.modelo, c.forma) + " (" + c.nome + ")" + (cls === "off" ? ", liberado no nível " + c.de : ""), desc: " " }) +
+        "<span>" + esc(J.etapaDe(rascunho.modelo, c.forma)) + "</span><small>Nv " + c.de + "+</small></li>";
     }).join("");
   }
 
   function pintarAbas() {
-    $("abas").innerHTML = ABAS.map(function (a) {
+    if (!abas().some(function (a) { return a[0] === abaAtual; })) abaAtual = "modelo";
+    $("abas").innerHTML = abas().map(function (a) {
       return '<button type="button" role="tab" id="aba-' + a[0] + '" aria-controls="p-' + a[0] + '" aria-selected="' + (a[0] === abaAtual) + '" tabindex="' + (a[0] === abaAtual ? 0 : -1) + '">' + a[1] + "</button>";
     }).join("");
   }
 
   function opcoesDe(lugar) {
     var e = J.estado(), d = J.desbloqueados(e);
+    if (lugar === "modelo") return J.MODELOS.map(function (m) { return { v: m.id, nome: m.nome.split(",")[0], ok: true, op: { modelo: m.id } }; });
     if (lugar === "cor") return J.CORES.map(function (c) {
       return { v: c.id, nome: c.nome, ok: d.cores.indexOf(c.id) >= 0, tranca: "Nível " + c.nivel, op: { cor: c.id } };
     });
@@ -240,7 +244,7 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
   }
 
   function pintarPaineis() {
-    $("paineis").innerHTML = ABAS.map(function (a) {
+    $("paineis").innerHTML = abas().map(function (a) {
       var k = a[0], corpo;
       if (k === "nome") {
         corpo = '<div class="campo"><label for="f-nome">Nome do robô</label><input id="f-nome" maxlength="16" autocomplete="off" value="' + esc(rascunho.nome) + '"><small>Até 16 letras. Só você e o professor veem.</small></div>';
@@ -253,7 +257,8 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
             mini(o.op, 64) + "<span>" + esc(o.nome) + "</span>" +
             (o.ok ? "" : '<span class="tranca" id="tr-' + k + "-" + i + '">🔒 ' + esc(o.tranca) + "</span>") + "</button>";
         }).join("") + "</div>";
-        if (k === "cabeca" || k === "peito" || k === "extra") corpo += '<p class="nota">Acessórios são liberados por conquistas. Veja abaixo como ganhar cada uma.</p>';
+        if (k === "cabeca" || k === "peito" || k === "extra") corpo += '<p class="nota">Acessórios são liberados por conquistas. Veja abaixo como ganhar cada uma.' + (modeloAtual().rosto ? "" : " Neste avatar, eles aparecem como selos ao redor.") + "</p>";
+        if (k === "modelo") corpo += '<p class="nota">Pode trocar quando quiser: o nível, o XP e as conquistas continuam os mesmos.</p>';
         if (k === "cor") corpo += '<p class="nota">Novas cores aparecem conforme você sobe de nível.</p>';
       }
       return '<div class="painel" role="tabpanel" id="p-' + k + '" aria-labelledby="aba-' + k + '"' + (k === abaAtual ? "" : " hidden") + ">" + corpo + "</div>";
@@ -321,10 +326,10 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
     abaAtual = b.id.slice(4); pintarAbas(); pintarPaineis(); $("aba-" + abaAtual).focus();
   });
   $("abas").addEventListener("keydown", function (ev) {
-    var i = ABAS.map(function (a) { return a[0]; }).indexOf(abaAtual), n = ABAS.length;
+    var L = abas(), i = L.map(function (a) { return a[0]; }).indexOf(abaAtual), n = L.length;
     var j = ev.key === "ArrowRight" ? (i + 1) % n : ev.key === "ArrowLeft" ? (i - 1 + n) % n : ev.key === "Home" ? 0 : ev.key === "End" ? n - 1 : -1;
     if (j < 0) return;
-    ev.preventDefault(); abaAtual = ABAS[j][0]; pintarAbas(); pintarPaineis(); $("aba-" + abaAtual).focus();
+    ev.preventDefault(); abaAtual = L[j][0]; pintarAbas(); pintarPaineis(); $("aba-" + abaAtual).focus();
   });
   function escolher(b) {
     if (b.getAttribute("aria-disabled") === "true") {
@@ -333,7 +338,9 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
     }
     var k = b.getAttribute("data-k");
     rascunho[k] = b.getAttribute("data-v");
-    pintarPalco(); pintarPaineis();
+    // Nome padrão acompanha o modelo (Bit, Pixel, Tatu…); nome personalizado é mantido.
+    if (k === "modelo" && J.MODELOS.some(function (m) { return m.apelido === rascunho.nome; })) rascunho.nome = modeloAtual().apelido;
+    pintarPalco(); if (k === "modelo") pintarAbas(); pintarPaineis();
     var nb = document.querySelector('.opc[data-k="' + k + '"][data-v="' + rascunho[k] + '"]'); if (nb) nb.focus();
     sujo();
   }
