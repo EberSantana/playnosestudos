@@ -81,8 +81,8 @@ test("Conquistas", () => {
 test("Desbloqueios: cores por nível e acessórios por conquista", () => {
   const novo = J.calcular([]);
   const d0 = J.desbloqueados(novo);
-  assert.ok(d0.cores.includes("verde") && d0.cores.includes("azul"));
-  assert.ok(!d0.cores.includes("laranja"));
+  assert.ok(d0.cores.includes("verde") && d0.cores.includes("azul") && d0.cores.includes("laranja") && d0.cores.includes("rosa"));
+  assert.ok(!d0.cores.includes("dourado") && !d0.cores.includes("holografico"));
   assert.deepEqual(d0.acessorios, []);
   const e = J.calcular([linha("subnetting-v1", 20, 20), linha("redes-console-v1", 30, 520)]);
   const d = J.desbloqueados(e);
@@ -185,4 +185,31 @@ test("O Apps Script guarda o modelo e recusa modelo inválido", () => {
   vm.runInContext(src + ";this.L = limparEscolhas_;", ctx);
   assert.equal(ctx.L({ modelo: "cidade" }, 1).modelo, "cidade");
   assert.equal(ctx.L({ modelo: "x" }, 1).modelo, "bit");
+});
+
+test("ritmo: sequência de dias, XP do dia e da semana, metas", () => {
+  const at = { dias: ["2026-10-27", "2026-10-28"], historico: { "2026-10-25": 400, "2026-10-27": 700, "2026-10-28": 850 } };
+  const r = J.ritmo(at, 1000, "2026-10-29");
+  assert.equal(r.xpHoje, 150);
+  assert.equal(r.sequencia, 3);
+  assert.equal(r.xpSemana, 600);
+  assert.equal(r.diasSemana, 3);
+  assert.equal(r.metaDia, true);
+  assert.equal(r.metaSemana, true);
+  assert.equal(r.metaDias, true);
+  // sem estudar hoje a sequência de ontem ainda vale; pulando um dia ela zera
+  assert.equal(J.ritmo(at, 850, "2026-10-29").sequencia, 2);
+  assert.equal(J.ritmo(at, 850, "2026-10-30").sequencia, 0);
+  // semana nova (segunda-feira) recomeça a contagem
+  const nova = J.ritmo(at, 850, "2026-11-02");
+  assert.equal(nova.xpSemana, 0);
+  assert.equal(nova.diasSemana, 0);
+});
+
+test("ritmo aceita dados vazios ou inválidos", () => {
+  for (const v of [null, undefined, "x", {}, { dias: "a", historico: [] }]) {
+    const r = J.ritmo(v, 0, "2026-10-29");
+    assert.equal(r.sequencia, 0);
+    assert.equal(r.xpHoje, 0);
+  }
 });

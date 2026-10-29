@@ -21,6 +21,7 @@ Cada estudante escolhe o seu avatar entre **10 modelos**, pode trocar quando qui
 
 - **XP:** +10 por atividade feita, +50 na metade de um material, +100 ao concluir. Nunca diminui.
 - **Nível:** 50 × (N−1) × N de XP para chegar ao nível N. As etapas ligam-se aos cargos Estagiário, Técnico, Analista, Especialista, Arquiteto e Lenda.
+- **Ritmo:** sequência de dias estudados e metas do dia, da semana e de constância, sem punição. O estudante pode esconder o ranking.
 - **Personalização:** cor (liberada por nível), acessórios (liberados por conquistas), expressão (nos modelos com rosto) e nome. A cor pinta a parte principal do avatar.
 - **Atributos:** Conexão (Redes), Escudo (Segurança), Memória (Banco de Dados), Base (Informática Básica), Maker (Laboratório 3D), Criação e Processo.
 - **Conquistas:** 10 conquistas, cada uma libera um acessório. Tudo é só visual e não vale nota.
@@ -34,7 +35,9 @@ O Play nos Estudos usa a **sua própria planilha**, separada do portal de discip
 2. **Implantar → Nova implantação → App da Web** (executar como você; acesso: qualquer pessoa).
 3. Copie a URL que termina em `/exec` para `window.RANKING_URL` em `config.js`.
 4. As abas **Turmas**, **Progresso** e **Avatar** são criadas sozinhas. Cadastre os alunos em **Turmas** (`turma, curso, turno, matricula, nome`); o PIN o próprio aluno cria no primeiro acesso.
-5. Ao atualizar o código, faça uma **nova versão** da implantação (mesmo endereço).
+5. Menu **Play nos Estudos** na planilha (aparece ao reabrir): atualizar o **painel da turma**, **importar a lista** de alunos (aba Importar; há um modelo em `modelo-lista-alunos.csv`), **liberar o PIN** de um aluno, **exportar dados anonimizados** para pesquisa, **backup** agora e **backup semanal**.
+6. O PIN não aceita sequências óbvias (1234, 0000) e, depois de erros seguidos, o bloqueio cresce (15 min, 1 h, 24 h). O professor libera pelo menu.
+7. Ao atualizar o código, faça uma **nova versão** da implantação (mesmo endereço).
 
 Testes: `node --test testes/*.test.js` (inclui a conferência de que o Apps Script calcula o mesmo XP que o site).
 

@@ -52,11 +52,11 @@
   var CORES = [
     { id: "verde", nome: "Verde IFS", nivel: 1, c: ["#2E8B57", "#1B5236", "#8EDCAE"] },
     { id: "azul", nome: "Azul", nivel: 1, c: ["#2F6DB5", "#1B4478", "#9CC3F0"] },
-    { id: "laranja", nome: "Laranja", nivel: 3, c: ["#E07A2E", "#97481A", "#F7BC8C"] },
-    { id: "roxo", nome: "Roxo", nivel: 5, c: ["#7B4FC9", "#4B2B8A", "#C3AEF0"] },
-    { id: "rosa", nome: "Rosa", nivel: 8, c: ["#D9468C", "#952A5D", "#F4AACD"] },
-    { id: "grafite", nome: "Grafite", nivel: 10, c: ["#55616C", "#2A3138", "#A9B4BE"] },
-    { id: "dourado", nome: "Dourado", nivel: 12, c: ["#D4A017", "#8A660C", "#F6DC80"] },
+    { id: "laranja", nome: "Laranja", nivel: 1, c: ["#E07A2E", "#97481A", "#F7BC8C"] },
+    { id: "roxo", nome: "Roxo", nivel: 1, c: ["#7B4FC9", "#4B2B8A", "#C3AEF0"] },
+    { id: "rosa", nome: "Rosa", nivel: 1, c: ["#D9468C", "#952A5D", "#F4AACD"] },
+    { id: "grafite", nome: "Grafite", nivel: 5, c: ["#55616C", "#2A3138", "#A9B4BE"] },
+    { id: "dourado", nome: "Dourado", nivel: 10, c: ["#D4A017", "#8A660C", "#F6DC80"] },
     { id: "holografico", nome: "Holográfico", nivel: 16, c: ["holo", "#3B3F8F", "#E9F7FF"] }
   ];
   var ACESSORIOS = [
@@ -706,12 +706,41 @@
       '<g class="bit-corpo">' + tras + r.corpo + frente + "</g></svg>";
   }
 
+
+  /* ---------- Ritmo de estudo: sequência de dias e metas (só visual, nada vale nota) ---------- */
+  var METAS = { dia: 50, semana: 200, dias: 3 };
+  function isoDia(d) { return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function somaDias(iso, n) { var p = iso.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2] + n); return isoDia(d); }
+  function segundaDe(iso) { var p = iso.split("-"), d = new Date(+p[0], +p[1] - 1, +p[2]); return somaDias(iso, -((d.getDay() + 6) % 7)); }
+  // atividade = { dias: ["2026-10-27", ...], historico: { "2026-10-27": xpAoFimDoDia } }
+  function ritmo(atividade, xp, hoje) {
+    atividade = atividade && typeof atividade === "object" ? atividade : {};
+    var dias = Array.isArray(atividade.dias) ? atividade.dias.map(String) : [];
+    var hist = atividade.historico && typeof atividade.historico === "object" ? atividade.historico : {};
+    xp = num(xp);
+    function antesDe(dia) { // XP ao fim do último dia registrado antes de "dia"
+      var melhor = null;
+      Object.keys(hist).forEach(function (k) { if (k < dia && (melhor === null || k > melhor)) melhor = k; });
+      return melhor === null ? 0 : num(hist[melhor]);
+    }
+    var xpHoje = Math.max(0, xp - antesDe(hoje)), ini = segundaDe(hoje), xpSemana = Math.max(0, xp - antesDe(ini));
+    if (xpHoje > 0 && dias.indexOf(hoje) < 0) dias = dias.concat(hoje);
+    var set = {}; dias.forEach(function (d) { set[d] = true; });
+    var dia = set[hoje] ? hoje : somaDias(hoje, -1), seq = 0;
+    while (set[dia] && seq < 400) { seq++; dia = somaDias(dia, -1); }
+    var diasSemana = dias.filter(function (d) { return d >= ini && d <= hoje; }).length;
+    return {
+      sequencia: seq, xpHoje: xpHoje, xpSemana: xpSemana, diasSemana: diasSemana, metas: METAS,
+      metaDia: xpHoje >= METAS.dia, metaSemana: xpSemana >= METAS.semana, metaDias: diasSemana >= METAS.dias
+    };
+  }
+
   var motor = {
     MATERIAIS: MATERIAIS, NOMES_MATERIAIS: NOMES_MATERIAIS, ATRIBUTOS: ATRIBUTOS, CARGOS: CARGOS, CORES: CORES,
     ACESSORIOS: ACESSORIOS, EXPRESSOES: EXPRESSOES, MODELOS: MODELOS, etapaDe: etapaDe, CONQUISTAS: CONQUISTAS, ESCOLHAS_PADRAO: ESCOLHAS_PADRAO,
     xpMaterial: xpMaterial, xpParaNivel: xpParaNivel, nivelDe: nivelDe, cargoDe: cargoDe, calcular: calcular,
     desbloqueados: desbloqueados, validarEscolhas: validarEscolhas, novidades: novidades, desenhar: desenhar,
-    descrever: descrever, limparNome: limparNome, esc: esc
+    descrever: descrever, limparNome: limparNome, esc: esc, ritmo: ritmo, METAS: METAS
   };
 
   if (typeof module !== "undefined" && module.exports) { module.exports = motor; return; }
@@ -724,13 +753,18 @@
   var URL_ = String(raiz.RANKING_URL || "").trim();
   var DEMO = /[?&]demo\b/.test(location.search);
   var CACHE_MS = 2 * 60 * 1000;
-  var estado = calcular([]), escolhas = Object.assign({}, ESCOLHAS_PADRAO), progresso = [];
+  var estado = calcular([]), escolhas = Object.assign({}, ESCOLHAS_PADRAO), progresso = [], atividade = { dias: [], historico: {} };
 
   var DEMO_LINHAS = [
     { material: "redes-console-v1", feitas: 186, total: 520 }, { material: "subnetting-v1", feitas: 24, total: 24 },
     { material: "mapa-do-chamado-v1", feitas: 6, total: 10 }, { material: "seginfo-console-v1", feitas: 64, total: 400 },
     { material: "detetives-digitais-v1", feitas: 9, total: 12 }, { material: "esp32-lab-v1", feitas: 12, total: 30 }
   ];
+  var DEMO_ATIVIDADE = (function () {
+    var h = isoDia(new Date()), d = [somaDias(h, -2), somaDias(h, -1)], hist = {};
+    hist[somaDias(h, -9)] = 3100; hist[somaDias(h, -2)] = 3150; hist[somaDias(h, -1)] = 3230;
+    return { dias: d, historico: hist };
+  })();
   var DEMO_ESCOLHAS = { cor: "azul", cabeca: "fone", peito: "medalha", extra: "", expressao: "feliz", nome: "Bit" };
 
   function perfil() { return raiz.PORTAL_ALUNO && raiz.PORTAL_ALUNO.perfil ? raiz.PORTAL_ALUNO.perfil() : null; }
@@ -778,14 +812,16 @@
 
   function carregar(forcar) {
     var c = ler();
-    if (DEMO) { aplicar(DEMO_LINHAS, c.escolhas || DEMO_ESCOLHAS, !forcar); return Promise.resolve(estado); }
+    if (DEMO) { atividade = DEMO_ATIVIDADE; aplicar(DEMO_LINHAS, c.escolhas || DEMO_ESCOLHAS, !forcar); return Promise.resolve(estado); }
+    if (c.atividade) atividade = c.atividade;
     if (c.progresso) aplicar(c.progresso, c.escolhas, true);
     if (!perfil() || !URL_) return Promise.resolve(estado);
     if (!forcar && c.t && Date.now() - c.t < CACHE_MS) { aplicar(c.progresso, c.escolhas); return Promise.resolve(estado); }
     return post({ acao: "avatar" }).then(function (r) {
       if (!r || !r.ok) { aplicar(c.progresso || [], c.escolhas); return estado; }
       var esc_ = r.escolhas && typeof r.escolhas === "object" && Object.keys(r.escolhas).length ? r.escolhas : c.escolhas;
-      gravar({ t: Date.now(), progresso: r.progresso || [], escolhas: esc_ });
+      if (r.atividade && typeof r.atividade === "object") atividade = r.atividade;
+      gravar({ t: Date.now(), progresso: r.progresso || [], escolhas: esc_, atividade: atividade });
       aplicar(r.progresso || [], esc_);
       return estado;
     });
@@ -830,6 +866,14 @@
     ".jg-barra i{display:block;height:100%;background:linear-gradient(90deg,#2E8B57,#7CC77A);border-radius:inherit}" +
     ".jg-bloco a{display:inline-block;margin-top:2px;font-weight:600;color:#1F5135;text-decoration:none}.jg-bloco a:hover{text-decoration:underline}" +
     ".jg-toast{position:fixed;left:50%;top:16px;z-index:10001;transform:translateX(-50%);display:flex;gap:12px;align-items:center;width:min(420px,calc(100vw - 32px));padding:12px 44px 12px 12px;border-radius:14px;background:#16261C;color:#fff;box-shadow:0 12px 32px rgba(0,0,0,.3);font:15px/1.4 'Source Sans 3','Segoe UI',system-ui,sans-serif}" +
+    ".jg-evolucao{position:fixed;inset:0;z-index:10002;display:grid;place-items:center;padding:16px;background:rgba(10,18,14,.72)}" +
+    ".jg-ev-card{position:relative;overflow:hidden;width:min(380px,100%);text-align:center;background:#fff;color:#16261C;border-radius:20px;padding:26px 22px 22px;box-shadow:0 24px 70px rgba(0,0,0,.45)}" +
+    ".jg-ev-card h2{margin:6px 0 4px;font:700 32px/1.05 'Barlow Condensed','Arial Narrow',sans-serif}.jg-ev-card p{margin:0 0 16px;font-size:17px}" +
+    ".jg-ev-card svg{position:relative;display:block;margin:0 auto}.jg-ev-card button{min-height:48px;padding:0 28px;border:0;border-radius:12px;background:#1F5135;color:#fff;font:700 17px/1 system-ui,sans-serif;cursor:pointer}" +
+    ".jg-ev-card button:focus-visible{outline:3px solid #0B6BCB;outline-offset:3px}" +
+    ".jg-ev-brilho{position:absolute;left:50%;top:104px;width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;background:radial-gradient(circle,rgba(255,213,79,.55),rgba(255,213,79,0) 68%);animation:jg-pulsa 1.6s ease-in-out infinite}" +
+    "@keyframes jg-pulsa{0%,100%{transform:scale(.85);opacity:.7}50%{transform:scale(1.1);opacity:1}}@keyframes jg-surge{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}.jg-ev-card{animation:jg-surge .35s ease-out}" +
+    "@media (prefers-reduced-motion:reduce){.jg-ev-brilho,.jg-ev-card{animation:none}}html[data-a11y-mov=reduzir] .jg-ev-brilho,html[data-a11y-mov=reduzir] .jg-ev-card{animation:none}" +
     ".jg-toast[hidden]{display:none}.jg-toast svg{flex:none}.jg-toast strong{display:block;font:700 20px/1.1 'Barlow Condensed','Arial Narrow',sans-serif;color:#9FE6B5}" +
     ".jg-toast a{color:#9FE6B5;font-weight:600}.jg-toast button{position:absolute;top:6px;right:6px;width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:#fff;font-size:24px;cursor:pointer}" +
     ".jg-toast button:focus-visible,.jg-toast a:focus-visible{outline:3px solid #9FE6B5;outline-offset:2px}" +
@@ -860,6 +904,7 @@
       "<small>" + esc(estado.cargo) + " · " + estado.xp.toLocaleString("pt-BR") + " XP</small>" +
       '<div class="jg-barra" role="progressbar" aria-label="Progresso até o próximo nível" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(estado.fracao * 100) + '"><i style="width:' + Math.round(estado.fracao * 100) + '%"></i></div>' +
       "<small>Faltam " + falta.toLocaleString("pt-BR") + " XP para o nível " + (estado.nivel + 1) + "</small>" +
+      (function () { var rt = ritmo(atividade, estado.xp, isoDia(new Date())); return "<small>" + (rt.sequencia > 1 ? "🔥 " + rt.sequencia + " dias seguidos" : "Estude hoje para iniciar uma sequência") + " · semana: " + Math.min(rt.xpSemana, rt.metas.semana) + "/" + rt.metas.semana + " XP</small>"; })() +
       '<a href="' + esc(BASE + "meu-personagem/" + (DEMO ? "?demo" : "")) + '">Meu personagem →</a></div></div>';
   }
 
@@ -880,10 +925,25 @@
     tt = setTimeout(function () { if (!toast.contains(document.activeElement)) toast.hidden = true; }, 7000);
   }
   function avisar(nov) {
-    if (nov.cargoNovo) return mostrar(escolhas.nome + " evoluiu!", "Nova etapa: " + etapaDe(escolhas.modelo, estado.forma) + " (" + estado.cargo + ", nível " + estado.nivel + ").");
+    if (nov.cargoNovo) return celebrar();
     if (nov.subiu) return mostrar("Subiu para o nível " + estado.nivel + "!", "Continue assim. Novas cores aparecem conforme você sobe.");
     var c = achar(CONQUISTAS, nov.conquistas[0]), a = ACESSORIOS.filter(function (x) { return x.conquista === c.id; })[0];
     mostrar("Conquista: " + c.nome, a ? "Você liberou: " + a.nome.toLowerCase() + "." : "");
+  }
+  // Tela de comemoração quando o avatar muda de etapa (não bloqueia nada: Esc ou o botão fecham).
+  function celebrar() {
+    var ant = document.activeElement, tela = document.createElement("div");
+    tela.className = "jg-evolucao";
+    tela.setAttribute("role", "dialog"); tela.setAttribute("aria-modal", "true"); tela.setAttribute("aria-labelledby", "jg-ev-t");
+    tela.innerHTML = '<div class="jg-ev-card"><div class="jg-ev-brilho" aria-hidden="true"></div>' + svg(190) +
+      '<h2 id="jg-ev-t">' + esc(escolhas.nome) + " evoluiu!</h2>" +
+      "<p>Nova etapa: <b>" + esc(etapaDe(escolhas.modelo, estado.forma)) + "</b><br>" + esc(estado.cargo) + " · nível " + estado.nivel + "</p>" +
+      '<button type="button">Continuar</button></div>';
+    document.body.appendChild(tela);
+    var b = tela.querySelector("button");
+    function fechar() { tela.remove(); document.removeEventListener("keydown", tecla, true); if (ant && ant.focus) try { ant.focus(); } catch (e) {} }
+    function tecla(ev) { if (ev.key === "Escape") { ev.preventDefault(); fechar(); } else if (ev.key === "Tab") { ev.preventDefault(); b.focus(); } }
+    b.onclick = fechar; document.addEventListener("keydown", tecla, true); b.focus();
   }
   function boasVindas() {
     if (!perfil() && !DEMO) return;
@@ -904,7 +964,8 @@
   raiz.JOGO = Object.assign({}, motor, {
     carregar: carregar, salvar: salvar, svg: svg, demo: DEMO, base: BASE,
     estado: function () { return estado; }, escolhas: function () { return Object.assign({}, escolhas); },
-    perfil: perfil, temServidor: function () { return !!URL_; }
+    perfil: perfil, temServidor: function () { return !!URL_; },
+    ritmo: function () { return ritmo(atividade, estado.xp, isoDia(new Date())); }
   });
 
   if (perfil() || DEMO) carregar(false);

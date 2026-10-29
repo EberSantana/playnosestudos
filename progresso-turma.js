@@ -89,6 +89,7 @@
     ".pt-go{width:100%;min-height:50px;margin-top:20px;border:0;border-radius:10px;background:#1F5135;color:#fff;font:700 17px/1 " + F + ";cursor:pointer}" +
     ".pt-go:hover{background:#163D28}.pt-go:focus-visible{outline:3px solid #16261C;outline-offset:2px}.pt-go[disabled]{opacity:.7;cursor:wait}" +
     ".pt-note{margin:12px 0 0;font-size:13px;color:#5B6871}" +
+    ".pt-opt{display:flex;gap:8px;align-items:center;margin:10px 0 2px;font-size:14px}.pt-opt input{width:18px;height:18px}" +
     ".pt-msg{margin-top:10px;font-size:14px}.pt-msg:empty{margin:0}" +
     ".pt-msg.bad{color:#B3261E}.pt-msg.good{color:#0B7A49}" +
     "@media (max-width:820px){.pt-screen{grid-template-columns:1fr;grid-template-rows:auto auto;align-content:start}.pt-hero{padding:28px 20px 26px;gap:10px;overflow:visible;flex-shrink:0}.pt-hero::after{display:none}.pt-hero h1{font-size:40px}.pt-hero p{font-size:15.5px}.pt-feats{display:none}.pt-side{padding:18px 16px 32px;align-items:flex-start}}" +
@@ -384,7 +385,7 @@
       '<a class="pt-btn sec" href="' + esc(BASE + "meu-personagem/") + '">Meu personagem</a>' +
       '<a class="pt-btn sec" href="' + esc(BASE) + '">P\u00e1gina inicial</a>' +
       '<button class="pt-btn sec" id="pt-out" type="button">Sair</button></div>' +
-      '<div class="pt-msg" role="status"></div>' + (d && URL_ ? '<ol class="pt-rank" aria-label="Ranking da turma"></ol>' : "");
+      '<div class="pt-msg" role="status"></div>' + (d && URL_ ? '<label class="pt-opt"><input type="checkbox" id="pt-ver-rank"' + (verRanking() ? " checked" : "") + '> Mostrar o ranking da turma</label>' + (verRanking() ? '<ol class="pt-rank" aria-label="Ranking da turma"></ol>' : "") : "");
     box.querySelector("#pt-x").onclick = fechar;
     var s = box.querySelector("#pt-s");
     if (s) s.onclick = function () { bmsg("Enviando\u2026"); enviar(dados()).then(function (r) { bmsg(r.ok ? "Progresso salvo." : r.erro || "Falha no envio.", r.ok ? "good" : "bad"); if (r.ok) ranking(); }); };
@@ -393,10 +394,14 @@
       if (window.A11Y_AP) window.A11Y_AP.recarregar();
       fechar(); avisar(); mostrarEntrada();
     };
+    var cb = box.querySelector("#pt-ver-rank");
+    if (cb) cb.onchange = function () { try { localStorage.setItem("pt:ranking", cb.checked ? "1" : "0"); } catch (e) {} painel(); };
     ranking();
     try { window.dispatchEvent(new CustomEvent("painel:aberto")); } catch (e) {}
   }
 
+  // O estudante escolhe se quer ver o ranking (algumas pessoas preferem comparar só consigo mesmas).
+  function verRanking() { try { return localStorage.getItem("pt:ranking") !== "0"; } catch (e) { return true; } }
   function ranking() {
     var ol = box.querySelector(".pt-rank");
     if (!ol || !URL_ || !perfil) return;

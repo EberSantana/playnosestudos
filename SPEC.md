@@ -99,8 +99,16 @@ Todas as recompensas são só visuais.
 | Mão na massa | Maker ≥ 500 | Chave inglesa |
 | Lenda | Nível 20 | Coroa |
 
-Cores do Bit liberadas por nível: Verde IFS e Azul (1), Laranja (3), Roxo (5), Rosa (8), Grafite (10), Dourado (12), Holográfico (16).
+Cores liberadas por nível: Verde IFS, Azul, Laranja, Roxo e Rosa (1), Grafite (5), Dourado (10), Holográfico (16).
 Expressões (feliz, focado, surpreso, piscando) e o nome do robô (até 16 caracteres) são livres.
+
+### Ritmo de estudo (metas e sequência)
+
+Só visual e sem punição. O servidor guarda na aba Avatar os dias em que o XP cresceu (`dias`) e o XP ao fim de cada dia (`historico xp`, últimos 40 dias).
+- **Sequência:** dias seguidos com XP novo. Se hoje ainda não estudou, a sequência de ontem continua valendo.
+- **Metas:** 50 XP no dia, 200 XP na semana (segunda a domingo) e estudar em 3 dias diferentes na semana.
+- Ao mudar de etapa o avatar mostra uma tela de comemoração (fecha com Esc ou botão; sem animação se o aluno reduzir movimento).
+- O estudante pode esconder o ranking da turma no painel do canto.
 
 ## Arquitetura
 
@@ -138,5 +146,5 @@ testes/jogo.test.js     node --test testes/
 - [ ] Ao subir de nível ou ganhar conquista, aparece um aviso uma única vez.
 - [ ] Página "Meu personagem" permite trocar cor, acessórios, expressão e nome; itens bloqueados mostram como desbloquear.
 - [ ] Os três consoles de estudo (Redes, Segurança, Banco de Dados) passam a enviar progresso.
-- [ ] `node --test testes/` passa.
+- [ ] `node --test testes/*.test.js` passa (motor, Apps Script ponta a ponta com planilha simulada).
 - [ ] axe-core sem falhas em "Meu personagem" nos temas claro e escuro.

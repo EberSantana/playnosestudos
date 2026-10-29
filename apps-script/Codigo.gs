@@ -20,7 +20,7 @@ const ABA_PROG = "Progresso";
 const CAB_TURMAS = ["turma", "curso", "turno", "matricula", "nome", "pin", "ultimo acesso", "tentativas", "bloqueado ate"];
 const CAB_PROG = ["material", "nome", "matricula", "curso", "turno", "turma", "feitas", "total", "pontos", "atualizado", "detalhe"];
 const ABA_AVATAR = "Avatar";
-const CAB_AVATAR = ["matricula", "nome", "turma", "curso", "nome do robo", "cor", "cabeca", "peito", "extra", "expressao", "xp", "nivel", "atualizado", "modelo"];
+const CAB_AVATAR = ["matricula", "nome", "turma", "curso", "nome do robo", "cor", "cabeca", "peito", "extra", "expressao", "xp", "nivel", "atualizado", "modelo", "dias", "historico xp"];
 const MAX_TENTATIVAS = 5, BLOQUEIO_MIN = 15;
 
 function aba_(nome, cab) {
@@ -56,7 +56,7 @@ function xpENivel_(linhas) {
   while (50 * nivel * (nivel + 1) <= xp) nivel++;
   return { xp: xp, nivel: nivel };
 }
-const CORES_NIVEL_ = { verde: 1, azul: 1, laranja: 3, roxo: 5, rosa: 8, grafite: 10, dourado: 12, holografico: 16 };
+const CORES_NIVEL_ = { verde: 1, azul: 1, laranja: 1, roxo: 1, rosa: 1, grafite: 5, dourado: 10, holografico: 16 };
 const ACESS_ = { cabeca: ["oculos", "fone", "bone", "antena-wifi", "coroa"], peito: ["medalha", "chip"], extra: ["jetpack", "escudo", "chave"] };
 const EXPR_ = ["feliz", "focado", "surpreso", "piscando"];
 const MODELOS_ = ["bit", "pixel", "tatu", "sonda", "arvore", "cidade", "girassol", "gotinha", "borboleta", "gata"];
@@ -82,12 +82,26 @@ function limparEscolhas_(e, nivel) {
   const nome = txt_(String(e.nome || "").replace(/<[^>]*>/g, "").replace(/[<>"'`&\\]/g, ""), 16) || "Bit";
   return { modelo: MODELOS_.indexOf(e.modelo) >= 0 ? e.modelo : "bit", nome: nome, cor: cor, cabeca: lugar("cabeca"), peito: lugar("peito"), extra: lugar("extra"), expressao: EXPR_.indexOf(e.expressao) >= 0 ? e.expressao : "feliz" };
 }
+function hojeBahia_() { return Utilities.formatDate(new Date(), "America/Bahia", "yyyy-MM-dd"); }
+function atividadeDe_(valores) {
+  const le = (v, vazio) => { try { const o = JSON.parse(v || ""); return o && typeof o === "object" ? o : vazio; } catch (e) { return vazio; } };
+  const dias = valores ? le(valores[14], []) : [], hist = valores ? le(valores[15], {}) : {};
+  return { dias: Array.isArray(dias) ? dias.map(String) : [], historico: hist && !Array.isArray(hist) ? hist : {} };
+}
 function gravarAvatar_(a, lp, escolhas) {
   const sh = avatar_(), atual = linhaAvatar_(sh, a.matricula);
   const xn = xpENivel_(progressoDe_(a.matricula, lp));
   const esc = escolhas ? limparEscolhas_(escolhas, xn.nivel) : (atual ? escolhasDe_(atual.valores) : limparEscolhas_({}, 1));
-  const linha = [a.matricula, a.nome, a.turma, a.curso, esc.nome, esc.cor, esc.cabeca, esc.peito, esc.extra, esc.expressao, xn.xp, xn.nivel, new Date(), esc.modelo];
-  if (sh.getLastColumn() < CAB_AVATAR.length) sh.getRange(1, CAB_AVATAR.length).setValue("modelo").setFontWeight("bold");
+  // Dias em que o estudante ganhou XP e o XP ao fim de cada dia (para sequência e metas)
+  const at = atividadeDe_(atual ? atual.valores : null), hoje = hojeBahia_();
+  const xpAntes = atual ? Number(atual.valores[10]) || 0 : 0;
+  if (xn.xp > xpAntes && at.dias.indexOf(hoje) < 0) at.dias.push(hoje);
+  at.historico[hoje] = xn.xp;
+  const dias = at.dias.sort().slice(-60);
+  const chaves = Object.keys(at.historico).sort().slice(-40), hist = {};
+  chaves.forEach(k => { hist[k] = at.historico[k]; });
+  const linha = [a.matricula, a.nome, a.turma, a.curso, esc.nome, esc.cor, esc.cabeca, esc.peito, esc.extra, esc.expressao, xn.xp, xn.nivel, new Date(), esc.modelo, JSON.stringify(dias), JSON.stringify(hist)];
+  for (let c = sh.getLastColumn(); c < CAB_AVATAR.length; c++) sh.getRange(1, c + 1).setValue(CAB_AVATAR[c]).setFontWeight("bold");
   if (atual) sh.getRange(atual.linha, 1, 1, linha.length).setValues([linha]);
   else sh.appendRow(linha);
   return esc;
@@ -199,7 +213,7 @@ function doPost(e) {
     if (d.acao === "avatar") {
       const lp = prog_().getDataRange().getValues();
       const atual = linhaAvatar_(avatar_(), a.matricula);
-      return json_({ ok: true, perfil: perfil, progresso: progressoDe_(a.matricula, lp), escolhas: atual ? escolhasDe_(atual.valores) : {} });
+      return json_({ ok: true, perfil: perfil, progresso: progressoDe_(a.matricula, lp), escolhas: atual ? escolhasDe_(atual.valores) : {}, atividade: atividadeDe_(atual ? atual.valores : null) });
     }
     if (d.acao === "avatar-salvar") {
       const esc = gravarAvatar_(a, prog_().getDataRange().getValues(), d.escolhas);

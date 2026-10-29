@@ -55,7 +55,7 @@ function carregar() {
     Utilities: {
       DigestAlgorithm: { SHA_256: "sha256" },
       computeDigest: (alg, s) => Array.from(crypto.createHash("sha256").update(s).digest()).map(b => (b > 127 ? b - 256 : b)),
-      formatDate: d => new Date(d).toISOString(),
+      formatDate: (d, tz, f) => (f === "yyyy-MM-dd" ? new Date(d).toISOString().slice(0, 10) : new Date(d).toISOString()),
       newBlob: () => ({})
     },
     Session: { getScriptTimeZone: () => "America/Bahia" },

@@ -81,6 +81,15 @@ h3{font:700 12px/1.3 "JetBrains Mono",monospace;letter-spacing:.08em;text-transf
 
 /* seções */
 .secao{margin-top:16px}
+.chama{margin:0 0 12px;font:600 18px/1.3 "Barlow Condensed","Arial Narrow",sans-serif;display:flex;align-items:center;gap:8px}
+.chama svg{flex:none}
+.metas{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.meta{padding:12px;border:1px solid var(--line);border-radius:12px}
+.meta.ok{border-color:var(--accent);background:var(--accent-soft)}
+.meta b{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.meta b span{font:13px/1.6 "JetBrains Mono",monospace;color:var(--muted);font-weight:400}
+.meta .barra{height:8px;margin:6px 0 2px}
+.meta small{color:var(--muted);font-size:13px}
 .atributos{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .atr{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:12px}
 .atr .ico{grid-row:span 2;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--accent-soft);color:var(--accent)}
@@ -118,7 +127,7 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
   <a class="back" href="../">← Disciplinas</a>
   <span class="eyebrow">Play nos Estudos</span>
   <h1>Meu personagem</h1>
-  <p>Escolha o seu avatar: robô, criatura digital, tatu-bola, sonda, árvore ou cidade inteligente. Cada atividade feita nas disciplinas dá experiência (XP), sobe o nível e faz o avatar evoluir em 6 etapas.</p>
+  <p>Escolha o seu avatar: um de 10 personagens, de robô a girassol, borboleta e gata. Cada atividade feita nas disciplinas dá experiência (XP), sobe o nível e faz o avatar evoluir em 6 etapas.</p>
 </div></header>
 <main id="conteudo"><div class="wrap">
   <p class="aviso" id="aviso" hidden></p>
@@ -148,6 +157,13 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
       </div>
     </section>
   </div>
+
+  <section class="card secao" aria-labelledby="t-ritmo">
+    <h2 id="t-ritmo">Seu ritmo</h2>
+    <p class="chama" id="chama" aria-live="polite"></p>
+    <div class="metas" id="metas"></div>
+    <p class="nota">Estudar um pouco todo dia vale mais do que muito de uma vez. As metas são só um empurrãozinho: não valem nota e não tiram nada de você.</p>
+  </section>
 
   <section class="card secao" aria-labelledby="t-atr">
     <h2 id="t-atr">Atributos</h2>
@@ -267,6 +283,21 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
     inp.addEventListener("input", function () { rascunho.nome = J.limparNome(inp.value); pintarPalco(); sujo(); });
   }
 
+  function pintarRitmo() {
+    var rt = J.ritmo(), m = rt.metas;
+    var fogo = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 3 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/></svg>';
+    $("chama").innerHTML = fogo + (rt.sequencia > 1 ? rt.sequencia + " dias seguidos estudando" : rt.sequencia === 1 ? "1 dia estudando. Volte amanhã para manter a sequência." : "Estude hoje para começar uma sequência.");
+    function meta(titulo, atual, alvo, feito, dica) {
+      var pct = Math.min(100, Math.round(atual / alvo * 100));
+      return '<div class="meta' + (feito ? " ok" : "") + '"><b>' + titulo + '<span>' + Math.min(atual, alvo) + " / " + alvo + (feito ? " ✓" : "") + '</span></b>' +
+        '<div class="barra" role="progressbar" aria-label="' + titulo + '" aria-valuemin="0" aria-valuemax="' + alvo + '" aria-valuenow="' + Math.min(atual, alvo) + '"><i style="width:' + pct + '%"></i></div><small>' + dica + '</small></div>';
+    }
+    $("metas").innerHTML =
+      meta("Hoje", rt.xpHoje, m.dia, rt.metaDia, "Ganhe " + m.dia + " XP hoje (uns 5 atividades).") +
+      meta("Esta semana", rt.xpSemana, m.semana, rt.metaSemana, "Junte " + m.semana + " XP de segunda a domingo.") +
+      meta("Dias de estudo", rt.diasSemana, m.dias, rt.metaDias, "Estude em " + m.dias + " dias diferentes nesta semana.");
+  }
+
   function pintarAtributos() {
     var e = J.estado(), p = J.perfil(), pastas = [];
     var cursos = window.PORTAL_ALUNO ? window.PORTAL_ALUNO.cursos : [];
@@ -318,7 +349,7 @@ footer{color:var(--muted);font-size:14px;margin-top:28px}
 
   function tudo() {
     rascunho = J.validarEscolhas(rascunho, J.estado());
-    pintarPalco(); pintarAbas(); pintarPaineis(); pintarAtributos(); pintarConquistas(); pintarMateriais(); sujo();
+    pintarPalco(); pintarAbas(); pintarPaineis(); pintarRitmo(); pintarAtributos(); pintarConquistas(); pintarMateriais(); sujo();
   }
 
   $("abas").addEventListener("click", function (ev) {
