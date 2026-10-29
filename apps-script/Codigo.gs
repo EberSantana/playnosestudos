@@ -59,7 +59,7 @@ function xpENivel_(linhas) {
 const CORES_NIVEL_ = { verde: 1, azul: 1, laranja: 3, roxo: 5, rosa: 8, grafite: 10, dourado: 12, holografico: 16 };
 const ACESS_ = { cabeca: ["oculos", "fone", "bone", "antena-wifi", "coroa"], peito: ["medalha", "chip"], extra: ["jetpack", "escudo", "chave"] };
 const EXPR_ = ["feliz", "focado", "surpreso", "piscando"];
-const MODELOS_ = ["bit", "pixel", "tatu", "sonda", "arvore", "cidade"];
+const MODELOS_ = ["bit", "pixel", "tatu", "sonda", "arvore", "cidade", "girassol", "gotinha", "borboleta", "gata"];
 
 function progressoDe_(matricula, lp) {
   return lp.slice(1).filter(r => String(r[2]).trim() === matricula && r[0] !== "portal")

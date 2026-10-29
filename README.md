@@ -157,3 +157,7 @@ Professor EBTT do Instituto Federal de Sergipe, Campus Tobias Barreto. Pesquisad
 ## Uso dos materiais
 
 Os materiais são de uso educacional. Para reutilizar ou adaptar em outra instituição, entre em contato com o autor.
+
+### Avatares femininos
+
+Além dos 6 modelos iniciais, o aluno pode escolher **Girassol**, **Gotinha**, **Borboleta** e **Gata (Mia)**, todos com 6 etapas, rosto com cílios e bochechas, acessórios e expressões. Ao atualizar, cole o novo `apps-script/Codigo.gs` no Apps Script e faça uma nova implantação (a lista `MODELOS_` mudou).

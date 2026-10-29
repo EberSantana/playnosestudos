@@ -1,7 +1,7 @@
 # Especificação · Play nos Estudos
 
 Gamificação com avatares sobre o portal de disciplinas do Prof. Eber Santana (IFS Campus Tobias Barreto).
-O estudante escolhe um avatar entre 6 modelos (o padrão é o robô **Bit**) que evolui conforme ele estuda. O avatar compara o estudante com ele mesmo; o ranking da turma continua existindo, mas não é o centro.
+O estudante escolhe um avatar entre 10 modelos (o padrão é o robô **Bit**) que evolui conforme ele estuda. O avatar compara o estudante com ele mesmo; o ranking da turma continua existindo, mas não é o centro.
 
 ## Objetivos
 
@@ -48,10 +48,14 @@ O aluno escolhe o modelo na aba **Avatar** de "Meu personagem" e pode trocar qua
 | Sonda | Drone → Drone de patrulha → Satélite → Sonda espacial → Sonda com anel → Estação orbital | não |
 | Árvore-circuito | Semente-chip → Broto → Muda → Árvore jovem → Copa de circuitos → Frutos de LED | não |
 | Minha Smart City | Vila → Vila com escola → Bairro conectado → Cidade → Cidade grande → Metrópole inteligente | não |
+| Girassol | Semente → Brotinho → Muda com laço → Botão de flor → Girassol → Girassol solar | sim |
+| Gotinha | Gotinha → Gota → Gota com laço → Gota com ondas → Nuvenzinha → Nuvem arco-íris | sim |
+| Borboleta | Ovinho → Lagarta → Lagarta crescida → Crisálida → Borboleta → Borboleta de luz | sim |
+| Gata (Mia) | Gatinha → Gata com laço → Gata de coleira → Gata programadora → Gata de capa → Gata mística | sim |
 
 - Modelos com rosto vestem os acessórios e têm expressões. Nos outros, os acessórios aparecem como selos ao redor e a aba Expressão some.
 - A cor escolhida pinta a parte principal do modelo (corpo, casco, copa, prédio principal).
-- O nome padrão acompanha o modelo (Bit, Pixel, Tatu, Sonda, Raiz, Cidade); um nome personalizado é mantido.
+- O nome padrão acompanha o modelo (Bit, Pixel, Tatu, Sonda, Raiz, Cidade, Girassol, Gotinha, Borboleta, Mia); um nome personalizado é mantido.
 
 ### Forma do avatar (cargo)
 

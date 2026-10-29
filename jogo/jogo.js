@@ -81,7 +81,7 @@
     { id: "maker", nome: "Mão na massa", como: "Junte 500 XP em Maker (Laboratório 3D).", t: function (e) { return e.atributos.maker >= 500; } },
     { id: "lenda", nome: "Lenda", como: "Chegue ao nível 20.", t: function (e) { return e.nivel >= 20; } }
   ];
-  var MODELOS_IDS = ["bit", "pixel", "tatu", "sonda", "arvore", "cidade"];
+  var MODELOS_IDS = ["bit", "pixel", "tatu", "sonda", "arvore", "cidade", "girassol", "gotinha", "borboleta", "gata"];
   var ESCOLHAS_PADRAO = { modelo: "bit", cor: "verde", cabeca: "", peito: "", extra: "", expressao: "feliz", nome: "Bit" };
 
   function num(v) { v = Number(v); return isFinite(v) && v > 0 ? Math.floor(v) : 0; }
@@ -520,13 +520,160 @@
       drone(30, 36) + drone(170, 24) + path("M20 186q80-30 160 0", "none", tr("#7CF0B0", 2) + ' stroke-dasharray="4 6"') };
   }
 
+  /* ---------- Avatares femininos: Girassol, Gotinha, Borboleta e Gata ---------- */
+  // Olhos com cílios e bochechas rosadas.
+  function olhosF(exp, xs, y, r, boca) {
+    var cil = "";
+    xs.forEach(function (x, i) {
+      var fechado = exp === "piscando" && i === xs.length - 1, lado = xs.length > 1 ? (i === 0 ? -1 : 1) : -1;
+      var topo = y - (exp === "surpreso" ? r * 1.25 : r) - (fechado ? -r * .2 : 0);
+      if (exp !== "focado") cil += path("M" + (x + lado * r * .55) + " " + (topo + r * .25) + "l" + lado * r * .55 + " " + (-r * .55) + "M" + (x + lado * r * .1) + " " + topo + "l" + lado * r * .2 + " " + (-r * .7), "none", tr("#16261C", Math.max(1.5, r * .28)));
+      cil += ell(x + lado * r * 1.1, y + r * 1.4, r * .75, r * .45, "#F48FB1", ' opacity=".75"');
+    });
+    return cil + olhosBicho(exp, xs, y, r, boca);
+  }
+  function laco(x, y, s, c, d) {
+    return '<g transform="translate(' + x + " " + y + ") scale(" + s + ')">' + path("M0 0l-15-10v20zM0 0l15-10v20z", c, tr(d, 2)) + circ(0, 0, 4.5, d) + "</g>";
+  }
+  function brilhos(pts, c) {
+    return pts.map(function (p) { return path("M" + p[0] + " " + (p[1] - 6) + "l1.6 4.4 4.4 1.6-4.4 1.6-1.6 4.4-1.6-4.4-4.4-1.6 4.4-1.6z", c || "#FFE58A"); }).join("");
+  }
+
+  /* Girassol (Sol). A cor escolhida pinta o vaso e o laço; as pétalas são sempre amarelas. */
+  function girassol(f, K, op, id) {
+    var ex = op.expressao, verde = "#3DBA6F", verdeE = "#1B5236";
+    var vaso = path("M70 178h60l-8 30h-44z", K.m, tr(K.d)) + rr(66, 172, 68, 10, 4, K.d) + ell(100, 176, 28, 4, "#5A3B22");
+    var folhas = function (y, s) { return path("M100 " + y + "c-" + 26 * s + " -2 -" + 36 * s + " -20 -" + 34 * s + " -32 " + 18 * s + " 0 " + 32 * s + " 12 " + 34 * s + " 32zM100 " + (y - 10) + "c" + 24 * s + " -4 " + 34 * s + " -20 " + 32 * s + " -32 -" + 16 * s + " 0 -" + 30 * s + " 10 -" + 32 * s + " 32z", verde, tr(verdeE, 2.5)); };
+    var caule = function (y) { return path("M100 174V" + y, "none", tr(verdeE, 6)); };
+    var fita = f >= 2 ? laco(100, f === 2 ? 150 : 146, .8, K.l, K.d) : "";
+    var flor = function (cx, cy, rd, n, rx, ry, dist, solar) {
+      var p = "";
+      for (var i = 0; i < n; i++) {
+        var a = Math.round(i * 360 / n);
+        p += ell(cx, cy - dist, rx, ry, "#F7C531", tr("#C9930E", 2) + ' transform="rotate(' + a + " " + cx + " " + cy + ')"');
+        if (solar && i % 2 === 0) p += rr(cx - rx * .45, cy - dist - ry * .5, rx * .9, ry, 2, "#2F6DB5", ' transform="rotate(' + a + " " + cx + " " + cy + ')" opacity=".85"');
+      }
+      return p + circ(cx, cy, rd, "#8B5A2B", tr("#5A3B22", 3)) + circ(cx, cy, rd * .78, "#C98A4B");
+    };
+    if (f === 1) return { corpo: sombraChao(36) + vaso + path("M100 146v-12", "none", tr(verdeE, 4)) + path("M100 136c-8-8-16-6-16-2 4 4 12 4 16 2z", verde) +
+      ell(100, 160, 17, 20, "#8B5A2B", tr("#5A3B22", 3)) + ell(100, 160, 12, 15, "#C98A4B") + olhosF(ex, [94, 106], 157, 3, [100, 166]),
+      a: { olhos: [100, 157, .4], topo: [100, 140, .45], peito: [100, 194, .7], lado: [56, 188, .7], costas: [100, 160, .5] } };
+    if (f === 2) return { corpo: sombraChao(40) + vaso + caule(124) + folhas(150, .8) + fita + circ(100, 116, 18, verde, tr(verdeE, 3)) + olhosF(ex, [93, 107], 114, 3.5, [100, 123]),
+      a: { olhos: [100, 114, .5], topo: [100, 98, .55], peito: [100, 194, .7], lado: [56, 186, .7], costas: [100, 130, .6] } };
+    if (f === 3) return { corpo: sombraChao(42) + vaso + caule(110) + folhas(150, 1) + fita +
+      path("M82 92l6-16 6 10 6-14 6 14 6-10 6 16z", "#F7C531", tr("#C9930E", 2)) + ell(100, 102, 24, 22, verde, tr(verdeE, 3)) + olhosF(ex, [91, 109], 100, 4.5, [100, 111]),
+      a: { olhos: [100, 100, .65], topo: [100, 78, .65], peito: [100, 194, .7], lado: [54, 180, .75], costas: [100, 106, .7] } };
+    if (f === 4) return { corpo: sombraChao(46) + vaso + caule(110) + folhas(156, 1.05) + fita + flor(100, 94, 24, 12, 8, 15, 36) + olhosF(ex, [91, 109], 92, 4.5, [100, 103]),
+      a: { olhos: [100, 92, .7], topo: [100, 70, .75], peito: [100, 194, .7], lado: [150, 152, .8], costas: [100, 100, .8] } };
+    var solar = f === 6;
+    return { fundo: solar ? auraDe(id + "g", "#FFD54F", 98) : "", corpo: sombraChao(52) + vaso + caule(116) + folhas(160, 1.15) + fita +
+      flor(100, 90, 28, 16, 9, 21, 44, solar) + olhosF(ex, [89, 111], 88, 5.5, [100, 101]) + (solar ? brilhos([[28, 44], [172, 40], [24, 132], [178, 128]]) : ""),
+      a: { olhos: [100, 88, .85], topo: [100, 62, .85], peito: [100, 194, .7], lado: [156, 150, .85], costas: [100, 96, .9] } };
+  }
+
+  /* Gotinha. A gota vira nuvem de dados (computação em nuvem). A cor escolhida pinta o laço. */
+  function gota(f, K, op, id) {
+    var ex = op.expressao, ag = "#5BB8F0", agE = "#2A79B8", agC = "#CFEFFF";
+    var gotaP = function (cx, cy, r) {
+      var ty = Math.round(cy - r * 2.1);
+      return path("M" + cx + " " + ty + "C" + (cx + r * .35) + " " + (ty + r * .6) + " " + (cx + r) + " " + (cy - r * .7) + " " + (cx + r) + " " + cy + "A" + r + " " + r + " 0 0 1 " + (cx - r) + " " + cy +
+        "C" + (cx - r) + " " + (cy - r * .7) + " " + (cx - r * .35) + " " + (ty + r * .6) + " " + cx + " " + ty + "Z", ag, tr(agE)) +
+        ell(cx - r * .45, cy - r * .55, r * .18, r * .35, "#fff", ' opacity=".6"');
+    };
+    var poca = function (w) { return ell(100, 208, w, 7, agC, tr("#9ED6F5", 2)); };
+    var bolhas = function (pts) { return pts.map(function (p) { return circ(p[0], p[1], p[2], agC, tr(agE, 2)) + circ(p[0] - p[2] * .3, p[1] - p[2] * .3, p[2] * .25, "#fff"); }).join(""); };
+    var temCabeca = op.cabeca && op.cabeca !== "oculos";
+    if (f === 1) return { corpo: poca(30) + gotaP(100, 182, 24) + olhosF(ex, [92, 108], 180, 3.5, [100, 190]),
+      a: { olhos: [100, 180, .5], topo: [100, 150, .45], peito: [100, 200, .4], lado: [68, 192, .5], costas: [100, 182, .5] } };
+    if (f <= 4) {
+      var r = [0, 0, 34, 40, 44][f], cy = [0, 0, 168, 158, 154][f], ty = cy - r * 2.1;
+      var corpo = poca(r + 12) + (f === 4 ? path("M40 196q15-10 30 0t30 0 30 0 30 0", "none", tr("#9ED6F5", 3)) : "") + gotaP(100, cy, r) +
+        (f >= 3 ? ell(100 - r - 4, cy + 6, 7, 9, ag, tr(agE, 2)) + ell(100 + r + 4, cy + 6, 7, 9, ag, tr(agE, 2)) : "") +
+        (f >= 3 ? bolhas(f === 3 ? [[46, 104, 7], [156, 92, 9], [164, 128, 5]] : [[40, 96, 8], [160, 80, 10], [168, 122, 6], [34, 140, 5]]) : "") +
+        (temCabeca ? "" : laco(100 + r * .45, ty + r * .9, .9, K.m, K.d)) + olhosF(ex, [100 - r * .3, 100 + r * .3], cy - 2, 3 + r * .06, [100, cy + r * .3]);
+      return { corpo: corpo, a: { olhos: [100, cy - 2, .55 + r * .008], topo: [100, Math.round(ty + r * .9), .5 + r * .006], peito: [100, cy + r * .62, .55 + r * .004], lado: [100 - r - 12, cy + 12, .6 + r * .005], costas: [100, cy, .6 + r * .007] } };
+    }
+    var nuvem = circ(66, 122, 30, "#EAF6FF", tr("#7FB5E0")) + circ(100, 98, 38, "#EAF6FF", tr("#7FB5E0")) + circ(136, 118, 32, "#EAF6FF", tr("#7FB5E0")) +
+      rr(44, 116, 114, 40, 20, "#EAF6FF") + path("M46 140c0 10 6 16 20 16h72c14 0 20-8 20-18", "none", tr("#7FB5E0")) +
+      ell(84, 86, 10, 5, "#fff") + (temCabeca ? "" : laco(132, 82, .95, K.m, K.d)) + olhosF(ex, [86, 114], 120, 6, [100, 136]);
+    var chuva = [70, 100, 130].map(function (x, i) { return path("M" + x + " " + (166 + i % 2 * 8) + "c3 5 5 8 5 11a5 5 0 0 1-10 0c0-3 2-6 5-11z", ag, tr(agE, 1.5)); }).join("");
+    if (f === 5) return { corpo: sombraChao(50) + chuva + nuvem + bolhas([[30, 80, 6], [172, 70, 8]]),
+      a: { olhos: [100, 120, .85], topo: [100, 66, .85], peito: [100, 148, .65], lado: [40, 128, .8], costas: [100, 118, 1] } };
+    var arco = ["#E5484D", "#FF9F43", "#F7D774", "#4FCB7F", "#4FA3F7", "#9B7BF0"].map(function (c, i) { return path("M" + (20 + i * 7) + " 150a" + (80 - i * 7) + " " + (80 - i * 7) + " 0 0 1 " + (160 - i * 14) + " 0", "none", tr(c, 7)); }).join("");
+    return { fundo: auraDe(id + "w", "#9ED6F5", 98) + arco, corpo: sombraChao(54) + chuva + nuvem + path("M150 150l-8 14h8l-6 14 16-20h-8l6-8z", "#F7D774", tr("#C9930E", 1.5)) + brilhos([[24, 40], [178, 36], [30, 180]]),
+      a: { olhos: [100, 120, .85], topo: [100, 66, .85], peito: [100, 148, .65], lado: [40, 128, .8], costas: [100, 118, 1] } };
+  }
+
+  /* Borboleta (Luna). A cor escolhida pinta as asas. */
+  function borboleta(f, K, op, id) {
+    var ex = op.expressao, verde = "#8BD47A", verdeE = "#3E8E3A", pele = "#FBE7F0", peleE = "#B98AA6";
+    var folha = path("M30 182c30-40 110-46 150-20-40 22-110 34-150 20z", "#5DBB63", tr("#2E7D32", 2.5)) + path("M40 180c40-8 90-14 130-18", "none", tr("#2E7D32", 2));
+    var temCabeca = op.cabeca && op.cabeca !== "oculos";
+    if (f === 1) return { corpo: sombraChao(60) + folha + ell(100, 150, 22, 28, "#FFF4E0", tr("#C9A26A")) + circ(92, 138, 3, "#F4A6C6") + circ(110, 162, 2.5, "#F4A6C6") + olhosF(ex, [93, 107], 148, 3.5, [100, 158]),
+      a: { olhos: [100, 148, .5], topo: [100, 124, .5], peito: [100, 170, .45], lado: [70, 160, .55], costas: [100, 150, .55] } };
+    if (f <= 3) {
+      var hx = f === 2 ? 130 : 136, hy = f === 2 ? 148 : 136, hr = f === 2 ? 20 : 25, segs = f === 2 ? [72, 90, 108] : [52, 70, 88, 106, 120];
+      var corpo = sombraChao(62) + folha + segs.map(function (x, i) { return circ(x, f === 2 ? 164 : 158, f === 2 ? 13 : 15, verde, tr(verdeE, 2.5)) + circ(x, f === 2 ? 170 : 165, 2.5, f === 3 ? "#F2C230" : verdeE); }).join("") +
+        path("M" + (hx - 8) + " " + (hy - hr + 2) + "l-6-16M" + (hx + 8) + " " + (hy - hr + 2) + "l6-16", "none", tr(verdeE, 3)) + circ(hx - 14, hy - hr - 14, 4, K.m) + circ(hx + 14, hy - hr - 14, 4, K.m) +
+        circ(hx, hy, hr, verde, tr(verdeE, 3)) + (temCabeca ? "" : laco(hx + hr * .7, hy - hr * .7, .7, K.m, K.d)) + olhosF(ex, [hx - hr * .32, hx + hr * .32], hy - 2, 3 + hr * .06, [hx, hy + hr * .38]);
+      return { corpo: corpo, a: { olhos: [hx, hy - 2, .5 + hr * .007], topo: [hx, hy - hr + 4, .5 + hr * .006], peito: [segs[Math.floor(segs.length / 2)], f === 2 ? 164 : 158, .5], lado: [segs[0] - 14, 168, .55], costas: [segs[1], 146, .55] } };
+    }
+    if (f === 4) return { corpo: path("M30 40q70-12 140 0", "none", tr("#7A5532", 6)) + path("M100 40v26", "none", tr("#D8D8D8", 2)) + sombraChao(30) +
+      ell(100, 122, 30, 54, "#C9D86A", tr("#7A8A2A")) + path("M74 110q26 10 52 0M72 136q28 10 56 0M78 160q22 8 44 0", "none", tr("#9AAA3A", 2.5)) + circ(100, 150, 4, "#F2C230") +
+      ell(100, 102, 18, 14, pele, tr(peleE, 2)) + olhosF(ex, [93, 107], 101, 3.5, [100, 109]),
+      a: { olhos: [100, 101, .55], topo: [100, 76, .6], peito: [100, 140, .55], lado: [62, 126, .7], costas: [100, 122, .8] } };
+    var g = f === 6, s = g ? 1.12 : 1;
+    var asa = function (lado) {
+      var x = 100 + lado * 40 * s;
+      return '<g class="asa">' + ell(x, 92, 40 * s, 32 * s, K.m, tr(K.d) + ' transform="rotate(' + (-lado * 22) + " " + x + ' 92)"') +
+        ell(100 + lado * 30 * s, 148, 28 * s, (g ? 30 : 22), K.m, tr(K.d) + ' transform="rotate(' + (lado * 24) + " " + (100 + lado * 30 * s) + ' 148)"') +
+        circ(100 + lado * 46 * s, 86, 10 * s, K.l) + circ(100 + lado * 30 * s, 104, 5 * s, "#fff", ' opacity=".8"') + circ(100 + lado * 32 * s, 150, 7 * s, K.l) +
+        path("M" + (100 + lado * 12) + " 100h" + lado * 22 + "v-14h" + lado * 14 + "M" + (100 + lado * 12) + " 140h" + lado * 14 + "v12", "none", tr("#F2C230", 2)) + "</g>";
+    };
+    var hy = g ? 72 : 78;
+    return { fundo: g ? auraDe(id + "b", "#F8BBD9", 98) : "", corpo: sombraChao(48) + asa(-1) + asa(1) + rr(92, hy + 8, 16, 92, 8, "#5A3E7A", tr("#3B2752", 2)) +
+      path("M94 " + (hy - 18) + "q-10-22-22-22M106 " + (hy - 18) + "q10-22 22-22", "none", tr("#3B2752", 3)) + circ(72, hy - 40, 5, K.m) + circ(128, hy - 40, 5, K.m) +
+      circ(100, hy, 22, pele, tr(peleE, 2.5)) + olhosF(ex, [92, 108], hy - 1, 4.5, [100, hy + 9]) + (g ? brilhos([[26, 34], [176, 30], [22, 190], [178, 186], [100, 200]], "#FFF") + brilhos([[40, 200], [160, 204]]) : ""),
+      a: { olhos: [100, hy - 1, .7], topo: [100, hy - 20, .7], peito: [100, hy + 46, .6], lado: [100, 184, .7], costas: [100, hy + 40, .75] } };
+  }
+
+  /* Gata (Mia). A cor escolhida pinta o laço, a coleira e a capa. */
+  function gata(f, K, op, id) {
+    var ex = op.expressao, pelo = "#CDB9DE", pE = "#7E6A96", rosa = "#F4A6C6", focinho = "#F6F0FA";
+    var temCabeca = op.cabeca && op.cabeca !== "oculos";
+    var cab = function (cx, cy, r) {
+      return path("M" + (cx - r * .95) + " " + (cy - r * .35) + "l" + r * .15 + " " + (-r * .95) + " " + r * .6 + " " + r * .5 + "zM" + (cx + r * .95) + " " + (cy - r * .35) + "l" + (-r * .15) + " " + (-r * .95) + " " + (-r * .6) + " " + r * .5 + "z", pelo, tr(pE, 2.5)) +
+        path("M" + (cx - r * .75) + " " + (cy - r * .6) + "l" + r * .08 + " " + (-r * .5) + " " + r * .3 + " " + r * .26 + "zM" + (cx + r * .75) + " " + (cy - r * .6) + "l" + (-r * .08) + " " + (-r * .5) + " " + (-r * .3) + " " + r * .26 + "z", rosa) +
+        circ(cx, cy, r, pelo, tr(pE, 3)) + ell(cx, cy + r * .42, r * .42, r * .3, focinho) + path("M" + (cx - 3) + " " + (cy + r * .26) + "h6l-3 3.5z", "#E57FA6") +
+        path("M" + (cx - r * .3) + " " + (cy + r * .42) + "h" + (-r * .55) + "M" + (cx - r * .3) + " " + (cy + r * .52) + "l" + (-r * .5) + " " + r * .12 + "M" + (cx + r * .3) + " " + (cy + r * .42) + "h" + r * .55 + "M" + (cx + r * .3) + " " + (cy + r * .52) + "l" + r * .5 + " " + r * .12, "none", tr(pE, 1.5)) +
+        olhosF(ex, [cx - r * .36, cx + r * .36], cy - r * .05, r * .14, null);
+    };
+    var rabo = function (y, brilho) { return path("M132 " + y + "c26 0 34-26 22-40", "none", tr(brilho ? K.l : pE, 13)) + path("M132 " + y + "c26 0 34-26 22-40", "none", tr(brilho ? "#fff" : pelo, 8)); };
+    var corpoG = function (cy, rx, ry) { return ell(100, cy, rx, ry, pelo, tr(pE, 3)) + ell(100, cy + ry * .2, rx * .5, ry * .6, focinho) + ell(84, cy + ry - 4, 10, 7, pelo, tr(pE, 2)) + ell(116, cy + ry - 4, 10, 7, pelo, tr(pE, 2)); };
+    var G = [null, [136, 28, 180, 30, 24], [128, 30, 176, 34, 28], [118, 32, 170, 38, 34], [108, 32, 162, 40, 38], [104, 32, 160, 42, 40], [100, 33, 158, 42, 42]][f];
+    var cx = 100, cy = G[0], r = G[1];
+    var fundo = "", tras = "", frente = "";
+    if (f === 5 || f === 6) tras += path("M" + (100 - r * .8) + " " + (cy + r * .7) + "L52 196h96L" + (100 + r * .8) + " " + (cy + r * .7) + "z", f === 6 ? K.d : K.m, tr(K.d, 2.5));
+    if (f === 6) { fundo = auraDe(id + "m", "#C9B6F2", 98); frente += brilhos([[30, 40], [170, 34], [26, 150], [176, 140], [60, 20], [140, 18]], "#FFE58A"); }
+    if (f >= 3) frente += rr(100 - r * .7, cy + r * .82, r * 1.4, 8, 4, K.m, tr(K.d, 2)) + circ(100, cy + r * .82 + 12, 6, "#F2C230", tr("#A9820F", 2)) + (f >= 5 ? path("M100 " + (cy + r * .82 + 8) + "l1.5 3 3.5.5-2.5 2.4.6 3.4-3.1-1.6-3.1 1.6.6-3.4-2.5-2.4 3.5-.5z", "#A9820F") : "");
+    if (f === 4) frente += rr(62, 170, 76, 6, 3, "#9AA6B1", tr("#55616C", 2)) + path("M68 170l6-34h52l6 34z", "#55616C", tr("#2A3138", 2)) + rr(78, 142, 44, 22, 2, "#16261C") +
+      path("M84 150h10M84 156h18M98 150h14", "none", tr("#7CF0B0", 2)) + circ(100, 154, 2, "#F4A6C6");
+    var corpo = sombraChao(40 + f * 3) + tras + rabo(G[2] + G[4] * .5, f === 6) + corpoG(G[2], G[3], G[4]) + cab(cx, cy, r) + frente +
+      (f >= 2 && !temCabeca ? laco(cx + r * .62, cy - r * .78, .85, K.m, K.d) : "");
+    return { fundo: fundo, corpo: corpo, a: { olhos: [cx, cy - r * .05, r * .025], topo: [cx, cy - r * .92, r * .024], peito: [100, f === 4 ? cy + r * .7 : G[2] + 2, .6], lado: [100 - G[3] - 12, G[2] + 6, .7], costas: [100, G[2] - 6, .75] } };
+  }
+
   var MODELOS = [
     { id: "bit", nome: "Bit, o robô", apelido: "Bit", rosto: true, etapas: ["Robô sobre rodas", "Braços e antena", "Visor e painel", "Pernas e ombreiras", "Propulsores", "Aura de lenda"] },
     { id: "pixel", nome: "Pixel, a criatura digital", apelido: "Pixel", rosto: true, desenho: pixel, etapas: ["Ovo de dados", "Ovo rachando", "Filhote", "Pixel jovem", "Asas de cabo", "Dragão de código"] },
     { id: "tatu", nome: "Tatu-bola tech", apelido: "Tatu", rosto: true, desenho: tatu, etapas: ["Filhote", "Capacete de minerador", "Casco com circuitos", "Carapaça placa-mãe", "Rolando", "Bola de energia"] },
     { id: "sonda", nome: "Sonda", apelido: "Sonda", rosto: false, desenho: sonda, etapas: ["Drone", "Drone de patrulha", "Satélite", "Sonda espacial", "Sonda com anel", "Estação orbital"] },
     { id: "arvore", nome: "Árvore-circuito", apelido: "Raiz", rosto: false, desenho: arvore, etapas: ["Semente-chip", "Broto", "Muda", "Árvore jovem", "Copa de circuitos", "Frutos de LED"] },
-    { id: "cidade", nome: "Minha Smart City", apelido: "Cidade", rosto: false, desenho: cidade, etapas: ["Vila", "Vila com escola", "Bairro conectado", "Cidade", "Cidade grande", "Metrópole inteligente"] }
+    { id: "cidade", nome: "Minha Smart City", apelido: "Cidade", rosto: false, desenho: cidade, etapas: ["Vila", "Vila com escola", "Bairro conectado", "Cidade", "Cidade grande", "Metrópole inteligente"] },
+    { id: "girassol", nome: "Girassol, a florzinha", apelido: "Girassol", rosto: true, desenho: girassol, etapas: ["Semente", "Brotinho", "Muda com laço", "Botão de flor", "Girassol", "Girassol solar"] },
+    { id: "gotinha", nome: "Gotinha, a gota d'água", apelido: "Gotinha", rosto: true, desenho: gota, etapas: ["Gotinha", "Gota", "Gota com laço", "Gota com ondas", "Nuvenzinha", "Nuvem arco-íris"] },
+    { id: "borboleta", nome: "Borboleta, a metamorfose", apelido: "Borboleta", rosto: true, desenho: borboleta, etapas: ["Ovinho", "Lagarta", "Lagarta crescida", "Crisálida", "Borboleta", "Borboleta de luz"] },
+    { id: "gata", nome: "Gata, a gatinha", apelido: "Mia", rosto: true, desenho: gata, etapas: ["Gatinha", "Gata com laço", "Gata de coleira", "Gata programadora", "Gata de capa", "Gata mística"] }
   ];
   function etapaDe(modelo, forma) { var m = achar(MODELOS, modelo) || MODELOS[0]; return m.etapas[Math.min(6, Math.max(1, forma)) - 1]; }
 

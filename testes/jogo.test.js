@@ -150,8 +150,8 @@ test("O XP do Apps Script é igual ao do motor", () => {
   assert.equal(g.nivel, e.nivel);
 });
 
-test("Modelos: 6 avatares, cada um com 6 etapas", () => {
-  assert.deepEqual(J.MODELOS.map(m => m.id), ["bit", "pixel", "tatu", "sonda", "arvore", "cidade"]);
+test("Modelos: 10 avatares, cada um com 6 etapas", () => {
+  assert.deepEqual(J.MODELOS.map(m => m.id), ["bit", "pixel", "tatu", "sonda", "arvore", "cidade", "girassol", "gotinha", "borboleta", "gata"]);
   for (const m of J.MODELOS) assert.equal(m.etapas.length, 6, m.id);
   assert.equal(J.etapaDe("pixel", 6), "Dragão de código");
   assert.equal(J.etapaDe("inexistente", 1), "Robô sobre rodas");
