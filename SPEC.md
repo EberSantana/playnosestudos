@@ -104,7 +104,7 @@ Expressões (feliz, focado, surpreso, piscando) e o nome do robô (até 16 carac
 
 ### Disciplinas por turma
 
-A aba **Acesso** da planilha (turma | disciplinas liberadas) define o que cada turma vê. O servidor devolve `perfil.disciplinas` no login e a cada envio de progresso. Sem linha, vazio ou `todas`: tudo liberado. `nenhuma`: nada. Nome que não existe é ignorado (nunca deixa a turma sem acesso por engano). No site, a página inicial e o menu mostram só as liberadas e uma disciplina não liberada abre um aviso no lugar do conteúdo. Recursos de aula, Laboratório 3D e Meu personagem são sempre livres. É controle de navegação, não de segurança.
+A aba **Acesso** da planilha (turma | disciplinas liberadas) define o que cada turma vê. O servidor devolve `perfil.disciplinas` no login e a cada envio de progresso. Sem linha ou vazio: só as disciplinas do curso da turma. `todas`: tudo liberado. `nenhuma`: nada. Nome que não existe é ignorado (nunca deixa a turma sem acesso por engano). No site, a página inicial e o menu mostram só as liberadas e uma disciplina não liberada abre um aviso no lugar do conteúdo. Recursos de aula, Laboratório 3D e Meu personagem são sempre livres. É controle de navegação, não de segurança.
 
 ### Ritmo de estudo (metas e sequência)
 

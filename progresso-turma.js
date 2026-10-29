@@ -48,8 +48,15 @@
     try { var p = JSON.parse(localStorage.getItem(PKEY) || "null"); return p && p.id && p.pin && p.nome ? p : null; } catch (e) { return null; }
   }
   var perfil = lerPerfil();
-  // perfil.disciplinas: lista de pastas liberadas para a turma, ou ausente/null = todas.
-  function liberada(pasta) { return !perfil || !Array.isArray(perfil.disciplinas) || !NOMES_PASTAS[pasta] || perfil.disciplinas.indexOf(pasta) >= 0; }
+  // perfil.disciplinas: lista de pastas liberadas pelo professor, "todas" (liberou tudo) ou ausente/null = s\u00f3 as disciplinas do curso da turma.
+  function pastasLiberadas() {
+    if (!perfil) return "todas";
+    if (Array.isArray(perfil.disciplinas)) return perfil.disciplinas;
+    if (perfil.disciplinas === "todas") return "todas";
+    var c = cursoDe(perfil.curso);
+    return c ? c.disciplinas.map(function (d) { return d[1]; }) : "todas";
+  }
+  function liberada(pasta) { var L = pastasLiberadas(); return L === "todas" || !NOMES_PASTAS[pasta] || L.indexOf(pasta) >= 0; }
 
   if (!document.querySelector('link[href*="Barlow+Condensed"]')) {
     var fl = document.createElement("link");
@@ -398,7 +405,7 @@
   function bmsg(t, cl) { var m = box.querySelector(".pt-msg"); if (m) { m.textContent = t; m.className = "pt-msg " + (cl || ""); } }
 
   function painel() {
-    var d = dados(), c = Array.isArray(perfil.disciplinas) ? { disciplinas: perfil.disciplinas.filter(function (f) { return NOMES_PASTAS[f]; }).map(function (f) { return [NOMES_PASTAS[f], f]; }) } : cursoDe(perfil.curso) || { disciplinas: [].concat.apply([], CURSOS.map(function (x) { return x.disciplinas; })).filter(function (x, i, a) { return a.map(function (y) { return y[1]; }).indexOf(x[1]) === i; }) }, atual = pastaAtual();
+    var d = dados(), L = pastasLiberadas(), c = { disciplinas: (L === "todas" ? Object.keys(NOMES_PASTAS) : L.filter(function (f) { return NOMES_PASTAS[f]; })).map(function (f) { return [NOMES_PASTAS[f], f]; }) }, atual = pastaAtual();
     box.innerHTML =
       '<button class="pt-close" id="pt-x" type="button" aria-label="Fechar">\u00d7</button>' +
       "<h3>Ol\u00e1, " + esc(primeiroNome()) + "</h3>" +
@@ -466,7 +473,7 @@
   });
 
   // Para a p\u00e1gina inicial organizar as disciplinas pelo curso do aluno
-  window.PORTAL_ALUNO = { perfil: function () { return perfil; }, liberada: liberada, nomes: NOMES_PASTAS, cursos: CURSOS, entrar: mostrarEntrada };
+  window.PORTAL_ALUNO = { perfil: function () { return perfil; }, liberada: liberada, pastas: pastasLiberadas, nomes: NOMES_PASTAS, cursos: CURSOS, entrar: mostrarEntrada };
 
   // Quem entrou quando o envio ainda n\u00e3o estava ligado \u00e9 cadastrado na planilha agora (uma vez por visita).
   function sincronizar() {

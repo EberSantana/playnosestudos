@@ -187,11 +187,12 @@ footer{color:var(--muted);font-size:14px;margin-top:32px}
     var p = P.perfil(), curso = null;
     if (p) P.cursos.forEach(function (c) { if (c.nome === p.curso) curso = c; });
     cards.forEach(function (a) { todas.appendChild(a); });
-    if (p && Array.isArray(p.disciplinas)) { // turma com disciplinas restritas pelo professor
-      p.disciplinas.forEach(function (f) { cards.forEach(function (a) { if (pasta(a) === f) meuGrid.appendChild(a); }); });
-      document.getElementById("meu-curso-titulo").textContent = p.turma + " · " + p.turno + " · liberadas pelo professor";
+    var L = P.pastas();
+    if (p && L !== "todas") { // s\u00f3 as disciplinas do curso da turma, ou as que o professor liberou na aba Acesso
+      L.forEach(function (f) { cards.forEach(function (a) { if (pasta(a) === f) meuGrid.appendChild(a); }); });
+      document.getElementById("meu-curso-titulo").textContent = p.turma + " \u00b7 " + p.turno;
       todas.style.display = "none"; document.getElementById("todas-titulo").style.display = "none";
-      meu.hidden = !p.disciplinas.length || !meuGrid.children.length; aviso.hidden = true;
+      meu.hidden = !meuGrid.children.length; aviso.hidden = true;
       if (meu.hidden) { document.getElementById("todas-titulo").style.display = ""; document.getElementById("todas-titulo").textContent = "Nenhuma disciplina liberada para a sua turma ainda."; }
       return;
     }

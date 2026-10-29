@@ -117,10 +117,11 @@ function gravarAvatar_(a, lp, escolhas) {
 
 const norm_ = s => String(s == null ? "" : s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim();
 
-// Disciplinas liberadas para uma turma, lidas da aba Acesso. null = todas (sem linha, vazio ou "todas").
+// Disciplinas liberadas para uma turma, lidas da aba Acesso. "todas" = tudo liberado; null = sem regra (o site mostra s\u00f3 as disciplinas do curso da turma).
 function interpretarAcesso_(texto) {
   const t = norm_(texto);
-  if (!t || t === "todas" || t === "todos" || t === "*") return null;
+  if (!t) return null;
+  if (t === "todas" || t === "todos" || t === "*") return "todas";
   if (t === "nenhuma" || t === "nenhum") return [];
   const achadas = [];
   t.split(/[,;\n]/).map(x => x.trim()).filter(Boolean).forEach(tok => {
@@ -423,7 +424,7 @@ function ligarBackupSemanal() {
   avisar_(ja ? "O backup semanal já estava ligado." : "Backup semanal ligado: toda segunda-feira, de madrugada.");
 }
 
-// Cria a aba Acesso com uma linha por turma (todas liberadas). O professor edita a segunda coluna.
+// Cria a aba Acesso com uma linha por turma (vazio = só as disciplinas do curso da turma). O professor edita a segunda coluna.
 function prepararAcesso() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sh = ss.getSheetByName(ABA_ACESSO) || ss.insertSheet(ABA_ACESSO);
@@ -432,8 +433,8 @@ function prepararAcesso() {
   if (sh.getLastRow() === 0) sh.appendRow(CAB_ACESSO);
   const turmas = {};
   lerTurmas_().forEach(a => { turmas[a.turma] = true; });
-  Object.keys(turmas).sort().forEach(tu => { if (!atuais[chave_(tu)]) sh.appendRow([tu, "todas"]); });
+  Object.keys(turmas).sort().forEach(tu => { if (!atuais[chave_(tu)]) sh.appendRow([tu, ""]); });
   sh.getRange(1, 4, 1, 1).setValue("Nomes aceitos (separe por vírgula; ou escreva todas / nenhuma)");
   DISCIPLINAS_.forEach((d, i) => sh.getRange(2 + i, 4, 1, 1).setValue(d[1]));
-  avisar_("Aba Acesso pronta. Em cada turma, escreva as disciplinas liberadas separadas por vírgula (ex.: Banco de Dados, Redes de Computadores). Escreva todas para liberar tudo.");
+  avisar_("Aba Acesso pronta. Em cada turma, escreva as disciplinas liberadas separadas por vírgula (ex.: Banco de Dados, Redes de Computadores). Deixe vazio para mostrar s\u00f3 as disciplinas do curso da turma; escreva todas para liberar tudo.");
 }
