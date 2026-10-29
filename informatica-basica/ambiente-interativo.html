@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script>try{var pa=JSON.parse(localStorage.getItem("perfil:aluno")||"null");if(!(pa&&pa.id&&pa.pin)&&!/[?&]professor\b/.test(location.search))document.documentElement.classList.add("pt-gate")}catch(e){}</script><style>html.pt-gate body>*:not(.pt-screen){visibility:hidden}</style>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Informática Básica - Ambiente Interativo</title>
@@ -1753,6 +1755,31 @@ function responderVF(btn, resposta, correta){
 
 init();
 </script>
+<script>
+/* Play nos Estudos: cada flashcard revelado e cada Verdadeiro/Falso respondido conta como uma atividade feita. */
+(function(){
+  var KEY="info-interativo-v1", feitas={};
+  try{ feitas=JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ feitas={}; }
+  function salvar(){ try{ localStorage.setItem(KEY,JSON.stringify(feitas)); }catch(e){} }
+  function total(){ var t=0; (window.modules||modules).forEach(function(m){ t+=m.flashcards.length+m.vf.length; }); return t; }
+  function marcar(el,tipo){
+    var mod=el.closest(".module"); if(!mod) return;
+    var lista=Array.prototype.slice.call(mod.querySelectorAll(tipo==="f"?".flashcard":".vf-question"));
+    var k=tipo+":"+mod.id+":"+lista.indexOf(el.closest(tipo==="f"?".flashcard":".vf-question"));
+    if(!feitas[k]){ feitas[k]=1; salvar(); if(window.progressoMudou) window.progressoMudou(); }
+  }
+  document.addEventListener("click",function(ev){
+    var fc=ev.target.closest&&ev.target.closest(".flashcard");
+    if(fc){ setTimeout(function(){ if(fc.classList.contains("revealed")) marcar(fc,"f"); },0); return; }
+    var vf=ev.target.closest&&ev.target.closest(".vf-btn");
+    if(vf) setTimeout(function(){ marcar(vf,"v"); },0);
+  });
+  window.PROGRESSO_ID="info-interativo-v1";
+  window.PROGRESSO_DADOS=function(){ var n=Math.min(Object.keys(feitas).length,total()); return {feitas:n,total:total(),pontos:n*10,detalhe:{}}; };
+})();
+</script>
+<script src="../config.js"></script>
+<script src="../progresso-turma.js"></script>
 <script src="../acessibilidade.js" defer></script>
 </body>
 </html>

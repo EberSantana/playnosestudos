@@ -1879,7 +1879,7 @@ function renderTop(){
   const x=xp(), lv=level(x);
   $("#ov-txt").textContent=t+" / "+all;
   $("#ov-bar").style.width=(100*t/all)+"%";
-  $("#xp").innerHTML=`<b class="mono">${x} XP</b><span>Nível ${lv.i+1} · ${lv.name}</span>`;
+  $("#xp").innerHTML=`<b class="mono">${x} pts</b><span>Patente: ${lv.name}</span>`;
 }
 function renderRail(){
   $("#rail").innerHTML=`<div class="eyebrow rail-h">Módulos da disciplina</div>`+MODULES.map(m=>{
@@ -1927,7 +1927,7 @@ function renderModule(){
   const labDone=S[m.id+"-lab"]&&S[m.id+"-lab"].done;
   const exN=(EXPLORE[m.id]||[]).length, exD=(EXPLORE[m.id]||[]).filter((_,i)=>S[m.id+"-ex-"+i]&&S[m.id+"-ex-"+i].done).length;
   const tabs=`<button class="tab tab-ex" role="tab" data-tab="explorar" aria-selected="${view.tab==="explorar"}">Explorar<span class="cnt">${exD}/${exN} visuais</span></button>`+TYPES.map(t=>`<button class="tab" role="tab" data-tab="${t.k}" aria-selected="${view.tab===t.k}">${t.label}<span class="cnt">${doneCount(m,t.k)}/${t.n}</span></button>`).join("")
-    +`<button class="tab tab-lab" role="tab" data-tab="lab" aria-selected="${view.tab==="lab"}">Laboratório<span class="cnt">${labDone?"concluído":"+30 XP"}</span></button>`;
+    +`<button class="tab tab-lab" role="tab" data-tab="lab" aria-selected="${view.tab==="lab"}">Laboratório<span class="cnt">${labDone?"concluído":"+30 pts"}</span></button>`;
   const T=view.tab==="lab"?{intro:LAB_INFO[LABS[m.id]].d}:view.tab==="explorar"?{intro:"Comece por aqui: imagens, linhas do tempo e animações para ver o conteúdo acontecer. Clique, arraste e experimente."}:TYPES.find(t=>t.k===view.tab);
   let extra="";
   if(view.tab==="vf"){
@@ -1964,17 +1964,17 @@ function renderModule(){
 function paneExplore(m,pane){
   pane.className="items";
   const list=EXPLORE[m.id]||[];
-  pane.innerHTML=list.map((v,i)=>{const st=S[m.id+"-ex-"+i]||{};return `<section class="card ex-card"><div class="lab-head"><div><span class="eyebrow">Visual ${i+1} de ${list.length}</span><h2>${esc(v.t)}</h2><p class="hint" style="margin:4px 0 0">${esc(v.d)}</p></div><span class="badge ${st.done?"ok":""}" data-exb="${i}">${st.done?"Explorado · +10 XP":"A explorar"}</span></div><div class="ex-body" data-ex="${i}"></div></section>`;}).join("");
+  pane.innerHTML=list.map((v,i)=>{const st=S[m.id+"-ex-"+i]||{};return `<section class="card ex-card"><div class="lab-head"><div><span class="eyebrow">Visual ${i+1} de ${list.length}</span><h2>${esc(v.t)}</h2><p class="hint" style="margin:4px 0 0">${esc(v.d)}</p></div><span class="badge ${st.done?"ok":""}" data-exb="${i}">${st.done?"Explorado · +10 pts":"A explorar"}</span></div><div class="ex-body" data-ex="${i}"></div></section>`;}).join("");
   list.forEach((v,i)=>{ const id=m.id+"-ex-"+i;
-    EXE[v.type](pane.querySelector(`[data-ex="${i}"]`),v.spec,()=>{ const st=get(id); if(st.done) return; st.done=true; save(); refreshCounts(); toast("Visual explorado! +10 XP");
-      const b=pane.querySelector(`[data-exb="${i}"]`); if(b){b.textContent="Explorado · +10 XP";b.classList.add("ok");}
+    EXE[v.type](pane.querySelector(`[data-ex="${i}"]`),v.spec,()=>{ const st=get(id); if(st.done) return; st.done=true; save(); refreshCounts(); toast("Visual explorado! +10 pts");
+      const b=pane.querySelector(`[data-exb="${i}"]`); if(b){b.textContent="Explorado · +10 pts";b.classList.add("ok");}
       const tc=document.querySelector(".tab-ex .cnt"); if(tc){ const d=list.filter((_,k)=>S[m.id+"-ex-"+k]&&S[m.id+"-ex-"+k].done).length; tc.textContent=d+"/"+list.length+" visuais"; } }); });
 }
 function paneLab(m,pane){
   const key=LABS[m.id], info=LAB_INFO[key], st=get(m.id+"-lab");
   pane.className="";
   pane.innerHTML=`<section class="card lab"><div class="lab-head"><h2>${esc(info.t)}</h2><span class="badge ${st.done?"ok":""}" id="lab-badge">${st.done?"Concluído":"Em andamento"}</span></div><div id="lab-body"></div></section>`;
-  LABS_IMPL[key](pane.querySelector("#lab-body"),{esc,complete:()=>{ if(!st.done){ st.done=true; save(); refreshCounts(); toast("Laboratório concluído! +30 XP"); const b=$("#lab-badge"); if(b){b.textContent="Concluído";b.classList.add("ok");} const tc=document.querySelector('.tab-lab .cnt'); if(tc) tc.textContent="concluído"; } }});
+  LABS_IMPL[key](pane.querySelector("#lab-body"),{esc,complete:()=>{ if(!st.done){ st.done=true; save(); refreshCounts(); toast("Laboratório concluído! +30 pts"); const b=$("#lab-badge"); if(b){b.textContent="Concluído";b.classList.add("ok");} const tc=document.querySelector('.tab-lab .cnt'); if(tc) tc.textContent="concluído"; } }});
 }
 function toast(t){ const d=document.createElement("div"); d.className="toast"; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2600); }
 function homeStatus(){
@@ -1984,7 +1984,7 @@ function homeStatus(){
   return `<div class="status">
     <section class="card st-l"><span class="eyebrow">Seu nível</span><div class="lv">Nível ${lv.i+1} · ${lv.name}</div>
       <div class="bar" style="height:8px"><span style="width:${pct}%"></span></div>
-      <span class="hint">${x} XP${lv.next?` · faltam ${lv.next-x} XP para o próximo nível`:" · nível máximo"}. Cada atividade vale 10 XP, acerto no V ou F +5, laboratório +30.</span>
+      <span class="hint">${x} pts${lv.next?` · faltam ${lv.next-x} pts para a próxima patente`:" · patente máxima"}. Cada atividade vale 10 pts, acerto no V ou F +5, laboratório +30.</span>
       <div class="bdgs"><span class="hint">Selos de módulo completo (40 atividades + laboratório):</span> ${badges}</div></section>
     <section class="card st-r"><span class="eyebrow">Desafio relâmpago</span><div class="lv">10 questões · 90 segundos</div><span class="hint">V ou F sorteadas de todos os módulos. Seu recorde: ${best}/10.</span>
       <button class="btn primary" data-page="desafio">Começar desafio</button></section>
@@ -1999,7 +1999,7 @@ function renderQuiz(){
   if(!QZ||QZ.over&&QZ.reset){ QZ=null; }
   if(!QZ){
     $("#main").innerHTML=`<section class="card hero"><span class="eyebrow">Desafio relâmpago · todos os módulos</span><h1>10 questões em 90 segundos</h1>
-      <p>Afirmações de Verdadeiro ou Falso sorteadas dos ${MODULES.length} módulos. Você vê a correção comentada logo depois de cada resposta. Cada acerto do seu recorde vale 3 XP.</p>
+      <p>Afirmações de Verdadeiro ou Falso sorteadas dos ${MODULES.length} módulos. Você vê a correção comentada logo depois de cada resposta. Cada acerto do seu recorde vale 3 pts.</p>
       <div class="controls"><button class="btn primary" id="qz-go">Começar</button><span class="score">Recorde: ${best}/10</span></div></section>`;
     $("#qz-go").onclick=()=>{ const pool=[]; MODULES.forEach(m=>m.vf.forEach(q=>pool.push({...q,mod:m.num}))); pool.sort(()=>Math.random()-.5);
       QZ={qs:pool.slice(0,10),i:0,ok:0,left:90,ans:null,over:false}; renderQuiz(); };
@@ -2036,7 +2036,7 @@ function renderReport(){
     const lab=S[m.id+"-lab"]&&S[m.id+"-lab"].done;
     return {m,c:doneCount(m,"caderno"),f:doneCount(m,"flash"),p:doneCount(m,"pbl"),v:vf.length,ok,lab,t:doneCount(m)};
   });
-  const txt=()=>`Relatório de estudo · Redes de Computadores\nAluno(a): ${S.nome||"(sem nome)"}\nData: ${new Date().toLocaleDateString("pt-BR")}\nXP: ${xp()} · Nível ${level(xp()).i+1} (${level(xp()).name}) · Recorde no desafio: ${S.quiz&&S.quiz.best?S.quiz.best:0}/10\n\n`+
+  const txt=()=>`Relatório de estudo · Redes de Computadores\nAluno(a): ${S.nome||"(sem nome)"}\nData: ${new Date().toLocaleDateString("pt-BR")}\nPontos: ${xp()} · Patente: ${level(xp()).name} · Recorde no desafio: ${S.quiz&&S.quiz.best?S.quiz.best:0}/10\n\n`+
     lines.map(l=>`Módulo ${l.m.num} (${l.m.title}): ${l.t}/40 | caderno ${l.c}/8, flashcards ${l.f}/12, PBL ${l.p}/4, V/F ${l.v}/16 (${l.ok} acertos) | laboratório ${l.lab?"concluído":"pendente"}`).join("\n");
   $("#main").innerHTML=`<section class="card hero"><span class="eyebrow">Avaliação contínua</span><h1>Relatório para o professor</h1>
     <p>Preencha seu nome, copie o relatório e envie ao professor pelo canal combinado (AVA, e-mail ou mensagem).</p>

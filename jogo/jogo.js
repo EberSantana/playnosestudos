@@ -17,7 +17,9 @@
     "redes-comp-v1": "conexao", "projeto-redes-v1": "conexao", "subnetting-v1": "conexao",
     "mapa-do-chamado-v1": "conexao", "redes-console-v1": "conexao",
     "seginfo-console-v1": "escudo", "detetives-digitais-v1": "escudo",
-    "bd-console-v1": "memoria",
+    "bd-console-v1": "memoria", "apostila-banco-de-dados-v1": "memoria",
+    "apostila-info-basica-v1": "base", "info-interativo-v1": "base", "apostila-construcao-de-sites-v1": "criacao",
+    "apostila-eng-soft-v1": "processo", "apostila-eng-software-I-v1": "processo", "apostila-eng-requisitos-v1": "processo", "roteiro-atividade-processo-v1": "processo",
     "windows11-v1": "base", "office-visual-v1": "base",
     "esp32-lab-v1": "maker", "microbit-lab-v1": "maker"
   };
@@ -25,7 +27,11 @@
     "redes-comp-v1": "Redes · Atividades", "projeto-redes-v1": "Projeto de Redes · Atividades",
     "subnetting-v1": "Subnetting na Prática", "mapa-do-chamado-v1": "Mapa do Chamado",
     "redes-console-v1": "Redes · Console de estudo", "seginfo-console-v1": "Segurança · Console de estudo",
-    "detetives-digitais-v1": "Detetives Digitais", "bd-console-v1": "Banco de Dados · Console de estudo",
+    "detetives-digitais-v1": "Detetives Digitais", "bd-console-v1": "Banco de Dados · Console de estudo", "apostila-banco-de-dados-v1": "Banco de Dados · Apostila de SQL",
+    "apostila-info-basica-v1": "Informática Básica · Apostila", "info-interativo-v1": "Informática Básica · Ambiente interativo",
+    "apostila-construcao-de-sites-v1": "Construção de Sites · Apostila", "apostila-eng-soft-v1": "Eng. de Software · Apostila",
+    "apostila-eng-software-I-v1": "Eng. de Software I · Apostila", "apostila-eng-requisitos-v1": "Eng. de Requisitos · Apostila",
+    "roteiro-atividade-processo-v1": "Eng. de Software · Roteiro de processo",
     "windows11-v1": "Trilha Windows 11", "office-visual-v1": "Método Office Visual",
     "esp32-lab-v1": "Laboratório ESP32", "microbit-lab-v1": "Laboratório micro:bit"
   };
