@@ -27,7 +27,7 @@ const DISCIPLINAS_ = [
   ["informatica-basica", "Informática Básica"], ["engenharia-de-software", "Engenharia de Software"],
   ["construcao-de-sites-1", "Construção de Sites 1"], ["banco-de-dados", "Banco de Dados"],
   ["redes-de-computadores", "Redes de Computadores"], ["projeto-de-redes", "Projeto de Redes"],
-  ["seguranca-da-informacao", "Segurança da Informação"], ["laboratorio-3d", "Laboratório 3D"]
+  ["seguranca-da-informacao", "Segurança da Informação"]
 ];
 const MAX_TENTATIVAS = 5, BLOQUEIO_MIN = 15;
 

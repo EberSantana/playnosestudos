@@ -187,8 +187,6 @@ footer{color:var(--muted);font-size:14px;margin-top:32px}
     var p = P.perfil(), curso = null;
     if (p) P.cursos.forEach(function (c) { if (c.nome === p.curso) curso = c; });
     cards.forEach(function (a) { todas.appendChild(a); });
-    var lab = document.getElementById("lab3d-sec");
-    if (lab) lab.hidden = !(!p || P.liberada("laboratorio-3d"));
     if (p && Array.isArray(p.disciplinas)) { // turma com disciplinas restritas pelo professor
       p.disciplinas.forEach(function (f) { cards.forEach(function (a) { if (pasta(a) === f) meuGrid.appendChild(a); }); });
       document.getElementById("meu-curso-titulo").textContent = p.turma + " · " + p.turno + " · liberadas pelo professor";

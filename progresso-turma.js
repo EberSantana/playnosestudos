@@ -29,8 +29,8 @@
       ["Projeto de Redes", "projeto-de-redes"],
       ["Seguran\u00e7a da Informa\u00e7\u00e3o", "seguranca-da-informacao"] ] }
   ];
-  // Pastas que o professor pode liberar ou bloquear por turma (aba Acesso da planilha).
-  var NOMES_PASTAS = { "laboratorio-3d": "Laborat\u00f3rio 3D" };
+  // Pastas que o professor pode liberar ou bloquear por turma (aba Acesso da planilha). Recursos de aula e Laborat\u00f3rio 3D s\u00e3o comuns a todos.
+  var NOMES_PASTAS = {};
   CURSOS.forEach(function (c) { c.disciplinas.forEach(function (d) { NOMES_PASTAS[d[1]] = d[0]; }); });
   var TKEY = "pt-ultima-turma", LKEY = "pt-turmas-v2";
 
