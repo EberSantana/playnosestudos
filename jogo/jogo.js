@@ -545,12 +545,12 @@
     var vaso = path("M70 178h60l-8 30h-44z", K.m, tr(K.d)) + rr(66, 172, 68, 10, 4, K.d) + ell(100, 176, 28, 4, "#5A3B22");
     var folhas = function (y, s) { return path("M100 " + y + "c-" + 26 * s + " -2 -" + 36 * s + " -20 -" + 34 * s + " -32 " + 18 * s + " 0 " + 32 * s + " 12 " + 34 * s + " 32zM100 " + (y - 10) + "c" + 24 * s + " -4 " + 34 * s + " -20 " + 32 * s + " -32 -" + 16 * s + " 0 -" + 30 * s + " 10 -" + 32 * s + " 32z", verde, tr(verdeE, 2.5)); };
     var caule = function (y) { return path("M100 174V" + y, "none", tr(verdeE, 6)); };
-    var fita = f >= 2 ? laco(100, f === 2 ? 150 : 146, .8, K.l, K.d) : "";
+    var fita = f >= 2 ? laco(100, f === 2 ? 150 : 146, .8, "#E5568B", "#9B2C5C") : "";
     var flor = function (cx, cy, rd, n, rx, ry, dist, solar) {
       var p = "";
       for (var i = 0; i < n; i++) {
         var a = Math.round(i * 360 / n);
-        p += ell(cx, cy - dist, rx, ry, "#F7C531", tr("#C9930E", 2) + ' transform="rotate(' + a + " " + cx + " " + cy + ')"');
+        p += ell(cx, cy - dist, rx, ry, K.m, tr(K.d, 2) + ' transform="rotate(' + a + " " + cx + " " + cy + ')"');
         if (solar && i % 2 === 0) p += rr(cx - rx * .45, cy - dist - ry * .5, rx * .9, ry, 2, "#2F6DB5", ' transform="rotate(' + a + " " + cx + " " + cy + ')" opacity=".85"');
       }
       return p + circ(cx, cy, rd, "#8B5A2B", tr("#5A3B22", 3)) + circ(cx, cy, rd * .78, "#C98A4B");
@@ -561,7 +561,7 @@
     if (f === 2) return { corpo: sombraChao(40) + vaso + caule(124) + folhas(150, .8) + fita + circ(100, 116, 18, verde, tr(verdeE, 3)) + olhosF(ex, [93, 107], 114, 3.5, [100, 123]),
       a: { olhos: [100, 114, .5], topo: [100, 98, .55], peito: [100, 194, .7], lado: [56, 186, .7], costas: [100, 130, .6] } };
     if (f === 3) return { corpo: sombraChao(42) + vaso + caule(110) + folhas(150, 1) + fita +
-      path("M82 92l6-16 6 10 6-14 6 14 6-10 6 16z", "#F7C531", tr("#C9930E", 2)) + ell(100, 102, 24, 22, verde, tr(verdeE, 3)) + olhosF(ex, [91, 109], 100, 4.5, [100, 111]),
+      path("M82 92l6-16 6 10 6-14 6 14 6-10 6 16z", K.m, tr(K.d, 2)) + ell(100, 102, 24, 22, verde, tr(verdeE, 3)) + olhosF(ex, [91, 109], 100, 4.5, [100, 111]),
       a: { olhos: [100, 100, .65], topo: [100, 78, .65], peito: [100, 194, .7], lado: [54, 180, .75], costas: [100, 106, .7] } };
     if (f === 4) return { corpo: sombraChao(46) + vaso + caule(110) + folhas(156, 1.05) + fita + flor(100, 94, 24, 12, 8, 15, 36) + olhosF(ex, [91, 109], 92, 4.5, [100, 103]),
       a: { olhos: [100, 92, .7], topo: [100, 70, .75], peito: [100, 194, .7], lado: [150, 152, .8], costas: [100, 100, .8] } };
@@ -573,7 +573,7 @@
 
   /* Gotinha. A gota vira nuvem de dados (computação em nuvem). A cor escolhida pinta o laço. */
   function gota(f, K, op, id) {
-    var ex = op.expressao, ag = "#5BB8F0", agE = "#2A79B8", agC = "#CFEFFF";
+    var ex = op.expressao, ag = K.m, agE = K.d, agC = K.l;
     var gotaP = function (cx, cy, r) {
       var ty = Math.round(cy - r * 2.1);
       return path("M" + cx + " " + ty + "C" + (cx + r * .35) + " " + (ty + r * .6) + " " + (cx + r) + " " + (cy - r * .7) + " " + (cx + r) + " " + cy + "A" + r + " " + r + " 0 0 1 " + (cx - r) + " " + cy +
@@ -590,12 +590,12 @@
       var corpo = poca(r + 12) + (f === 4 ? path("M40 196q15-10 30 0t30 0 30 0 30 0", "none", tr("#9ED6F5", 3)) : "") + gotaP(100, cy, r) +
         (f >= 3 ? ell(100 - r - 4, cy + 6, 7, 9, ag, tr(agE, 2)) + ell(100 + r + 4, cy + 6, 7, 9, ag, tr(agE, 2)) : "") +
         (f >= 3 ? bolhas(f === 3 ? [[46, 104, 7], [156, 92, 9], [164, 128, 5]] : [[40, 96, 8], [160, 80, 10], [168, 122, 6], [34, 140, 5]]) : "") +
-        (temCabeca ? "" : laco(100 + r * .45, ty + r * .9, .9, K.m, K.d)) + olhosF(ex, [100 - r * .3, 100 + r * .3], cy - 2, 3 + r * .06, [100, cy + r * .3]);
+        (temCabeca ? "" : laco(100 + r * .45, ty + r * .9, .9, "#E5568B", "#9B2C5C")) + olhosF(ex, [100 - r * .3, 100 + r * .3], cy - 2, 3 + r * .06, [100, cy + r * .3]);
       return { corpo: corpo, a: { olhos: [100, cy - 2, .55 + r * .008], topo: [100, Math.round(ty + r * .9), .5 + r * .006], peito: [100, cy + r * .62, .55 + r * .004], lado: [100 - r - 12, cy + 12, .6 + r * .005], costas: [100, cy, .6 + r * .007] } };
     }
-    var nuvem = circ(66, 122, 30, "#EAF6FF", tr("#7FB5E0")) + circ(100, 98, 38, "#EAF6FF", tr("#7FB5E0")) + circ(136, 118, 32, "#EAF6FF", tr("#7FB5E0")) +
-      rr(44, 116, 114, 40, 20, "#EAF6FF") + path("M46 140c0 10 6 16 20 16h72c14 0 20-8 20-18", "none", tr("#7FB5E0")) +
-      ell(84, 86, 10, 5, "#fff") + (temCabeca ? "" : laco(132, 82, .95, K.m, K.d)) + olhosF(ex, [86, 114], 120, 6, [100, 136]);
+    var nuvem = circ(66, 122, 30, K.l, tr(K.d)) + circ(100, 98, 38, K.l, tr(K.d)) + circ(136, 118, 32, K.l, tr(K.d)) +
+      rr(44, 116, 114, 40, 20, K.l) + path("M46 140c0 10 6 16 20 16h72c14 0 20-8 20-18", "none", tr(K.d)) +
+      ell(84, 86, 10, 5, "#fff") + (temCabeca ? "" : laco(132, 82, .95, "#E5568B", "#9B2C5C")) + olhosF(ex, [86, 114], 120, 6, [100, 136]);
     var chuva = [70, 100, 130].map(function (x, i) { return path("M" + x + " " + (166 + i % 2 * 8) + "c3 5 5 8 5 11a5 5 0 0 1-10 0c0-3 2-6 5-11z", ag, tr(agE, 1.5)); }).join("");
     if (f === 5) return { corpo: sombraChao(50) + chuva + nuvem + bolhas([[30, 80, 6], [172, 70, 8]]),
       a: { olhos: [100, 120, .85], topo: [100, 66, .85], peito: [100, 148, .65], lado: [40, 128, .8], costas: [100, 118, 1] } };
@@ -639,7 +639,7 @@
 
   /* Gata (Mia). A cor escolhida pinta o laço, a coleira e a capa. */
   function gata(f, K, op, id) {
-    var ex = op.expressao, pelo = "#CDB9DE", pE = "#7E6A96", rosa = "#F4A6C6", focinho = "#F6F0FA";
+    var ex = op.expressao, pelo = K.m, pE = K.d, rosa = "#F4A6C6", focinho = "#F6F0FA", LC = "#E5568B", LD = "#9B2C5C";
     var temCabeca = op.cabeca && op.cabeca !== "oculos";
     var cab = function (cx, cy, r) {
       return path("M" + (cx - r * .95) + " " + (cy - r * .35) + "l" + r * .15 + " " + (-r * .95) + " " + r * .6 + " " + r * .5 + "zM" + (cx + r * .95) + " " + (cy - r * .35) + "l" + (-r * .15) + " " + (-r * .95) + " " + (-r * .6) + " " + r * .5 + "z", pelo, tr(pE, 2.5)) +
@@ -648,18 +648,18 @@
         path("M" + (cx - r * .3) + " " + (cy + r * .42) + "h" + (-r * .55) + "M" + (cx - r * .3) + " " + (cy + r * .52) + "l" + (-r * .5) + " " + r * .12 + "M" + (cx + r * .3) + " " + (cy + r * .42) + "h" + r * .55 + "M" + (cx + r * .3) + " " + (cy + r * .52) + "l" + r * .5 + " " + r * .12, "none", tr(pE, 1.5)) +
         olhosF(ex, [cx - r * .36, cx + r * .36], cy - r * .05, r * .14, null);
     };
-    var rabo = function (y, brilho) { return path("M132 " + y + "c26 0 34-26 22-40", "none", tr(brilho ? K.l : pE, 13)) + path("M132 " + y + "c26 0 34-26 22-40", "none", tr(brilho ? "#fff" : pelo, 8)); };
+    var rabo = function (y, brilho) { return path("M132 " + y + "c26 0 34-26 22-40", "none", tr(pE, 13)) + path("M132 " + y + "c26 0 34-26 22-40", "none", tr(brilho ? K.l : pelo, 8)); };
     var corpoG = function (cy, rx, ry) { return ell(100, cy, rx, ry, pelo, tr(pE, 3)) + ell(100, cy + ry * .2, rx * .5, ry * .6, focinho) + ell(84, cy + ry - 4, 10, 7, pelo, tr(pE, 2)) + ell(116, cy + ry - 4, 10, 7, pelo, tr(pE, 2)); };
     var G = [null, [136, 28, 180, 30, 24], [128, 30, 176, 34, 28], [118, 32, 170, 38, 34], [108, 32, 162, 40, 38], [104, 32, 160, 42, 40], [100, 33, 158, 42, 42]][f];
     var cx = 100, cy = G[0], r = G[1];
     var fundo = "", tras = "", frente = "";
-    if (f === 5 || f === 6) tras += path("M" + (100 - r * .8) + " " + (cy + r * .7) + "L52 196h96L" + (100 + r * .8) + " " + (cy + r * .7) + "z", f === 6 ? K.d : K.m, tr(K.d, 2.5));
+    if (f === 5 || f === 6) tras += path("M" + (100 - r * .8) + " " + (cy + r * .7) + "L52 196h96L" + (100 + r * .8) + " " + (cy + r * .7) + "z", f === 6 ? LD : LC, tr(LD, 2.5));
     if (f === 6) { fundo = auraDe(id + "m", "#C9B6F2", 98); frente += brilhos([[30, 40], [170, 34], [26, 150], [176, 140], [60, 20], [140, 18]], "#FFE58A"); }
-    if (f >= 3) frente += rr(100 - r * .7, cy + r * .82, r * 1.4, 8, 4, K.m, tr(K.d, 2)) + circ(100, cy + r * .82 + 12, 6, "#F2C230", tr("#A9820F", 2)) + (f >= 5 ? path("M100 " + (cy + r * .82 + 8) + "l1.5 3 3.5.5-2.5 2.4.6 3.4-3.1-1.6-3.1 1.6.6-3.4-2.5-2.4 3.5-.5z", "#A9820F") : "");
+    if (f >= 3) frente += rr(100 - r * .7, cy + r * .82, r * 1.4, 8, 4, LC, tr(LD, 2)) + circ(100, cy + r * .82 + 12, 6, "#F2C230", tr("#A9820F", 2)) + (f >= 5 ? path("M100 " + (cy + r * .82 + 8) + "l1.5 3 3.5.5-2.5 2.4.6 3.4-3.1-1.6-3.1 1.6.6-3.4-2.5-2.4 3.5-.5z", "#A9820F") : "");
     if (f === 4) frente += rr(62, 170, 76, 6, 3, "#9AA6B1", tr("#55616C", 2)) + path("M68 170l6-34h52l6 34z", "#55616C", tr("#2A3138", 2)) + rr(78, 142, 44, 22, 2, "#16261C") +
       path("M84 150h10M84 156h18M98 150h14", "none", tr("#7CF0B0", 2)) + circ(100, 154, 2, "#F4A6C6");
     var corpo = sombraChao(40 + f * 3) + tras + rabo(G[2] + G[4] * .5, f === 6) + corpoG(G[2], G[3], G[4]) + cab(cx, cy, r) + frente +
-      (f >= 2 && !temCabeca ? laco(cx + r * .62, cy - r * .78, .85, K.m, K.d) : "");
+      (f >= 2 && !temCabeca ? laco(cx + r * .62, cy - r * .78, .85, LC, LD) : "");
     return { fundo: fundo, corpo: corpo, a: { olhos: [cx, cy - r * .05, r * .025], topo: [cx, cy - r * .92, r * .024], peito: [100, f === 4 ? cy + r * .7 : G[2] + 2, .6], lado: [100 - G[3] - 12, G[2] + 6, .7], costas: [100, G[2] - 6, .75] } };
   }
 
